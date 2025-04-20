@@ -21,7 +21,9 @@ struct MoofuslistView: View {
         .textCase(.none)
       }
       
-      Button(action: {}) {
+      Button {
+//        AddItemView()
+      } label: {
         Image(systemName: "plus")
       }
       .font(.title)
