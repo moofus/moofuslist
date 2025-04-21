@@ -18,7 +18,7 @@ struct Activity: Comparable, Identifiable {
   var sets : [Int] = []
 }
 
-struct ListActivities: Identifiable {
+struct ActivityList: Identifiable {
   let id: Date
   let activities: [Activity]
   var formattedDate: String {
@@ -35,37 +35,3 @@ struct ListActivities: Identifiable {
   }
 }
 
-private let tmpDate = Date()
-let activities = [
-  Activity(date: tmpDate, name: "Duck Walk", sets: [1, 2, 3]),
-  Activity(date: tmpDate, name: "Shoulders"),
-  Activity(date: tmpDate.addingTimeInterval(-86400), name: "Speed 60"),
-  Activity(date: tmpDate.addingTimeInterval(-86400), name: "Bend Back"),
-  Activity(date: tmpDate.addingTimeInterval(-86400 * 2), name: "Pull Ups"),
-  Activity(date: tmpDate.addingTimeInterval(-86400 * 2), name: "Leg Lifts"),
-]
-
-let activityList: [ListActivities] =  {
-  var activityList = [ListActivities]()
-  var tmpActivities = [Activity]()
-  var lastDate = Date.distantPast // this date should not exist in data
-
-  for a in activities {
-    if lastDate == a.date {
-      tmpActivities.append(a)
-    } else {
-      if lastDate != Date.distantPast {
-        activityList.append(ListActivities(id: lastDate, activities: tmpActivities))
-        tmpActivities.removeAll()
-      }
-      lastDate = a.date
-      tmpActivities.append(a)
-    }
-  }
-
-  if !tmpActivities.isEmpty {
-    activityList.append(ListActivities(id: lastDate, activities: tmpActivities))
-  }
-
-  return activityList
-}()

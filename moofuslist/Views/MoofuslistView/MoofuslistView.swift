@@ -8,7 +8,13 @@
 import SwiftUI
 
 struct MoofuslistView: View {
+  @State var viewModel: MoofuslistViewModel
 
+  init() {
+    let stream = AsyncStream.makeStream(of: MoofuslistSource.State.self)
+    viewModel = .init(stream: stream, viewSource: MoofuslistSource(continuation: stream.continuation))
+  }
+  
   var body: some View {
     ZStack(alignment: .topTrailing) {
       List(activityList) { activityList in
