@@ -9,6 +9,7 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
+  @State var searchText = ""
 
   var body: some View {
     NavigationSplitView {
@@ -27,8 +28,12 @@ struct MoofuslistView: View {
             .sharedBackgroundVisibility(.hidden)
 
             ToolbarItem {
-              Image(systemName: "person.fill")
-                .foregroundStyle(.accent)
+              Button {
+                print("pushed profile")
+              } label: {
+                Image(systemName: "person.fill")
+                  .foregroundStyle(.accent)
+              }
             }
           }
           .frame(maxWidth: .infinity, alignment: .leading)
@@ -37,9 +42,15 @@ struct MoofuslistView: View {
           Map()
             .aspectRatio(1.0, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 30))
-          FindActivitiesButton(cornerRadius: 40, displayOnLeft: true)
-            .padding([.leading, .trailing])
+          FindActivitiesButton(text: "Find Nearby Activities") {
+            print("pushed activities")
+          }
         }
+
+        ButtonWithImage(text: "Search City, State, or Zip...", systemName: "magnifyingglass") {
+          print("pushed search")
+        }
+        .padding(.top)
 
         Spacer()
       }

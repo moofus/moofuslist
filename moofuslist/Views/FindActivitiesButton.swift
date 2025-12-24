@@ -8,56 +8,34 @@
 import SwiftUI
 
 struct FindActivitiesButton: View {
-  private var cornerRadius: Double
-  private var displayOnLeft: Bool
-  private var displayOnRight: Bool
+  private var action: (() -> ())?
+  private var text: String
 
-  init(cornerRadius: Double = 10.0, displayOnLeft: Bool = false, displayOnRight: Bool = false) {
-    self.cornerRadius = cornerRadius
-    self.displayOnLeft = displayOnLeft
-    self.displayOnRight = displayOnRight
+  init(text: String,
+       padding: Double = 16,
+       action: (() -> ())? = nil
+  ) {
+    self.action = action
+    self.text = text
   }
 
   var body: some View {
     Button {
-      print("button ")
+      action?()
     } label: {
-      HStack {
-        Color.clear
-          .overlay {
-            HStack {
-              Spacer()
-              if displayOnLeft {
-                GPSPinView()
-              }
-            }
-          }
-
-        Text("Find Nearby Activities")
+      Label {
+        Text(text)
           .font(.title3)
-          .fixedSize(horizontal: true, vertical: false)
-
-        Color.clear
-          .overlay {
-            HStack {
-              if displayOnRight{
-                GPSPinView()
-              }
-              Spacer()
-            }
-          }
+          .padding(.all, 10)
+      } icon: {
+        GPSPinView()
       }
-      .padding(.all, 16)
+      .padding(.all, 10)
     }
-    .padding([.leading, .trailing])
-//    .buttonStyle(.borderedProminent)
     .buttonStyle(.glassProminent)
-    .buttonBorderShape(.roundedRectangle(radius: cornerRadius))
-    .fixedSize(horizontal: false, vertical: true)
-    .tint(.accent)
   }
 }
 
 #Preview {
-    FindActivitiesButton()
+  FindActivitiesButton(text: "Find Nearby Activities")
 }
