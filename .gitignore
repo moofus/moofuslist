@@ -1,0 +1,36 @@
+# Xcode
+.DS_Store
+DerivedData/
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xcworkspace
+!default.xcworkspace
+
+# Swift Package Manager
+.swiftpm
+.build/
+
+# CocoaPods
+Pods/
+# If you want to keep your Pods directory in git, comment the line above
+
+# Carthage
+Carthage/Build/
+
+# Accio
+.accio/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
