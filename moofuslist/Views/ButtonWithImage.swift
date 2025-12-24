@@ -11,6 +11,7 @@ struct ButtonWithImage: View {
   private var action: (() -> ())?
   private var systemName: String
   private var text: String
+  @State private var textValue: String = ""
 
   init(text: String,
        foregroundStyle: Color = .white,
@@ -26,10 +27,13 @@ struct ButtonWithImage: View {
     Button {
       action?()
     } label: {
-        Label(text, systemImage: systemName)
-          .font(.title3)
-          .foregroundStyle(.gray)
-          .padding(.all, 10)
+      HStack {
+        Image(systemName: systemName)
+        TextField(text, text: $textValue)
+      }
+      .font(.title3)
+      .padding(.all, 10)
+      .fixedSize()
     }
     .buttonStyle(.glass)
   }
