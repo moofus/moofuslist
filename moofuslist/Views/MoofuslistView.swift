@@ -9,6 +9,7 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
+  @Environment(LocationManager.self) var locationManager
   @State var searchText = ""
 
   var body: some View {
@@ -30,6 +31,8 @@ struct MoofuslistView: View {
             ToolbarItem {
               Button {
                 print("pushed profile")
+                print("stopLocationServices 2")
+//                locationManager.start()
               } label: {
                 Image(systemName: "person.fill")
                   .foregroundStyle(.accent)
@@ -40,15 +43,18 @@ struct MoofuslistView: View {
 
         ZStack {
           Map()
-            .aspectRatio(1.0, contentMode: .fit)
+            .aspectRatio(1.0, contentMode: .fit) 
             .clipShape(RoundedRectangle(cornerRadius: 30))
           FindActivitiesButton(text: "Find Nearby Activities") {
-            print("pushed activities")
+            print("start")
+//            locationManager.start()
           }
         }
 
         ButtonWithImage(text: "Search City, State, or Zip...", systemName: "magnifyingglass") {
           print("pushed search")
+          print("stopLocationServices 1")
+//          locationManager.start()
         }
         .padding(.top)
 

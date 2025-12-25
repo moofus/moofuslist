@@ -14,7 +14,6 @@ struct ButtonWithImage: View {
   @State private var textValue: String = ""
 
   init(text: String,
-       foregroundStyle: Color = .white,
        systemName: String,
        action: (() -> ())? = nil
   ) {
@@ -26,6 +25,7 @@ struct ButtonWithImage: View {
   var body: some View {
     Button {
       action?()
+      print("ljw action")
     } label: {
       HStack {
         Image(systemName: systemName)

@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct moofuslistApp: App {
-    var body: some Scene {
+  @State var locationManager = LocationManager()
+
+  var body: some Scene {
         WindowGroup {
-          MoofuslistView()
+//          MoofuslistView()
+//            .environment(locationManager)
+          JunkView()
+            .environment(locationManager)
         }
     }
 }
