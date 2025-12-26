@@ -9,7 +9,7 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
-  @Environment(LocationManager.self) var locationManager
+//  @Environment(LocationManager.self) var locationManager
   @State var searchText = ""
 
   var body: some View {
@@ -97,4 +97,5 @@ struct MoofuslistView: View {
 
 #Preview {
   MoofuslistView()
+    .environment(LocationManager())
 }

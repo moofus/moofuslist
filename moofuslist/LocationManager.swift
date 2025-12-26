@@ -13,24 +13,57 @@ import SwiftUI
 @MainActor
 @Observable
 class LocationManager {
-  var lastUpdate: CLLocationUpdate?
-  let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
+  enum LocationError: LocalizedError {
+    static let globalAuthDeniedError = "Please enable Location Services by going to Settings -> Privacy & Security."
+
+    case authorizationDeniedGlobally
+
+    var failureReason: String? {
+      switch self {
+      case .authorizationDeniedGlobally: "Location Services are disabled for this device."
+      }
+    }
+
+    var errorDescription: String? {
+      switch self {
+      case .authorizationDeniedGlobally: "Can't get location."
+      }
+    }
+
+    var recoverySuggestion: String? {
+      switch self {
+      case .authorizationDeniedGlobally:  "Please enable Location Services by going to Settings -> Privacy & Security"
+      }
+    }
+  }
+
+  private var lastUpdate: CLLocationUpdate?
+  private(set) var error: LocationError?
+  private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
+  var haveError = false
 
   private(set) var count = 0
   var lastLocation = CLLocation()
   var started = false {
     didSet {
       if started {
-        count = 0
+        reset()
         start()
       }
     }
   }
 
-  init() {
-    print("ljw \(Date()) \(#file):\(#function):\(#line)")
+  func reset() {
+    count = 0
+    error = nil
+    haveError = false
+    lastUpdate = nil
   }
-  
+
+  func stop() {
+    started = false
+  }
+
   func start() {
     Task {
       do {
@@ -46,6 +79,11 @@ class LocationManager {
           print("accuracyLimited=\(update.accuracyLimited)")
           print("authorizationDenied=\(update.authorizationDenied)")
           print("authorizationDeniedGlobally=\(update.authorizationDeniedGlobally)")
+          if update.authorizationDeniedGlobally {
+            self.error = LocationError.authorizationDeniedGlobally
+            self.haveError = true
+            break
+          }
           print("authorizationRequestInProgress=\(update.authorizationRequestInProgress)")
           print("authorizationRestricted=\(update.authorizationRestricted)")
           print("insufficientlyInUse=\(update.insufficientlyInUse)")
@@ -57,6 +95,7 @@ class LocationManager {
         print("ljw \(Date()) \(#file):\(#function):\(#line)")
         print("error=\(error)")
       }
+      logger.info("LocationManager stopped")
     }
   }
 }
