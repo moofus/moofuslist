@@ -17,7 +17,6 @@ struct MoofuslistView: View {
   @State private var isPerformingTask = false
 
   var body: some View {
-
     NavigationSplitView {
       VStack {
         HeaderView()

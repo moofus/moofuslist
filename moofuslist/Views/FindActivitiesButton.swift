@@ -25,7 +25,6 @@ struct FindActivitiesButton: View {
         await action?()
       }
     } label: {
-      let _ = print("line 33")
       Label {
         Text(text)
           .font(.title3)

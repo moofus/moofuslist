@@ -6,19 +6,29 @@
 //
 
 import Foundation
+import FactoryKit
 
 final actor MoofuslistSource {
+  @Injected(\.locationManager) var locationManager: LocationManager
 
   init() {
     print("ljw \(Date()) \(#file):\(#function):\(#line)")
+    Task {
+      await handleLocationManager()
+    }
   }
 
+  private func handleLocationManager() async {
+    for await location in locationManager.stream {
+      print(location)
+    }
+  }
 }
 
 extension MoofuslistSource {
   func findActivities() async {
-    print("sleeping")
-    try? await Task.sleep(nanoseconds: 5000000000)
+    print("starting")
+    await locationManager.start()
     print("sleeping end")
   }
 }

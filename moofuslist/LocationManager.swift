@@ -13,36 +13,40 @@ import SwiftUI
 
 actor LocationManager {
   var haveError = false
-  private var task: Task<Void,Never>? = nil
+  let stream: AsyncStream<CLLocation>
 
+  private let continuation: AsyncStream<CLLocation>.Continuation
   private(set) var count = 0 // ljw delete
   private(set) var error: LocationError?
-  private var lastUpdate: CLLocationUpdate? // ljw delete?
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
+  private var task: Task<Void,Never>? = nil
 
-  var started = false {
+  private(set) var started = false {
     didSet {
       if started {
         reset()
-        start()
+        run()
+      } else {
+        task?.cancel()
+        task = nil
       }
     }
   }
 
   init() {
     print("ljw \(Date()) \(#file):\(#function):\(#line)")
+    (stream, continuation) = AsyncStream.makeStream(of: CLLocation.self)
   }
 
   private func reset() {
     count = 0
     error = nil
     haveError = false
-    lastUpdate = nil
     task?.cancel()
     task = nil
   }
 
-  private func start() {
+  private func run() {
     logger.info("LocationManager starting")
     task = Task {
       do {
@@ -51,8 +55,8 @@ actor LocationManager {
           print("top")
           if Task.isCancelled { print("ljw break"); break }
           if !started { print("ljw started break");break }
-          lastUpdate = update
           if let location = update.location {
+            continuation.yield(location)
             count += 1
             logger.info("count=\(self.count) location=\(location)")
           }
@@ -135,18 +139,14 @@ extension LocationManager {
   }
 }
 
-extension LocationManager {
-  var lastLocation: CLLocation? {
-    lastUpdate?.location
-  }
-}
-
 // MARK: - Public Methods
 extension LocationManager {
+  func start() {
+    started = true
+  }
+
   func stop() {
     started = false
-    task?.cancel()
-    task = nil
   }
 }
 
