@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2A67A7AF2F0076D40021309F /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = 2A67A7AE2F0076D40021309F /* Factory */; };
+		2A67A7B12F0076D40021309F /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2A67A7B02F0076D40021309F /* FactoryKit */; };
+		2A67A7B32F0076D40021309F /* FactoryTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 2A67A7B22F0076D40021309F /* FactoryTesting */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2AC7B4B02EF9E40900A8401A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +58,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A67A7B12F0076D40021309F /* FactoryKit in Frameworks */,
+				2A67A7AF2F0076D40021309F /* Factory in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A67A7B32F0076D40021309F /* FactoryTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +121,8 @@
 			);
 			name = moofuslist;
 			packageProductDependencies = (
+				2A67A7AE2F0076D40021309F /* Factory */,
+				2A67A7B02F0076D40021309F /* FactoryKit */,
 			);
 			productName = moofuslist;
 			productReference = 2AC7B4A22EF9E40800A8401A /* moofuslist.app */;
@@ -135,6 +146,7 @@
 			);
 			name = moofuslistTests;
 			packageProductDependencies = (
+				2A67A7B22F0076D40021309F /* FactoryTesting */,
 			);
 			productName = moofuslistTests;
 			productReference = 2AC7B4AF2EF9E40900A8401A /* moofuslistTests.xctest */;
@@ -195,6 +207,9 @@
 			);
 			mainGroup = 2AC7B4992EF9E40800A8401A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2AC7B4A32EF9E40800A8401A /* Products */;
 			projectDirPath = "";
@@ -580,6 +595,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2A67A7AE2F0076D40021309F /* Factory */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = Factory;
+		};
+		2A67A7B02F0076D40021309F /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
+		};
+		2A67A7B22F0076D40021309F /* FactoryTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryTesting;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2AC7B49A2EF9E40800A8401A /* Project object */;
 }

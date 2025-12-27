@@ -5,26 +5,39 @@
 //  Created by Lamar Williams III on 12/21/25.
 //
 
+import FactoryKit
 import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
-  @Environment(LocationManager.self) var locationManager
-  //  @State var searchText = ""
+  @Injected(\.moofuslistSource) var source: MoofuslistSource
+  @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
+
+  @State var item: MKMapItem?
+  @State private var isPerformingTask = false
 
   var body: some View {
-    @Bindable var locationManager = locationManager
 
     NavigationSplitView {
       VStack {
         HeaderView()
         ZStack {
-          Map()
-            .aspectRatio(1.0, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 30))
-          FindActivitiesButton(text: "Find Nearby Activities") {
-            locationManager.started = true
+          Map() {
+            if let item {
+              Marker(item: item)
+            }
           }
+          .aspectRatio(1.0, contentMode: .fit)
+          .clipShape(RoundedRectangle(cornerRadius: 30))
+//          .mapControlVisibility(.hidden)
+          FindActivitiesButton(text: "Find Nearby Activities") {
+            Task {
+              isPerformingTask = true
+              await source.findActivities()
+              isPerformingTask = false
+            }
+          }
+          .disabled(isPerformingTask)
         }
 
         ButtonWithImage(text: "Search City, State, or Zip...", systemName: "magnifyingglass") {
@@ -42,13 +55,13 @@ struct MoofuslistView: View {
       Text("Detail")
         .navigationTitle("Moofuslist")
     }
-    .alert(isPresented: $locationManager.haveError, error: locationManager.error) { _ in
-      Button("OK") {
-        locationManager.stop()
-      }
-    } message: { error in
-      Text(error.recoverySuggestion ?? "Try again later.")
-    }
+//    .alert(isPresented: $locationManager.haveError, error: locationManager.error) { _ in
+//      Button("OK") {
+//        locationManager.stop()
+//      }
+//    } message: { error in
+//      Text(error.recoverySuggestion ?? "Try again later.")
+//    }
   }
 
   struct HeaderView: View {
@@ -79,9 +92,17 @@ struct MoofuslistView: View {
     }
   }
 
+  private func item(from location: CLLocation) async -> MKMapItem? {
+    if let request = MKReverseGeocodingRequest(location: location) {
+        let mapitems = try? await request.mapItems
+        if let mapitem = mapitems?.first {
+          return mapitem
+        }
+    }
+    return nil
+  }
 }
 
 #Preview {
   MoofuslistView()
-    .environment(LocationManager())
 }

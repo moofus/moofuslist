@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct FindActivitiesButton: View {
-  private var action: (() -> ())?
-  private var text: String
+  private var action: (() async -> ())?
+  private var text: String // ljw hardcode? localize
 
   init(text: String,
        padding: Double = 16,
@@ -21,16 +21,19 @@ struct FindActivitiesButton: View {
 
   var body: some View {
     Button {
-      action?()
+      Task {
+        await action?()
+      }
     } label: {
+      let _ = print("line 33")
       Label {
         Text(text)
           .font(.title3)
-          .padding(.all, 10)
+          .padding(10)
       } icon: {
         GPSPinView()
       }
-      .padding(.all, 10)
+      .padding(10)
     }
     .buttonStyle(.glassProminent)
   }

@@ -10,15 +10,13 @@ import CoreLocation
 import os
 import SwiftUI
 
-@MainActor
-@Observable
-class LocationManager {
+
+actor LocationManager {
   var haveError = false
   private var task: Task<Void,Never>? = nil
 
   private(set) var count = 0 // ljw delete
   private(set) var error: LocationError?
-  private(set) var lastLocation = CLLocation()
   private var lastUpdate: CLLocationUpdate? // ljw delete?
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
 
@@ -29,6 +27,10 @@ class LocationManager {
         start()
       }
     }
+  }
+
+  init() {
+    print("ljw \(Date()) \(#file):\(#function):\(#line)")
   }
 
   private func reset() {
@@ -52,7 +54,6 @@ class LocationManager {
           lastUpdate = update
           if let location = update.location {
             count += 1
-            lastLocation = location
             logger.info("count=\(self.count) location=\(location)")
           }
           if update.accuracyLimited {
@@ -134,10 +135,14 @@ extension LocationManager {
   }
 }
 
+extension LocationManager {
+  var lastLocation: CLLocation? {
+    lastUpdate?.location
+  }
+}
+
 // MARK: - Public Methods
 extension LocationManager {
-
-
   func stop() {
     started = false
     task?.cancel()
@@ -146,35 +151,32 @@ extension LocationManager {
 }
 
 #if DEBUG
-struct LocationManagerView: View {
-  @Environment(LocationManager.self) var locationManager
-  @State private var test = false
-
-  var body: some View {
-    @Bindable var locationManager = locationManager
-
-    VStack {
-      GroupBox(label: Label("Settings", systemImage: "gear")) {
-        Text("Option 1")
-        Toggle("Location Services", isOn: $locationManager.started)
-        Toggle("test", isOn: $test)
-      }
-      .font(.headline)
-      .padding()
-    }
-    .alert(isPresented: $locationManager.haveError, error: locationManager.error) { _ in
-      Button("OK") {
-        locationManager.stop()
-      }
-    } message: { error in
-      Text(error.recoverySuggestion ?? "Try again later.")
-    }
-  }
-}
+//struct LocationManagerView: View {
+//  @State private var test = false
+//
+//  var body: some View {
+//
+//    VStack {
+//      GroupBox(label: Label("Settings", systemImage: "gear")) {
+//        Text("Option 1")
+//        Toggle("Location Services", isOn: $locationManager.started)
+//        Toggle("test", isOn: $test)
+//      }
+//      .font(.headline)
+//      .padding()
+//    }
+//    .alert(isPresented: $locationManager.haveError, error: locationManager.error) { _ in
+//      Button("OK") {
+//        locationManager.stop()
+//      }
+//    } message: { error in
+//      Text(error.recoverySuggestion ?? "Try again later.")
+//    }
+//  }
+//}
 
 #Preview {
   JunkView()
-    .environment(LocationManager())
 }
 
 #endif // DEBUG
