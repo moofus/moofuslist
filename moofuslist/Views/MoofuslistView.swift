@@ -9,52 +9,26 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
-//  @Environment(LocationManager.self) var locationManager
-  @State var searchText = ""
+  @Environment(LocationManager.self) var locationManager
+  //  @State var searchText = ""
 
   var body: some View {
+    @Bindable var locationManager = locationManager
+
     NavigationSplitView {
       VStack {
-        Text("Activities & Places to Explore")
-          .font(.title2)
-          .navigationBarTitleDisplayMode(.inline)
-          .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-              Text("Moofuslist")
-                .font(.system(size: 40))
-                .bold()
-                .foregroundColor(.accent)
-                .fixedSize()
-            }
-            .sharedBackgroundVisibility(.hidden)
-
-            ToolbarItem {
-              Button {
-                print("pushed profile")
-                print("stopLocationServices 2")
-//                locationManager.start()
-              } label: {
-                Image(systemName: "person.fill")
-                  .foregroundStyle(.accent)
-              }
-            }
-          }
-          .frame(maxWidth: .infinity, alignment: .leading)
-
+        HeaderView()
         ZStack {
           Map()
-            .aspectRatio(1.0, contentMode: .fit) 
+            .aspectRatio(1.0, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 30))
           FindActivitiesButton(text: "Find Nearby Activities") {
-            print("start")
-//            locationManager.start()
+            locationManager.started = true
           }
         }
 
         ButtonWithImage(text: "Search City, State, or Zip...", systemName: "magnifyingglass") {
           print("pushed search")
-          print("stopLocationServices 1")
-//          locationManager.start()
         }
         .padding(.top)
 
@@ -68,16 +42,24 @@ struct MoofuslistView: View {
       Text("Detail")
         .navigationTitle("Moofuslist")
     }
+    .alert(isPresented: $locationManager.haveError, error: locationManager.error) { _ in
+      Button("OK") {
+        locationManager.stop()
+      }
+    } message: { error in
+      Text(error.recoverySuggestion ?? "Try again later.")
+    }
   }
 
-  struct NavigationHeaderView: View {
+  struct HeaderView: View {
     var body: some View {
       Text("Activities & Places to Explore")
+        .font(.title2)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
           ToolbarItem(placement: .navigationBarLeading) {
-            Text("Explore")
-              .font(.largeTitle)
+            Text("Moofuslist")
+              .font(.system(size: 40))
               .bold()
               .foregroundColor(.accent)
               .fixedSize()
@@ -85,14 +67,18 @@ struct MoofuslistView: View {
           .sharedBackgroundVisibility(.hidden)
 
           ToolbarItem {
-            Image(systemName: "person.fill")
-              .foregroundStyle(.accent)
+            Button {
+              print("pushed profile")
+            } label: {
+              Image(systemName: "person.fill")
+                .foregroundStyle(.accent)
+            }
           }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-      Spacer()
     }
   }
+
 }
 
 #Preview {

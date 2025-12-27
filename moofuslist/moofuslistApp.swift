@@ -13,10 +13,10 @@ struct moofuslistApp: App {
 
   var body: some Scene {
         WindowGroup {
-//          MoofuslistView()
-//            .environment(locationManager)
-          JunkView()
+          MoofuslistView()
             .environment(locationManager)
+//          LocationManagerView()
+//            .environment(locationManager)
         }
     }
 }
