@@ -10,14 +10,47 @@ import CoreLocation
 import os
 import SwiftUI
 
-
 actor LocationManager {
-  var haveError = false
-  let stream: AsyncStream<CLLocation>
+  enum Error: LocalizedError {
+    case authorizationDenied
+    case authorizationDeniedGlobally
+    case authorizationRestricted
+    case locationUnavailable
 
-  private let continuation: AsyncStream<CLLocation>.Continuation
-  private(set) var count = 0 // ljw delete
-  private(set) var error: LocationError?
+    var failureReason: String? {
+      switch self {
+      case .authorizationDenied:
+        "User denied location permissions for Moofuslist or location services are turned off or device is in Airplane mode"
+      case .authorizationDeniedGlobally: "Location Services are disabled for this device."
+      case .authorizationRestricted: "Moofuslist can't access your location. Do you have Parental Controls enabled?"
+      case .locationUnavailable: "Location Unabailable"
+      }
+    }
+
+    var errorDescription: String? {
+      "Can't get location."
+    }
+
+    var recoverySuggestion: String? {
+      switch self {
+      case .authorizationDenied: "Please authorize Moofuslist to access Location Services"
+      case .authorizationDeniedGlobally: "Please enable Location Services by going to Settings -> Privacy & Security"
+      case .authorizationRestricted: "Maybe disable Parental Controls?"
+      case .locationUnavailable: "Location Unabailable"
+      }
+    }
+  }
+
+  enum Response {
+    case error(Error)
+    case location(CLLocation)
+  }
+
+  let stream: AsyncStream<Response>
+
+  private let continuation: AsyncStream<Response>.Continuation
+  private(set) var count = 0
+  private(set) var error: Error?
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
   private var task: Task<Void,Never>? = nil
 
@@ -35,13 +68,15 @@ actor LocationManager {
 
   init() {
     print("ljw \(Date()) \(#file):\(#function):\(#line)")
-    (stream, continuation) = AsyncStream.makeStream(of: CLLocation.self)
+    (stream, continuation) = AsyncStream.makeStream(of: Response.self)
   }
+}
 
+// MARK: - Private Methods
+extension LocationManager {
   private func reset() {
     count = 0
     error = nil
-    haveError = false
     task?.cancel()
     task = nil
   }
@@ -52,11 +87,10 @@ actor LocationManager {
       do {
         let liveUpdates = CLLocationUpdate.liveUpdates()
         for try await update in liveUpdates {
-          print("top")
           if Task.isCancelled { print("ljw break"); break }
-          if !started { print("ljw started break");break }
+          if !started { print("ljw started break"); break }
           if let location = update.location {
-            continuation.yield(location)
+            continuation.yield(.location(location))
             count += 1
             logger.info("count=\(self.count) location=\(location)")
           }
@@ -64,14 +98,12 @@ actor LocationManager {
             logger.info("Location accuracyLimited: Moofuslist can't access your precise location, using approximate location")
           }
           if update.authorizationDeniedGlobally {
-            self.error = LocationError.authorizationDeniedGlobally
-            self.haveError = true
+            continuation.yield(.error(.authorizationDeniedGlobally))
             logger.info("Location authorizationDeniedGlobally")
             break
           }
           if update.authorizationDenied {
-            self.error = LocationError.authorizationDenied
-            self.haveError = true
+            continuation.yield(.error(.authorizationDenied))
             logger.info("Location authorizationDenied")
             break
           }
@@ -80,8 +112,7 @@ actor LocationManager {
             continue
           }
           if update.authorizationRestricted {
-            self.error = LocationError.authorizationRestricted
-            self.haveError = true
+            continuation.yield(.error(.authorizationRestricted))
             logger.info("Location authorizationDenied, maybe disable Parental Controls?")
             break
           }
@@ -89,7 +120,9 @@ actor LocationManager {
             logger.info("Location insufficientlyInUse")
           }
           if update.locationUnavailable {
+            continuation.yield(.error(.authorizationRestricted))
             logger.info("Location locationUnavailable")
+            break
           }
           if update.serviceSessionRequired {
             logger.info("Location serviceSessionRequired")
@@ -102,39 +135,8 @@ actor LocationManager {
         print("ljw \(Date()) \(#file):\(#function):\(#line)")
         print("error=\(error)")
       }
+      started = false
       logger.info("LocationManager stopped")
-    }
-  }}
-
-extension LocationManager {
-  enum LocationError: LocalizedError {
-    case authorizationDenied
-    case authorizationDeniedGlobally
-    case authorizationRestricted
-
-    var failureReason: String? {
-      switch self {
-      case .authorizationDenied:
-        "User denied location permissions for Moofuslist or location services are turned off or device is in Airplane mode"
-      case .authorizationDeniedGlobally: "Location Services are disabled for this device."
-      case .authorizationRestricted: "Moofuslist can't access your location. Do you have Parental Controls enabled?"
-      }
-    }
-
-    var errorDescription: String? {
-      switch self {
-      case .authorizationDenied: fallthrough
-      case .authorizationDeniedGlobally: fallthrough
-      case .authorizationRestricted: "Can't get location."
-      }
-    }
-
-    var recoverySuggestion: String? {
-      switch self {
-      case .authorizationDenied: "Please authorize Moofuslist to access Location Services"
-      case .authorizationDeniedGlobally: "Please enable Location Services by going to Settings -> Privacy & Security"
-      case .authorizationRestricted: "Maybe disable Parental Controls?"
-      }
     }
   }
 }
@@ -143,10 +145,6 @@ extension LocationManager {
 extension LocationManager {
   func start() {
     started = true
-  }
-
-  func stop() {
-    started = false
   }
 }
 

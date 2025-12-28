@@ -17,6 +17,8 @@ struct MoofuslistView: View {
   @State private var isPerformingTask = false
 
   var body: some View {
+    @Bindable var viewModel = viewModel
+
     NavigationSplitView {
       VStack {
         HeaderView()
@@ -54,13 +56,11 @@ struct MoofuslistView: View {
       Text("Detail")
         .navigationTitle("Moofuslist")
     }
-//    .alert(isPresented: $locationManager.haveError, error: locationManager.error) { _ in
-//      Button("OK") {
-//        locationManager.stop()
-//      }
-//    } message: { error in
-//      Text(error.recoverySuggestion ?? "Try again later.")
-//    }
+    .alert(viewModel.errorDescription, isPresented: $viewModel.haveError, presenting: viewModel) {  viewModel in
+      Button("OK") {}
+    } message: { error in
+      Text(viewModel.errorRecoverySuggestion)
+    }
   }
 
   struct HeaderView: View {
@@ -89,16 +89,6 @@ struct MoofuslistView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-  }
-
-  private func item(from location: CLLocation) async -> MKMapItem? {
-    if let request = MKReverseGeocodingRequest(location: location) {
-        let mapitems = try? await request.mapItems
-        if let mapitem = mapitems?.first {
-          return mapitem
-        }
-    }
-    return nil
   }
 }
 
