@@ -12,15 +12,19 @@ import SwiftUI
 struct moofuslistApp: App {
   var body: some Scene {
     WindowGroup {
-//      MoofuslistView()
-      //          LocationManagerView()
-                JunkView()
+      MoofuslistView()
     }
   }
 
 }
 
 extension Container {
+  @MainActor var appCoordinator: Factory<AppCoordinator> {
+    self { @MainActor in AppCoordinator() }.singleton
+  }
+  var aiManager: Factory<AIManager> {
+    self { AIManager() }.singleton
+  }
   var locationManager: Factory<LocationManager> {
     self { LocationManager() }.singleton
   }

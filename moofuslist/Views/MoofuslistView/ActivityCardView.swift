@@ -1,6 +1,6 @@
 //
 //  ActivityCardView.swift
-//  Explorer
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 1/7/26.
 //
@@ -11,7 +11,7 @@ import MapKit
 import SwiftUI
 
 struct ActivityCardView: View {
-  let activity: ExplorerViewModel.Activity
+  let activity: MoofuslistViewModel.Activity
   @State private var isFavorite = false
 
   var body: some View {

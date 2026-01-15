@@ -1,6 +1,6 @@
 //
 //  StringsExtensions.swift
-//  Explorer
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 1/10/26.
 //

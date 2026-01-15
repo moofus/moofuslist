@@ -1,6 +1,6 @@
 //
 //  AppCoordinator.swift
-//  Explorer
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 1/8/26.
 //
@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 @Observable
 class AppCoordinator {
-  typealias Activity = ExplorerViewModel.Activity
+  typealias Activity = MoofuslistViewModel.Activity
 
   enum Route: Hashable {
     case content

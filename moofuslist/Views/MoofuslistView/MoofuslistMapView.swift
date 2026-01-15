@@ -1,6 +1,6 @@
 //
-//  ExplorerMapView.swift
-//  Explorer
+//  MoofuslistMapView.swift
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 1/4/26.
 //

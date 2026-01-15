@@ -1,6 +1,6 @@
 //
 //  AIManager.swift
-//  Explorer
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 12/31/25.
 //
@@ -23,7 +23,7 @@ actor AIManager {
       switch self {
       case .appleIntelligenceNotEnabled: "Apple Intelligence is not enabled in Settings."
       case .deviceNotEligible: "Apple Intelligence is not available on this device."
-      case .location: "Explorer can't access your location. Do you have Parental Controls enabled?"
+      case .location: "Moofuslist can't access your location. Do you have Parental Controls enabled?"
       case .model(let errorString): "Apple Intelligence is unavailable: \(errorString)"
       case .modelNotReady: "Apple Intelligence is not ready."
       }
@@ -37,7 +37,7 @@ actor AIManager {
       switch self {
       case .appleIntelligenceNotEnabled: "Apple Intelligence is not enabled in Settings."
       case .deviceNotEligible: "Apple Intelligence is not available on this device."
-      case .location: "Explorer can't access your location. Do you have Parental Controls enabled?"
+      case .location: "Moofuslist can't access your location. Do you have Parental Controls enabled?"
       case .model: "Apple Intelligence is unavailable"
       case .modelNotReady: "Apple Intelligence is not ready, try again later."
       }
@@ -93,7 +93,7 @@ actor AIManager {
     }
   }
 
-  let logger = Logger(subsystem: "com.moofus.explorer", category: "AIManager")
+  let logger = Logger(subsystem: "com.moofus.moofuslist", category: "AIManager")
 
   let instructions = """
                   Your job is to find activities to do and places to go.

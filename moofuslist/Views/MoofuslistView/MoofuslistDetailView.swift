@@ -1,6 +1,6 @@
 //
-//  ExplorerDetailView.swift
-//  Explorer
+//  MoofuslistDetailView.swift
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 1/12/26.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MoofuslistDetailView: View {
-  typealias Activity = ExplorerViewModel.Activity
+  typealias Activity = MoofuslistViewModel.Activity
 
   @State private var selectedIdx = 0
   @State private var isFavorite = false
@@ -205,7 +205,7 @@ struct InfoRow2: View {
 
 #Preview {
   @Previewable @State var activity =
-  ExplorerViewModel.Activity(
+  MoofuslistViewModel.Activity(
     address: "address",
     category: "category",
     city: "City",

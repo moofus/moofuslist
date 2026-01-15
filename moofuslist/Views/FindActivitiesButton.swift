@@ -1,6 +1,6 @@
 //
 //  FindActivitiesButton.swift
-//  Explorer
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 12/21/25.
 //

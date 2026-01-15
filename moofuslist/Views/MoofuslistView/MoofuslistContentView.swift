@@ -1,6 +1,6 @@
 //
-//  ExplorerContentView.swift
-//  Explorer
+//  MoofuslistContentView.swift
+//  Moofuslist
 //
 //  Created by Lamar Williams III on 1/4/26.
 //
@@ -10,11 +10,11 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistContentView: View {
-  var source: ExplorerSource
-  @Bindable var viewModel: ExplorerViewModel
+  var source: MoofuslistSource
+  @Bindable var viewModel: MoofuslistViewModel
   @State private var selectedSort = "Relevance"
 
-  init(source: ExplorerSource, viewModel: ExplorerViewModel) { // delete
+  init(source: MoofuslistSource, viewModel: MoofuslistViewModel) { // delete
     print("ljw \(Date()) \(#file):\(#function):\(#line)")
     self.source = source
     self.viewModel = viewModel
@@ -101,7 +101,7 @@ struct MoofuslistContentView: View {
 #Preview("ContentView") {
 
   @Previewable @State var activities = [
-    ExplorerViewModel.Activity(
+    MoofuslistViewModel.Activity(
       address: "address",
       category: "category",
       city: "City",
@@ -114,7 +114,7 @@ struct MoofuslistContentView: View {
       somethingInteresting: "somethingInteresting",
       state: "State"
     ),
-    ExplorerViewModel.Activity(
+    MoofuslistViewModel.Activity(
       address: "address",
       category: "category",
       city: "City",
@@ -129,15 +129,15 @@ struct MoofuslistContentView: View {
     )
   ]
 
-  @Injected(\.explorerSource) var source: ExplorerSource
-  @Injected(\.explorerViewModel) var viewModel: ExplorerViewModel
+  @Injected(\.moofuslistSource) var source: MoofuslistSource
+  @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
 
   MoofuslistContentView(source: source, viewModel: viewModel)
 }
 
 #Preview("ContentView2") {
   @Previewable @State var activities = [
-    ExplorerViewModel.Activity(
+    MoofuslistViewModel.Activity(
       address: "address",
       category: "category",
       city: "City",
@@ -150,7 +150,7 @@ struct MoofuslistContentView: View {
       somethingInteresting: "somethingInteresting",
       state: "State"
     ),
-    ExplorerViewModel.Activity(
+    MoofuslistViewModel.Activity(
       address: "address",
       category: "category",
       city: "City",

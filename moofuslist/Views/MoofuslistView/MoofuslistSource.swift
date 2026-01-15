@@ -8,66 +8,144 @@
 import Foundation
 import FactoryKit
 import MapKit
+import os
+import SwiftUI
 
 final actor MoofuslistSource {
-  struct Error {
-    var errorDescription: String?
-    var recoverySuggestion: String?
+  typealias Activity = MoofuslistViewModel.Activity
+
+  enum SourceError: Error {
+    case location(description: String?, recoverySuggestion: String?)
+    case unknown(String)
   }
 
-  enum State {
+  enum Message {
+    case error(SourceError)
+    case badInput
     case initial
-    case error(Error)
+    case loaded
+    case loading(MKMapItem?, [AIManager.Activity])
+    case select(Activity)
+
   }
 
+  @Injected(\.aiManager) var aiManager: AIManager
   @Injected(\.locationManager) var locationManager: LocationManager
 
-  private let continuation: AsyncStream<State>.Continuation
-  let stream: AsyncStream<State>
+  private let continuation: AsyncStream<Message>.Continuation
+  private(set) var locationToSearch = CLLocation()
+  private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
+  let stream: AsyncStream<Message>
 
   init() {
-    print("ljw \(Date()) \(#file):\(#function):\(#line)")
-    (stream, continuation) = AsyncStream.makeStream(of: State.self)
-    Task {
-      await handleLocationManager()
+    (stream, continuation) = AsyncStream.makeStream(of: Message.self)
+    Task.detached { [weak self] in
+      guard let self else { return }
+      async let aiWait: Void = handleAIManager()
+      async let locationWait: () = handleLocationManager()
+      _ = await(aiWait, locationWait)
     }
   }
 }
 
-// MARK: - Private Methods
+
+// MARK: - Private Location Methods
 extension MoofuslistSource {
   private func handle(error: LocalizedError) async {
-    let error = Error(
-      errorDescription: error.errorDescription,
+    let error = SourceError.location(
+      description: error.errorDescription,
       recoverySuggestion: error.recoverySuggestion
     )
     continuation.yield(.error(error))
   }
 
+  /// Given the CLLocation get the city and state
+  /// - Parameter location: the location used to get the city and state
+  /// - Returns: the "city, state"
   private func handle(location: CLLocation) async {
-    if let request = MKReverseGeocodingRequest(location: location) {
+    if let request = MKReverseGeocodingRequest(location: location) { // ljw use cache
       do {
         let mapItems = try await request.mapItems
-        print("items=")
-        for item in mapItems {
-          print(item)
-          print("city=\(item.addressRepresentations?.cityName ?? "home")")
-          print("cityWithContext=\(item.addressRepresentations?.cityWithContext ?? "City, State")")
-          print("regionName=\(item.addressRepresentations?.regionName ?? "Country")")
-          print("region=\(item.addressRepresentations?.region ?? "Country")")
+        if mapItems.count > 1 {
+          print("mapItems.count=\(mapItems.count)")
+          print(mapItems)
+          assertionFailure()
         }
-        print("items end")
+        if let mapItem = mapItems.first {
+          await handle(mapItem: mapItem)
+          return
+        } else {
+          assertionFailure()
+          // ljw handle
+        }
       } catch {
-        print("Error reverse geocoding location: \(error)")
+        logger.error("Error MKReverseGeocodingRequest: \(error)")
+        assertionFailure("unknown error=\(error)")
+        continuation.yield(.error(.unknown(error.localizedDescription)))
+      }
+    }
+    let error = SourceError.location(description: "Can't get location", recoverySuggestion: nil)
+    continuation.yield(.error(error))
+  }
+
+  private func handle(mapItem: MKMapItem) async {
+    self.locationToSearch = mapItem.location
+    if let cityState = mapItem.addressRepresentations?.cityWithContext {
+     do {
+       continuation.yield(.loading(mapItem, []))
+       try await aiManager.findActivities(cityState: cityState)
+     } catch {
+       print("ljw \(Date()) \(#file):\(#function):\(#line)")
+       print(error)
+       if let error = error as? AIManager.Error {
+         let error = SourceError.location(
+           description: error.errorDescription,
+           recoverySuggestion: error.recoverySuggestion
+         )
+         continuation.yield(.error(error))
+       } else {
+         assertionFailure("unknown error=\(error)")
+         continuation.yield(.error(.unknown(error.localizedDescription)))
+       }
+     }
+     return
+    } else {
+      // ljw handle
+    }
+  }
+
+  private func navigate(to route: AppCoordinator.Route) {
+    Task { @MainActor in
+      @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
+      appCoordinator.navigate(to: route)
+    }
+  }
+}
+
+// MARK: - Private Handle Managers
+extension MoofuslistSource {
+  private func handleAIManager() async {
+    for await message in aiManager.stream {
+      switch message {
+      case .begin:
+        print("ljw begin \(Date()) \(#file):\(#function):\(#line)")
+        navigate(to: .content)
+      case .end:
+        print("ljw end \(Date()) \(#file):\(#function):\(#line)")
+        continuation.yield(.loaded) // ljw handle activities.isEmpty
+      case .error(_):
+        assertionFailure() // ljw
+      case .loading(let activities):
+        continuation.yield(.loading(nil, activities)) // ljw handle activities.isEmpty
       }
     }
   }
 
   private func handleLocationManager() async {
-    for await response in locationManager.stream {
-      print(response) // ljw add warnings for print statements
+    for await message in locationManager.stream {
+      print(message) // ljw add warnings for print statements
 
-      switch response {
+      switch message {
       case .error(let error):
         await handle(error: error)
       case .location(let location):
@@ -77,24 +155,27 @@ extension MoofuslistSource {
   }
 }
 
+// MARK: - Public Methods
 extension MoofuslistSource {
-  func findActivities() async {
-    print("starting")
-    await locationManager.start()
-    print("sleeping end")
+  func select(activity: Activity) {
+    continuation.yield(.select(activity))
+    navigate(to: .detail)
+  }
+
+  func searchCityState(_ cityState: String) async {
+    let request = MKGeocodingRequest(addressString: cityState)
+    do {
+      let mapItem = (try await request?.mapItems.first)!
+      await handle(mapItem: mapItem)
+    } catch {
+      print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
+      print(error.localizedDescription)
+      continuation.yield(.badInput)
+    }
+  }
+
+  func searchCurrentLocation() async {
+    continuation.yield(.loading(nil, []))
+    await locationManager.start(maxCount: 1)
   }
 }
-/*
- <MKMapItem: 0x116771f40> {
- address = "6825 Elverton Dr, Oakland, CA  94611, United States";
- isCurrentLocation = 0;
- name = "6825 Elverton Dr";
- placemark = "6825 Elverton Dr, 6825 Elverton Dr, Oakland, CA  94611, United States @ <+37.84662530,-122.20234210> +/- 0.00m, region CLCircularRegion (identifier:'<+37.84662530,-122.20234210> radius 70.59', center:<+37.84662530,-122.20234210>, radius:70.59m)";
- timeZone = "America/Los_Angeles (PST) offset -28800";
- }
- item.city=Oakland
- item.cityWithContext=Optional("Oakland, CA")
- item.regionName=Optional("United States")
- item.region=Optional(US)
-
- */
