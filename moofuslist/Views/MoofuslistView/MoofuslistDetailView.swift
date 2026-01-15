@@ -1,0 +1,225 @@
+//
+//  ExplorerDetailView.swift
+//  Explorer
+//
+//  Created by Lamar Williams III on 1/12/26.
+//
+
+import SwiftUI
+
+struct MoofuslistDetailView: View {
+  typealias Activity = ExplorerViewModel.Activity
+
+  @State private var selectedIdx = 0
+  @State private var isFavorite = false
+  @State private var setActiveIdx = 3
+  @State var autoImageSelect = true
+
+  let activity: Activity?
+  let timedAction = TimedAction()
+
+  var body: some View {
+    ZStack {
+      Color(.listBackground).ignoresSafeArea()
+
+      ScrollView {
+        VStack(spacing: 0) {
+          VStack {
+            if let activity {
+              TabView(selection: $selectedIdx) {
+                ForEach(0..<activity.imageNames.count, id: \.self) { idx in
+                  Image(systemName: activity.imageNames[idx])
+                    .font(.system(size: 80))
+                    .foregroundColor(.accent)
+                    .tag(idx)
+                }
+              }
+              .background(Color(red: 1, green: 0.9, blue: 0.8))
+              .tabViewStyle(.page)
+              .frame(height: 250)
+              .frame(maxWidth: .infinity)
+              .onAppear {
+                handleTabViewOnAppear()
+              }
+              .onChange(of: selectedIdx) {
+                handleSelectedIdxOnChange()
+              }
+            }
+          }
+
+          VStack(alignment: .leading, spacing: 20) {
+            // Title and Favorite
+            HStack {
+              VStack(alignment: .leading, spacing: 8) {
+                if let activity {
+                  Text(activity.name)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.black)
+                }
+
+                HStack(spacing: 12) {
+                  HStack(spacing: 4) {
+                    Image(systemName: "star.fill")
+                      .font(.system(size: 14))
+                      .foregroundColor(.orange)
+                    Text("\(String(format: "%.1f", activity?.rating ?? 0.0))")
+                      .font(.system(size: 14, weight: .semibold))
+                  }
+
+                  Text("(\(activity?.reviews ?? 0) reviews)")
+                    .font(.system(size: 12))
+                    .foregroundColor(.gray)
+                }
+              }
+
+              Spacer()
+
+              Button(action: { isFavorite.toggle() }) {
+                Image(systemName: isFavorite ? "heart.fill" : "heart")
+                  .font(.system(size: 24))
+                  .foregroundColor(isFavorite ? .accent : .gray)
+              }
+            }
+
+            // Info Cards
+            VStack(spacing: 12) {
+              if let activity {
+                InfoRow2(icon: "location.fill", title: "Address", value: activity.address)
+                InfoRow2(icon: "mappin.circle.fill", title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away")
+                InfoRow2(icon: "tag.fill", title: "Category", value: activity.category)
+              }
+            }
+
+            // Action Buttons
+            VStack(spacing: 12) {
+              Button(action: { }) {
+                HStack {
+                  Image(systemName: "phone.fill")
+                  Text("Call")
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .padding(12)
+                .background(.accent)
+                .foregroundColor(.white)
+                .cornerRadius(12)
+              }
+
+              Button(action: { }) {
+                HStack {
+                  Image(systemName: "map.fill")
+                  Text("Get Directions")
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .padding(12)
+                .background(Color.white)
+                .foregroundColor(.accent)
+                .cornerRadius(12)
+                .overlay(
+                  RoundedRectangle(cornerRadius: 12)
+                    .stroke(.accent, lineWidth: 1.5)
+                )
+              }
+            }
+
+            // Description
+            VStack(alignment: .leading, spacing: 8) {
+              Text("About")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.black)
+
+              Text(activity?.somethingInteresting ?? "")
+                .font(.system(size: 14))
+                .foregroundColor(.gray)
+                .lineSpacing(2)
+            }
+          }
+          .padding(20)
+        }
+      }
+    }
+    .navigationBarTitleDisplayMode(.inline)
+  }
+
+  private func handleTabViewOnAppear() {
+    var starting = true
+    if let activity {
+      timedAction.start(sleepTimeInSeconds: 2) {
+        withAnimation {
+          if starting {
+            starting = false
+            selectedIdx = 1
+          } else {
+            var tmpSelectedIdx = selectedIdx
+            tmpSelectedIdx += 1
+            if tmpSelectedIdx >= activity.imageNames.count {
+              selectedIdx = 0
+            } else {
+              selectedIdx = tmpSelectedIdx
+            }
+            autoImageSelect = true
+          }
+        }
+      }
+    }
+  }
+
+  private func handleSelectedIdxOnChange() {
+    if !autoImageSelect {
+      timedAction.stop()
+    }
+    autoImageSelect = false
+  }
+}
+
+// MARK: - Info Row
+struct InfoRow2: View {
+  let icon: String
+  let title: String
+  let value: String
+
+  var body: some View {
+    HStack(spacing: 12) {
+      Image(systemName: icon)
+        .font(.system(size: 16, weight: .semibold))
+        .foregroundColor(.accent)
+        .frame(width: 24)
+
+      VStack(alignment: .leading, spacing: 4) {
+        Text(title)
+          .font(.system(size: 12, weight: .medium))
+          .foregroundColor(.gray)
+        Text(value)
+          .font(.system(size: 14, weight: .semibold))
+          .foregroundColor(.black)
+      }
+
+      Spacer()
+    }
+    .padding(12)
+    .background(Color.white)
+    .cornerRadius(12)
+  }
+}
+
+#Preview {
+  @Previewable @State var activity =
+  ExplorerViewModel.Activity(
+    address: "address",
+    category: "category",
+    city: "City",
+    description: "description",
+    distance: 1.5,
+    imageNames: ["house"],
+    name: "name",
+    rating: 1.7,
+    reviews: 327,
+    somethingInteresting: "somethingInteresting",
+    state: "State"
+  )
+
+  NavigationStack {
+    MoofuslistDetailView(activity: activity)
+  }
+}
