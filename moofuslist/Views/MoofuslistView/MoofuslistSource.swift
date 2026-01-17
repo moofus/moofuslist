@@ -163,7 +163,7 @@ extension MoofuslistSource {
   }
 
   func searchCityState(_ cityState: String) async {
-    let request = MKGeocodingRequest(addressString: cityState)
+    let request = MKGeocodingRequest(addressString: cityState) // TODO: use cache
     do {
       let mapItem = (try await request?.mapItems.first)!
       await handle(mapItem: mapItem)

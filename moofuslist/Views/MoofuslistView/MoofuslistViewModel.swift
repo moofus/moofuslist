@@ -30,8 +30,6 @@ class MoofuslistViewModel {
     let state: String
   }
 
-//  @ObservationIgnored
-  private(set) var searchedCityState = ""
   @ObservationIgnored
   @Injected(\.moofuslistSource) var source: MoofuslistSource
 
@@ -46,18 +44,20 @@ class MoofuslistViewModel {
   private(set) var loading = false
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistViewModel")
   private(set) var mapItem: MKMapItem?
+  private(set) var searchedCityState = ""
   var selectedActivity: Activity?
 
   init() {
     buildImageNames()
 
-    Task { await handleSource() }
+    Task.detached { [weak self] in await self?.handleSource() }
   }
 }
 
 // MARK: - Private Methods
 extension MoofuslistViewModel {
   private func buildImageNames() {
+    imageNames["9/11 memorial"] = ["building.columns.fill"]
     imageNames["alcatraz"] = ["ferry.fill","binoculars.fill","figure.walk"]
     imageNames["arcade games"] = ["gamecontroller.fill"]
     imageNames["art"] = ["photo.artframe"]
@@ -72,33 +72,33 @@ extension MoofuslistViewModel {
     imageNames["beachs"] = ["beach.umbrella.fill"]
     imageNames["beauty salons"] = ["comb.fill"]
     imageNames["bike"] = ["bicycle"]
-    imageNames["biking"] = ["bicycle.circle.fill"]
+    imageNames["biking"] = ["bicycle"]
     imageNames["bridge"] = ["figure.walk"]
     imageNames["boat"] = ["ferry.fill"]
     imageNames["bookstores"] = ["books.vertical.fill"]
     imageNames["boutiques"] = ["handbag.fill"]
-    imageNames["bowling"] = ["figure.bowling.circle.fill"]
+    imageNames["bowling"] = ["figure.bowling"]
     imageNames["cable car"] = ["cablecar.fill"]
     imageNames["cable cars"] = ["cablecar.fill"]
     imageNames["cafes"] = ["cup.and.saucer.fill"]
     imageNames["camping"] = ["tent.2.fill"]
     imageNames["children's activities"] = ["figure.child"]
-    imageNames["chinatown"] = ["chineseyuanrenminbisign.circle.fill","fork.knife","storefront.fill"]
-    imageNames["clubs"] = ["music.note.list","figure.dance.circle.fill"]
+    imageNames["chinatown"] = ["chineseyuanrenminbisign","fork.knife","storefront.fill"]
+    imageNames["clubs"] = ["figure.socialdance","music.note.list"]
     imageNames["coit tower"] = ["binoculars.fill"]
     imageNames["colleges"] = ["graduationcap.fill"]
     imageNames["comedy clubs"] = ["person.wave.2.fill"]
     imageNames["concert halls"] = ["music.note.house.fill"]
-    imageNames["dance clubs"] = ["figure.socialdance.circle.fill"]
+    imageNames["dance clubs"] = ["figure.socialdance"]
     imageNames["dining"] = ["fork.knife"]
     imageNames["district"] = ["storefront.fill"]
     imageNames["drive"] = ["car.fill"]
     imageNames["education"] = ["book.fill", "text.book.closed.fill"] // TODO: delete one
     imageNames["empire state building"] = ["building.columns.fill", "binoculars.fill"]
     imageNames["entertainment"] = ["popcorn.fill"]
-    imageNames["events"] = ["calendar.circle.fill"]
+    imageNames["events"] = ["calendar"]
     imageNames["ferry"] = ["ferry.fill"]
-    imageNames["farmers markets"] = ["leaf.arrow.triangle.circlepath"]
+    imageNames["farmers markets"] = ["leaf.arrow.trianglehead.clockwise"]
     imageNames["fishing"] = ["figure.fishing"]
     imageNames["food"] = ["fork.knife"]
     imageNames["food trucks"] = ["truck.box.fill"]
@@ -111,8 +111,8 @@ extension MoofuslistViewModel {
     imageNames["harbor"] = ["water.waves"]
     imageNames["haight-ashbury"] = ["figure.walk","binoculars.fill"]
     imageNames["health clinics"] = ["cross.fill"]
-    imageNames["hike"] = ["figure.hiking.circle.fill"]
-    imageNames["hiking"] = ["figure.hiking.circle.fill"]
+    imageNames["hike"] = ["figure.hiking"]
+    imageNames["hiking"] = ["figure.hiking"]
     imageNames["historic site"] = ["building.columns.fill"]
     imageNames["historical"] = ["building.columns.fill"]
     imageNames["innovation"] = ["lightbulb.max.fill"]
@@ -132,7 +132,7 @@ extension MoofuslistViewModel {
     imageNames["music"] = ["music.pages.fill","music.note.house.fill"]
     imageNames["musicals"] = ["music.note"]
     imageNames["nature"] = ["leaf.fill"]
-    imageNames["nightlife"] = ["figure.dance.circle.fill","moon.stars.circle.fill"]
+    imageNames["nightlife"] = ["figure.socialdance","moon.stars"]
     imageNames["observatory"] = ["building.columns.fill"]
     imageNames["observe"] = ["binoculars.fill"]
     imageNames["outdoor"] = ["sun.max.fill"]
@@ -161,16 +161,16 @@ extension MoofuslistViewModel {
     imageNames["statue of liberty"] = ["ferry.fill","figure.walk"]
     imageNames["stroll"] = ["figure.walk"]
     imageNames["swimming"] = ["figure.open.water.swim"]
-    imageNames["tennis"] = ["figure.tennis.circle.fill","tennis.racket"]
+    imageNames["tennis"] = ["figure.tennis","tennis.racket"]
     imageNames["theater"] = ["theatermasks.fill"]
     imageNames["theaters"] = ["theatermasks.fill"]
     imageNames["theatre"] = ["theatermasks.fill"]
     imageNames["theme parks"] = ["ticket.fill"]
     imageNames["times square"] = ["theatermasks.fill","storefront.fill","person.2.badge.plus.fill"]
     imageNames["tour"] = ["figure.walk"]
-    imageNames["trails"] = ["figure.hiking.circle.fill"]
+    imageNames["trails"] = ["figure.hiking"]
     imageNames["travel"] = ["airplane"]
-    imageNames["yoga"] = ["figure.yoga.circle.fill"]
+    imageNames["yoga"] = ["figure.yoga"]
     imageNames["views"] = ["binoculars.fill"]
     imageNames["walking"] = ["figure.walk.motion"]
     imageNames["waterfront"] = ["water.waves"]
@@ -178,7 +178,6 @@ extension MoofuslistViewModel {
     imageNames["wildlife"] = ["pawprint.fill"]
     imageNames["zoo"] = ["pawprint.fill"]
     imageNames["zoos"] = ["pawprint.fill"]
-    imageNames["9/11 memorial"] = ["building.columns.fill"]
   }
 
   // Returns the coordinate of the most relevant result
@@ -186,12 +185,16 @@ extension MoofuslistViewModel {
     let activityLocation: CLLocation
     if let addressToLocation = addressToLocationCache[activity.address] {
       activityLocation = addressToLocation
+      print("used cached")
     } else {
       let request = MKLocalSearch.Request()
       request.naturalLanguageQuery = activity.address
       request.resultTypes = .address
+      print("before search")
       let search = MKLocalSearch(request: request)
+      print("after search")
       let response = try await search.start()
+      print("after start")
       guard let coordinate = response.mapItems.first?.placemark.coordinate else {
         return activity.distance
       }
@@ -212,6 +215,7 @@ extension MoofuslistViewModel {
       do {
         distance = try await getDistance(from: activity)
       } catch {
+        print("ljw \(Date()) \(#file):\(#function):\(#line)")
         logger.error("\(error.localizedDescription)")
         distance = activity.distance
       }
@@ -265,17 +269,15 @@ extension MoofuslistViewModel {
         print("loaded activities count=\(self.activities.count) \(activities.count)")
 
       case .loading(let mapItem, let activities):
-        print("ljw loading \(Date()) \(#file):\(#function):\(#line)")
         self.mapItem = mapItem
         if let cityState = mapItem?.addressRepresentations?.cityWithContext {
-          print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
           searchedCityState = cityState
         }
         self.activities = await convert(activities: activities)
-        self.loading = true
-
+        withAnimation {
+          loading = true
+        }
       case .select(let activity):
-        print("ljw select \(Date()) \(#file):\(#function):\(#line)")
         selectedActivity = activity
       }
     }
@@ -290,6 +292,7 @@ extension MoofuslistViewModel {
     result = process(input: activity.name, result: &result)
     result = process(input: activity.category, result: &result)
     result = process(input: activity.description, result: &result)
+    result = removeSimilarImages(result: &result)
 
     if result.count < 1 {
       print(activity)
@@ -309,6 +312,15 @@ extension MoofuslistViewModel {
       }
     }
     print("input=\(input) \(result)")
+    return result
+  }
+
+  private func removeSimilarImages(result: inout [String]) -> [String] {
+    if result.contains("building.columns.fill") {
+      if let idx = result.firstIndex(of: "building.fill") {
+        result.remove(at: idx)
+      }
+    }
     return result
   }
 }

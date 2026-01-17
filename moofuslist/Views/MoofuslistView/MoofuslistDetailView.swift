@@ -5,6 +5,7 @@
 //  Created by Lamar Williams III on 1/12/26.
 //
 
+import os
 import SwiftUI
 
 struct MoofuslistDetailView: View {
@@ -13,10 +14,11 @@ struct MoofuslistDetailView: View {
   @State private var selectedIdx = 0
   @State private var isFavorite = false
   @State private var setActiveIdx = 3
-  @State var autoImageSelect = true
+  @State private var timedActionSelectedImage = true
 
   let activity: Activity?
-  let timedAction = TimedAction()
+  private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
+  private let timedAction = TimedAction()
 
   var body: some View {
     ZStack {
@@ -41,9 +43,12 @@ struct MoofuslistDetailView: View {
               .onAppear {
                 handleTabViewOnAppear()
               }
-              .onChange(of: selectedIdx) {
-                handleSelectedIdxOnChange()
-              }
+//              onDisappear {
+//                handleTabViewOnDisAppear()
+//              }
+//              .onChange(of: selectedIdx) {
+//                handleSelectedIdxOnChange()
+//              }
             }
           }
 
@@ -143,33 +148,45 @@ struct MoofuslistDetailView: View {
   }
 
   private func handleTabViewOnAppear() {
+    guard let activity else {
+      logger.error("No activity")
+      return
+    }
+
     var starting = true
-    if let activity {
-      timedAction.start(sleepTimeInSeconds: 2) {
-        withAnimation {
-          if starting {
-            starting = false
-            selectedIdx = 1
+    timedAction.start(sleepTimeInSeconds: 2) {
+      withAnimation {
+        if starting {
+          starting = false
+          selectedIdx = 1
+          print("ljw starting selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
+        } else {
+          var tmpSelectedIdx = selectedIdx
+          print("ljw ------------ selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
+          tmpSelectedIdx += 1
+          if tmpSelectedIdx >= activity.imageNames.count {
+            selectedIdx = 0
+            print("ljw selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
           } else {
-            var tmpSelectedIdx = selectedIdx
-            tmpSelectedIdx += 1
-            if tmpSelectedIdx >= activity.imageNames.count {
-              selectedIdx = 0
-            } else {
-              selectedIdx = tmpSelectedIdx
-            }
-            autoImageSelect = true
+            selectedIdx = tmpSelectedIdx
+            print("ljw selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
           }
+          timedActionSelectedImage = true
         }
       }
     }
   }
 
+  private func handleTabViewOnDisAppear() {
+    timedAction.stop()
+    timedActionSelectedImage = false
+  }
+
   private func handleSelectedIdxOnChange() {
-    if !autoImageSelect {
+    if !timedActionSelectedImage {
       timedAction.stop()
     }
-    autoImageSelect = false
+    timedActionSelectedImage = false
   }
 }
 

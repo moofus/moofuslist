@@ -21,7 +21,7 @@ struct JunkView: View {
     .task {
       let request = MKGeocodingRequest(
         addressString: "Stockton, CA"
-//        addressString: "1 Ferry Building, San Francisco"
+        //        addressString: "1 Ferry Building, San Francisco"
       )
       do {
         let str = LocalizedStringKey("the string")
@@ -39,4 +39,43 @@ struct JunkView: View {
 
 #Preview {
   JunkView()
+}
+
+import SwiftUI
+
+struct BlinkingImageView: View {
+  @State private var isVisible: Bool
+  let blink: Bool
+  let durationValue: Double
+  let systemName: String
+
+  init(blink: Bool, duration durationValue: Double = 0.5, isVisible: Bool = true, systemName: String) {
+    self.blink = blink
+    self.durationValue = durationValue
+    self.isVisible = isVisible
+    self.systemName = systemName
+  }
+
+  var body: some View {
+    Image(systemName: systemName)
+      .font(.system(size: 24))
+      .foregroundColor(.accent)
+      .opacity(isVisible ? 1 : 0)
+      .animation(
+        .linear(duration: duration).repeatForever(autoreverses: true),
+        value: isVisible
+      )
+      .onAppear {
+        isVisible.toggle()
+      }
+  }
+
+  private var duration: Double {
+    blink ? 0.5 : Double.infinity
+  }
+}
+
+#Preview("BlinkingImageView") {
+  BlinkingImageView(blink: true, systemName: "sparkles")
+  BlinkingImageView(blink: false, systemName: "lightbulb.max.fill")
 }
