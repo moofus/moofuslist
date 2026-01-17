@@ -50,7 +50,7 @@ class MoofuslistViewModel {
   init() {
     buildImageNames()
 
-    Task.detached { [weak self] in await self?.handleSource() }
+    Task { await handleSource() }
   }
 }
 
@@ -118,6 +118,7 @@ extension MoofuslistViewModel {
     imageNames["innovation"] = ["lightbulb.max.fill"]
     imageNames["karaoke"] = ["music.mic"]
     imageNames["lakes"] = ["water.waves"]
+    imageNames["landmark"] = ["building.columns.fill"]
     imageNames["landmarks"] = ["building.columns.fill"]
     imageNames["libraries"] = ["books.vertical.fill"]
     imageNames["little havana"] = ["storefront.fill","fork.knife" ]
@@ -157,6 +158,7 @@ extension MoofuslistViewModel {
     imageNames["skateparks"] = ["skateboard.fill"]
     imageNames["space"] = ["moon.stars.fill","globe.americas.fill"]
     imageNames["sports"] = ["figure.basketball"]
+    imageNames["stairs"] = ["figure.stairs"]
     imageNames["state capitol"] = ["building.columns.fill"]
     imageNames["statue of liberty"] = ["ferry.fill","figure.walk"]
     imageNames["stroll"] = ["figure.walk"]
@@ -171,6 +173,7 @@ extension MoofuslistViewModel {
     imageNames["trails"] = ["figure.hiking"]
     imageNames["travel"] = ["airplane"]
     imageNames["yoga"] = ["figure.yoga"]
+    imageNames["vibrant boardwalk"] = ["fork.knife","storefront.fill"]
     imageNames["views"] = ["binoculars.fill"]
     imageNames["walking"] = ["figure.walk.motion"]
     imageNames["waterfront"] = ["water.waves"]
@@ -183,8 +186,8 @@ extension MoofuslistViewModel {
   // Returns the coordinate of the most relevant result
   private func getDistance(from activity: AIManager.Activity) async throws -> Double {
     let activityLocation: CLLocation
-    if let addressToLocation = addressToLocationCache[activity.address] {
-      activityLocation = addressToLocation
+    if let location = addressToLocationCache[activity.address] {
+      activityLocation = location
       print("used cached")
     } else {
       let request = MKLocalSearch.Request()
@@ -194,6 +197,16 @@ extension MoofuslistViewModel {
       let search = MKLocalSearch(request: request)
       print("after search")
       let response = try await search.start()
+/*Throttled "PlaceRequest.REQUEST_TYPE_SEARCH" request: Tried to make more than 50 requests in 60 seconds, will reset in 46 seconds - Error Domain=GEOErrorDomain Code=-3 "(null)" UserInfo={details=(
+ {
+ intervalType = short;
+ maxRequests = 50;
+ "throttler.keyPath" = "app:moofus.com.moofuslist/0x20301/short(default/any)";
+ timeUntilReset = 46;
+ windowSize = 60;
+}
+), requestKindString=PlaceRequest.REQUEST_TYPE_SEARCH, timeUntilReset=46, requestKind=769}
+ */
       print("after start")
       guard let coordinate = response.mapItems.first?.placemark.coordinate else {
         return activity.distance

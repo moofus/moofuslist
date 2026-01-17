@@ -13,15 +13,24 @@ class TimedAction {
   private(set) var count = UInt.zero
   private var maxCount: UInt = 1
 
+  deinit {
+    task?.cancel()
+    task = nil
+  }
+
   func start(count maxCount: UInt = UInt.max, sleepTimeInSeconds: UInt = 1, action: @escaping () -> ()) {
     self.maxCount = maxCount
     count = UInt.zero
     
     task = Task {
       repeat {
-        try? await Task.sleep(for: .seconds(sleepTimeInSeconds))
-        count += 1
-        action()
+        do {
+          try await Task.sleep(for: .seconds(sleepTimeInSeconds))
+          count += 1
+          action()
+        } catch {
+          print("sleep error=\(error.localizedDescription)")
+        }
       } while count < maxCount && !Task.isCancelled
     }
   }

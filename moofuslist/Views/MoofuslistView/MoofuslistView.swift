@@ -32,7 +32,7 @@ struct MoofuslistView: View {
         MoofuslistHeaderView()
 
         MoofuslistMapView(displayButton: !viewModel.isProcessing, item: viewModel.mapItem) {
-          Task {
+          Task { // TODO: look into moving this to source
             viewModel.isProcessing = true
             await source.searchCurrentLocation()
           }
@@ -63,6 +63,7 @@ struct MoofuslistView: View {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
       MoofuslistContentView(source: source, viewModel: viewModel)
     } detail: {
+      let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
       MoofuslistDetailView(activity: viewModel.selectedActivity)
     }
     .disabled(viewModel.isProcessing)

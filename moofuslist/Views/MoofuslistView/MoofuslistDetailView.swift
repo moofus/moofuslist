@@ -5,6 +5,7 @@
 //  Created by Lamar Williams III on 1/12/26.
 //
 
+import FactoryKit
 import os
 import SwiftUI
 
@@ -13,8 +14,7 @@ struct MoofuslistDetailView: View {
 
   @State private var selectedIdx = 0
   @State private var isFavorite = false
-  @State private var setActiveIdx = 3
-  @State private var timedActionSelectedImage = true
+  @State private var timedActionSelectedImage = false
 
   let activity: Activity?
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
@@ -43,17 +43,13 @@ struct MoofuslistDetailView: View {
               .onAppear {
                 handleTabViewOnAppear()
               }
-//              onDisappear {
-//                handleTabViewOnDisAppear()
-//              }
-//              .onChange(of: selectedIdx) {
-//                handleSelectedIdxOnChange()
-//              }
+              .onChange(of: selectedIdx) {
+                handleSelectedIdxOnChange()
+              }
             }
           }
 
           VStack(alignment: .leading, spacing: 20) {
-            // Title and Favorite
             HStack {
               VStack(alignment: .leading, spacing: 8) {
                 if let activity {
@@ -89,9 +85,9 @@ struct MoofuslistDetailView: View {
             // Info Cards
             VStack(spacing: 12) {
               if let activity {
-                InfoRow2(icon: "location.fill", title: "Address", value: activity.address)
-                InfoRow2(icon: "mappin.circle.fill", title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away")
-                InfoRow2(icon: "tag.fill", title: "Category", value: activity.category)
+                InfoRow(icon: "location.fill", title: "Address", value: activity.address)
+                InfoRow(icon: "mappin.circle.fill", title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away")
+                InfoRow(icon: "tag.fill", title: "Category", value: activity.category)
               }
             }
 
@@ -145,11 +141,32 @@ struct MoofuslistDetailView: View {
       }
     }
     .navigationBarTitleDisplayMode(.inline)
+    .navigationBarBackButtonHidden(true)
+    .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+            Button {
+              timedAction.stop()
+              selectedIdx = 0
+              timedActionSelectedImage = false
+              @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
+              appCoordinator.navigate(to: .content)
+            } label: {
+                HStack {
+                  Image(systemName: "chevron.backward")
+                      .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
   }
 
   private func handleTabViewOnAppear() {
     guard let activity else {
       logger.error("No activity")
+      return
+    }
+    guard activity.imageNames.count >= 1 else {
       return
     }
 
@@ -158,31 +175,20 @@ struct MoofuslistDetailView: View {
       withAnimation {
         if starting {
           starting = false
-          selectedIdx = 1
-          print("ljw starting selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
+          selectedIdx = 0
         } else {
-          var tmpSelectedIdx = selectedIdx
-          print("ljw ------------ selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
-          tmpSelectedIdx += 1
-          if tmpSelectedIdx >= activity.imageNames.count {
+          if (selectedIdx + 1) >= activity.imageNames.count {
             selectedIdx = 0
-            print("ljw selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
           } else {
-            selectedIdx = tmpSelectedIdx
-            print("ljw selectedIdx=\(selectedIdx) \(Date()) \(#file):\(#function):\(#line)")
+            selectedIdx += 1
           }
-          timedActionSelectedImage = true
         }
+        timedActionSelectedImage = true
       }
     }
   }
 
-  private func handleTabViewOnDisAppear() {
-    timedAction.stop()
-    timedActionSelectedImage = false
-  }
-
-  private func handleSelectedIdxOnChange() {
+   private func handleSelectedIdxOnChange() {
     if !timedActionSelectedImage {
       timedAction.stop()
     }
@@ -191,7 +197,7 @@ struct MoofuslistDetailView: View {
 }
 
 // MARK: - Info Row
-struct InfoRow2: View {
+struct InfoRow: View {
   let icon: String
   let title: String
   let value: String
