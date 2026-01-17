@@ -5,33 +5,33 @@
 //  Created by Lamar Williams III on 1/14/26.
 //
 
-
 import SwiftUI
 
 class TimedAction {
-  private var task: Task<(), Never>?
   private(set) var count = UInt.zero
   private var maxCount: UInt = 1
+  private var task: Task<Void, Never>?
 
   deinit {
-    task?.cancel()
-    task = nil
+    stop()
   }
 
-  func start(count maxCount: UInt = UInt.max, sleepTimeInSeconds: UInt = 1, action: @escaping () -> ()) {
+  func start(count maxCount: UInt = UInt.max, sleepTimeInSeconds: UInt = 1, action: @escaping () -> (), errorHandler: ((Error) -> Void)? = nil) {
     self.maxCount = maxCount
     count = UInt.zero
-    
-    task = Task {
+
+    task = Task(priority: nil) {
       repeat {
         do {
-          try await Task.sleep(for: .seconds(sleepTimeInSeconds))
+          try Task.checkCancellation()
+          try await Task.sleep(nanoseconds: UInt64(sleepTimeInSeconds) * 1_000_000_000)
           count += 1
           action()
         } catch {
-          print("sleep error=\(error.localizedDescription)")
+          errorHandler?(error)
+          break
         }
-      } while count < maxCount && !Task.isCancelled
+      } while count < maxCount
     }
   }
 

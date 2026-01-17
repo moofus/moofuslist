@@ -170,12 +170,13 @@ struct MoofuslistDetailView: View {
       return
     }
 
+
     var starting = true
-    timedAction.start(sleepTimeInSeconds: 2) {
+    timedAction.start(sleepTimeInSeconds: 3) {
       withAnimation {
         if starting {
           starting = false
-          selectedIdx = 0
+          selectedIdx = 1
         } else {
           if (selectedIdx + 1) >= activity.imageNames.count {
             selectedIdx = 0
@@ -185,6 +186,8 @@ struct MoofuslistDetailView: View {
         }
         timedActionSelectedImage = true
       }
+    } errorHandler: { error in
+      selectedIdx = 0
     }
   }
 
