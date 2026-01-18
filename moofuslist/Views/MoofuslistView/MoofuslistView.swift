@@ -9,10 +9,6 @@ import FactoryKit
 import MapKit
 import SwiftUI
 
-import FactoryKit
-import MapKit
-import SwiftUI
-
 struct MoofuslistView: View {
   typealias Activity = MoofuslistViewModel.Activity
 

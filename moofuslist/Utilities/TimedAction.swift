@@ -9,18 +9,23 @@ import SwiftUI
 
 class TimedAction {
   private(set) var count = UInt.zero
-  private var maxCount: UInt = 1
+  private var maxCount = UInt.max
   private var task: Task<Void, Never>?
 
   deinit {
     stop()
   }
 
-  func start(count maxCount: UInt = UInt.max, sleepTimeInSeconds: UInt = 1, action: @escaping () -> (), errorHandler: ((Error) -> Void)? = nil) {
+  func start(
+    count maxCount: UInt = UInt.max,
+    sleepTimeInSeconds: UInt = 2,
+    action: @escaping () -> (),
+    errorHandler: ((Error) -> Void)? = nil
+  ) {
     self.maxCount = maxCount
     count = UInt.zero
 
-    task = Task(priority: nil) {
+    task = Task {
       repeat {
         do {
           try Task.checkCancellation()

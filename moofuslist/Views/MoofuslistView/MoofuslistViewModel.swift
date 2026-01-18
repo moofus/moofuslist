@@ -134,7 +134,7 @@ extension MoofuslistViewModel {
     imageNames["murals"] = ["paintpalette.fill"]
     imageNames["museum"] = ["building.fill","figure.walk"]
     imageNames["museums"] = ["building.2.fill","figure.walk"]
-    imageNames["music"] = ["music.pages.fill","music.note.house.fill"]
+    imageNames["music"] = ["music.pages.fill"]
     imageNames["musicals"] = ["music.note.house.fill"]
     imageNames["nature"] = ["leaf.fill"]
     imageNames["nightlife"] = ["figure.socialdance","moon.stars"]

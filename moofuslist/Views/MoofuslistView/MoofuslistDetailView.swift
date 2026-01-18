@@ -158,18 +158,17 @@ struct MoofuslistDetailView: View {
             }
         }
     }
-
   }
 
   private func handleTabViewOnAppear() {
     guard let activity else {
+      assertionFailure()
       logger.error("No activity")
       return
     }
-    guard activity.imageNames.count >= 1 else {
+    guard activity.imageNames.count > 1 else {
       return
     }
-
 
     var starting = true
     timedAction.start(sleepTimeInSeconds: 3) {
