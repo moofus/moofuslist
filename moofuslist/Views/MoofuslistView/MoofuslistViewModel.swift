@@ -40,7 +40,7 @@ class MoofuslistViewModel {
   var haveError = false
   private var imageNames = [String: [String]]()
   var inputError = false
-  var isProcessing = false
+  private(set) var isProcessing = false
   private(set) var loading = false
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistViewModel")
   private(set) var mapItem: MKMapItem?
@@ -90,7 +90,8 @@ extension MoofuslistViewModel {
     imageNames["coit tower"] = ["binoculars.fill"]
     imageNames["colleges"] = ["graduationcap.fill"]
     imageNames["comedy clubs"] = ["person.wave.2.fill"]
-    imageNames["concert halls"] = ["music.note.house.fill"]
+    imageNames["concert hall"] = ["music.note.house.fill","music.note.list"]
+    imageNames["concert halls"] = ["music.note.house.fill","music.note.list"]
     imageNames["dance clubs"] = ["figure.socialdance"]
     imageNames["dining"] = ["fork.knife"]
     imageNames["district"] = ["storefront.fill"]
@@ -123,6 +124,7 @@ extension MoofuslistViewModel {
     imageNames["lakes"] = ["water.waves"]
     imageNames["landmark"] = ["building.columns.fill"]
     imageNames["landmarks"] = ["building.columns.fill"]
+    imageNames["library of congress"] = ["books.vertical.fill","building.columns.fill"]
     imageNames["libraries"] = ["books.vertical.fill"]
     imageNames["little havana"] = ["storefront.fill","fork.knife" ]
     imageNames["lombard street"] = ["road.lanes.curved.right"]
@@ -261,11 +263,13 @@ extension MoofuslistViewModel {
   private func handleSource() async {
     for await message in source.stream {
       loading = false
+      inputError = false
+      haveError = false
+      isProcessing = false
 
       switch message {
       case .badInput:
         inputError = true
-        isProcessing = false
       case .error(let error):
         if case let .location(description, recoverySuggestion) = error {
           errorDescription = description ?? "Error"
@@ -277,17 +281,15 @@ extension MoofuslistViewModel {
           errorRecoverySuggestion = ""
         }
         haveError = true
-        isProcessing = false
       case .initial:
         print("ljw initial \(Date()) \(#file):\(#function):\(#line)")
         mapItem = nil
       case .loaded:
         print("ljw loaded \(Date()) \(#file):\(#function):\(#line)")
         mapItem = nil
-        isProcessing = false
         print("loaded activities count=\(self.activities.count) \(activities.count)")
-
       case .loading(let mapItem, let activities):
+        isProcessing = true
         self.mapItem = mapItem
         if let cityState = mapItem?.addressRepresentations?.cityWithContext {
           searchedCityState = cityState
@@ -296,6 +298,7 @@ extension MoofuslistViewModel {
         withAnimation {
           loading = true
         }
+      case .processing: isProcessing = true
       case .select(let activity):
         selectedActivity = activity
       }
@@ -336,6 +339,11 @@ extension MoofuslistViewModel {
 
   private func removeSimilarImages(result: inout [String]) -> [String] {
     if result.contains("building.columns.fill") {
+      if let idx = result.firstIndex(of: "building.fill") {
+        result.remove(at: idx)
+      }
+    }
+    if result.contains("building.2.fill") {
       if let idx = result.firstIndex(of: "building.fill") {
         result.remove(at: idx)
       }

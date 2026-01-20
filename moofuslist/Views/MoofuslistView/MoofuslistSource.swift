@@ -25,8 +25,8 @@ final actor MoofuslistSource {
     case initial
     case loaded
     case loading(MKMapItem?, [AIManager.Activity])
+    case processing
     case select(Activity)
-
   }
 
   @Injected(\.aiManager) var aiManager: AIManager
@@ -114,11 +114,10 @@ extension MoofuslistSource {
     }
   }
 
+  @MainActor
   private func navigate(to route: AppCoordinator.Route) {
-    Task { @MainActor in
-      @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
-      appCoordinator.navigate(to: route)
-    }
+    @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
+    appCoordinator.navigate(to: route)
   }
 }
 
@@ -129,7 +128,7 @@ extension MoofuslistSource {
       switch message {
       case .begin:
         print("ljw begin \(Date()) \(#file):\(#function):\(#line)")
-        navigate(to: .content)
+        await navigate(to: .content)
       case .end:
         print("ljw end \(Date()) \(#file):\(#function):\(#line)")
         continuation.yield(.loaded) // ljw handle activities.isEmpty
@@ -157,25 +156,40 @@ extension MoofuslistSource {
 
 // MARK: - Public Methods
 extension MoofuslistSource {
+  nonisolated
   func select(activity: Activity) {
-    continuation.yield(.select(activity))
-    navigate(to: .detail)
-  }
-
-  func searchCityState(_ cityState: String) async {
-    let request = MKGeocodingRequest(addressString: cityState) // TODO: use cache
-    do {
-      let mapItem = (try await request?.mapItems.first)!
-      await handle(mapItem: mapItem)
-    } catch {
-      print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
-      print(error.localizedDescription)
-      continuation.yield(.badInput)
+    Task { [weak self] in
+      guard let self else { return }
+      continuation.yield(.select(activity))
+      await navigate(to: .detail)
     }
   }
 
-  func searchCurrentLocation() async {
-    continuation.yield(.loading(nil, []))
-    await locationManager.start(maxCount: 1)
+  nonisolated
+  func searchCityState(_ cityState: String) {
+    Task {
+      guard await cityState.validateTwoStringsSeparatedByComma() else {
+        continuation.yield(.badInput)
+        return
+      }
+      continuation.yield(.processing)
+      let request = MKGeocodingRequest(addressString: cityState) // TODO: use cache
+      do {
+        let mapItem = (try await request?.mapItems.first)!
+        await handle(mapItem: mapItem)
+      } catch {
+        logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
+        print(error.localizedDescription)
+        continuation.yield(.badInput)
+      }
+    }
+  }
+
+  nonisolated
+  func searchCurrentLocation() {
+    Task {
+      continuation.yield(.loading(nil, []))
+      await locationManager.start(maxCount: 1)
+    }
   }
 }

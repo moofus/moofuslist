@@ -28,10 +28,7 @@ struct MoofuslistView: View {
         MoofuslistHeaderView()
 
         MoofuslistMapView(displayButton: !viewModel.isProcessing, item: viewModel.mapItem) {
-          Task { // TODO: look into moving this to source
-            viewModel.isProcessing = true
-            await source.searchCurrentLocation()
-          }
+          source.searchCurrentLocation()
         }
 
         Label {
@@ -45,14 +42,7 @@ struct MoofuslistView: View {
       }
       .searchable(text: $searchText, prompt: "Search City, State, or Zip")
       .onSubmit(of: .search) {
-        if searchText.validateTwoStringsSeparatedByComma() {
-          Task {
-            viewModel.isProcessing = true
-            await source.searchCityState(searchText)
-          }
-        } else {
-          viewModel.inputError = true
-        }
+        source.searchCityState(searchText)
       }
       .safeAreaPadding([.leading, .trailing])
     } content: {

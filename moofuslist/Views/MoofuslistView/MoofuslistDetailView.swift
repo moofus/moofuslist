@@ -175,7 +175,7 @@ struct MoofuslistDetailView: View {
       withAnimation {
         if starting {
           starting = false
-          selectedIdx = 1
+          selectedIdx = activity.imageNames.count > 1 ? 1 : 0
         } else {
           if (selectedIdx + 1) >= activity.imageNames.count {
             selectedIdx = 0

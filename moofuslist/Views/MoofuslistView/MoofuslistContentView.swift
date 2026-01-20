@@ -79,14 +79,9 @@ struct MoofuslistContentView: View {
         ScrollView {
           VStack(spacing: 12) {
             ForEach(viewModel.activities) { activity in
-              //                            NavigationLink(destination: ActivityDetailView(activity: activity)) {
-              //                              ActivityCardView(activity: activity)
-              //                            }
               ActivityCardView(activity: activity)
                 .onTapGesture {
-                  Task {
-                    await source.select(activity: activity)
-                  }
+                  source.select(activity: activity)
                 }
             }
           }
