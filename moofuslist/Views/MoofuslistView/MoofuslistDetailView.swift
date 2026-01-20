@@ -10,87 +10,79 @@ import os
 import SwiftUI
 
 struct MoofuslistDetailView: View {
-  typealias Activity = MoofuslistViewModel.Activity
-
+  @Binding var activity: MoofuslistViewModel.Activity
+  @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
   @State private var selectedIdx = 0
-  @State private var isFavorite = false
   @State private var timedActionSelectedImage = false
-
-  let activity: Activity?
+  
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
   private let timedAction = TimedAction()
-
+  
   var body: some View {
     ZStack {
       Color(.listBackground).ignoresSafeArea()
-
+      
       ScrollView {
         VStack(spacing: 0) {
           VStack {
-            if let activity {
-              TabView(selection: $selectedIdx) {
-                ForEach(0..<activity.imageNames.count, id: \.self) { idx in
-                  Image(systemName: activity.imageNames[idx])
-                    .font(.system(size: 80))
-                    .foregroundColor(.accent)
-                    .tag(idx)
-                }
-              }
-              .background(Color(red: 1, green: 0.9, blue: 0.8))
-              .tabViewStyle(.page)
-              .frame(height: 250)
-              .frame(maxWidth: .infinity)
-              .onAppear {
-                handleTabViewOnAppear()
-              }
-              .onChange(of: selectedIdx) {
-                handleSelectedIdxOnChange()
+            TabView(selection: $selectedIdx) {
+              ForEach(0..<activity.imageNames.count, id: \.self) { idx in
+                Image(systemName: activity.imageNames[idx])
+                  .font(.system(size: 80))
+                  .foregroundColor(.accent)
+                  .tag(idx)
               }
             }
+            .background(Color(red: 1, green: 0.9, blue: 0.8))
+            .tabViewStyle(.page)
+            .frame(height: 250)
+            .frame(maxWidth: .infinity)
+            .onAppear {
+              onAppearTabView()
+            }
+            .onChange(of: selectedIdx) {
+              onChangeSelectedIdx()
+            }
           }
-
+          
           VStack(alignment: .leading, spacing: 20) {
             HStack {
               VStack(alignment: .leading, spacing: 8) {
-                if let activity {
-                  Text(activity.name)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.black)
-                }
-
+                Text(activity.name)
+                  .font(.system(size: 24, weight: .bold))
+                  .foregroundColor(.black)
+                
                 HStack(spacing: 12) {
                   HStack(spacing: 4) {
                     Image(systemName: "star.fill")
                       .font(.system(size: 14))
                       .foregroundColor(.orange)
-                    Text("\(String(format: "%.1f", activity?.rating ?? 0.0))")
+                    Text("\(String(format: "%.1f", activity.rating))")
                       .font(.system(size: 14, weight: .semibold))
                   }
-
-                  Text("(\(activity?.reviews ?? 0) reviews)")
+                  
+                  Text("(\(activity.reviews) reviews)")
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
                 }
               }
-
+              
               Spacer()
-
-              Button(action: { isFavorite.toggle() }) {
-                Image(systemName: isFavorite ? "heart.fill" : "heart")
+              
+              Button(action: { activity.isFavorite.toggle() }) {
+                Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
                   .font(.system(size: 24))
-                  .foregroundColor(isFavorite ? .accent : .gray)
+                  .foregroundColor(activity.isFavorite ? .accent : .gray)
               }
             }
-
+            
             // Info Cards
             VStack(spacing: 12) {
-              if let activity {
-                InfoRow(icon: "location.fill", title: "Address", value: activity.address)
-                InfoRow(icon: "mappin.circle.fill", title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away")
-                InfoRow(icon: "tag.fill", title: "Category", value: activity.category)
-              }
+              InfoRow(icon: "location.fill", title: "Address", value: activity.address)
+              InfoRow(icon: "mappin.circle.fill", title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away")
+              InfoRow(icon: "tag.fill", title: "Category", value: activity.category)
             }
-
+            
             // Action Buttons
             VStack(spacing: 12) {
               Button(action: { }) {
@@ -105,7 +97,7 @@ struct MoofuslistDetailView: View {
                 .foregroundColor(.white)
                 .cornerRadius(12)
               }
-
+              
               Button(action: { }) {
                 HStack {
                   Image(systemName: "map.fill")
@@ -123,14 +115,14 @@ struct MoofuslistDetailView: View {
                 )
               }
             }
-
+            
             // Description
             VStack(alignment: .leading, spacing: 8) {
               Text("About")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.black)
-
-              Text(activity?.somethingInteresting ?? "")
+              
+              Text(activity.somethingInteresting)
                 .font(.system(size: 14))
                 .foregroundColor(.gray)
                 .lineSpacing(2)
@@ -143,33 +135,27 @@ struct MoofuslistDetailView: View {
     .navigationBarTitleDisplayMode(.inline)
     .navigationBarBackButtonHidden(true)
     .toolbar {
-        ToolbarItem(placement: .topBarLeading) {
-            Button {
-              timedAction.stop()
-              selectedIdx = 0
-              timedActionSelectedImage = false
-              @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
-              appCoordinator.navigate(to: .content)
-            } label: {
-                HStack {
-                  Image(systemName: "chevron.backward")
-                      .fontWeight(.semibold)
-                }
-            }
+      ToolbarItem(placement: .topBarLeading) {
+        Button {
+          timedAction.stop()
+          selectedIdx = 0
+          timedActionSelectedImage = false
+          appCoordinator.navigate(to: .content)
+        } label: {
+          HStack {
+            Image(systemName: "chevron.backward")
+              .fontWeight(.semibold)
+          }
         }
+      }
     }
   }
-
-  private func handleTabViewOnAppear() {
-    guard let activity else {
-      assertionFailure()
-      logger.error("No activity")
-      return
-    }
+  
+  private func onAppearTabView() {
     guard activity.imageNames.count > 1 else {
       return
     }
-
+    
     var starting = true
     timedAction.start(sleepTimeInSeconds: 3) {
       withAnimation {
@@ -189,8 +175,8 @@ struct MoofuslistDetailView: View {
       selectedIdx = 0
     }
   }
-
-   private func handleSelectedIdxOnChange() {
+  
+  private func onChangeSelectedIdx() {
     if !timedActionSelectedImage {
       timedAction.stop()
     }
@@ -203,14 +189,14 @@ struct InfoRow: View {
   let icon: String
   let title: String
   let value: String
-
+  
   var body: some View {
     HStack(spacing: 12) {
       Image(systemName: icon)
         .font(.system(size: 16, weight: .semibold))
         .foregroundColor(.accent)
         .frame(width: 24)
-
+      
       VStack(alignment: .leading, spacing: 4) {
         Text(title)
           .font(.system(size: 12, weight: .medium))
@@ -219,7 +205,7 @@ struct InfoRow: View {
           .font(.system(size: 14, weight: .semibold))
           .foregroundColor(.black)
       }
-
+      
       Spacer()
     }
     .padding(12)
@@ -243,8 +229,9 @@ struct InfoRow: View {
     somethingInteresting: "somethingInteresting",
     state: "State"
   )
-
+  
   NavigationStack {
-    MoofuslistDetailView(activity: activity)
+    MoofuslistDetailView(activity: $activity)
   }
 }
+

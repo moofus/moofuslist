@@ -14,12 +14,6 @@ struct MoofuslistContentView: View {
   @Bindable var viewModel: MoofuslistViewModel
   @State private var selectedSort = "Relevance"
 
-  init(source: MoofuslistSource, viewModel: MoofuslistViewModel) { // delete
-    print("ljw \(Date()) \(#file):\(#function):\(#line)")
-    self.source = source
-    self.viewModel = viewModel
-  }
-
   var body: some View {
     ZStack {
       Color(.listBackground).ignoresSafeArea()
@@ -75,13 +69,12 @@ struct MoofuslistContentView: View {
         .padding(20)
         .background(Color.white)
 
-        // Results List
         ScrollView {
           VStack(spacing: 12) {
-            ForEach(viewModel.activities) { activity in
-              ActivityCardView(activity: activity)
+            ForEach(viewModel.activities.indices, id: \.self) { idx in
+              MoofuslistCardView(activity: $viewModel.activities[idx])
                 .onTapGesture {
-                  source.select(activity: activity)
+                  source.select(idx: idx)
                 }
             }
           }
@@ -173,4 +166,5 @@ struct MoofuslistContentView: View {
  //    ]
 
  */
+
 

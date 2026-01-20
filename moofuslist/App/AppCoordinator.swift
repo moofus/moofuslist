@@ -11,8 +11,6 @@ import SwiftUI
 @MainActor
 @Observable
 class AppCoordinator {
-  typealias Activity = MoofuslistViewModel.Activity
-
   enum Route: Hashable {
     case content
     case detail

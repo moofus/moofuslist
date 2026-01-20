@@ -10,9 +10,8 @@ import FactoryKit
 import MapKit
 import SwiftUI
 
-struct ActivityCardView: View {
-  let activity: MoofuslistViewModel.Activity
-  @State private var isFavorite = false
+struct MoofuslistCardView: View {
+  @Binding var activity: MoofuslistViewModel.Activity
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
@@ -50,10 +49,10 @@ struct ActivityCardView: View {
 
         Spacer()
 
-        Button(action: { isFavorite.toggle() }) {
-          Image(systemName: isFavorite ? "heart.fill" : "heart")
+        Button(action: { activity.isFavorite.toggle() }) {
+          Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
             .font(.system(size: 18))
-            .foregroundColor(isFavorite ? .accent : .gray)
+            .foregroundColor(activity.isFavorite ? .accent : .gray)
         }
       }
 

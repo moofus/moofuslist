@@ -12,8 +12,6 @@ import os
 import SwiftUI
 
 final actor MoofuslistSource {
-  typealias Activity = MoofuslistViewModel.Activity
-
   enum SourceError: Error {
     case location(description: String?, recoverySuggestion: String?)
     case unknown(String)
@@ -26,7 +24,7 @@ final actor MoofuslistSource {
     case loaded
     case loading(MKMapItem?, [AIManager.Activity])
     case processing
-    case select(Activity)
+    case select(Int) // the index of the selected activity
   }
 
   @Injected(\.aiManager) var aiManager: AIManager
@@ -157,10 +155,10 @@ extension MoofuslistSource {
 // MARK: - Public Methods
 extension MoofuslistSource {
   nonisolated
-  func select(activity: Activity) {
+  func select(idx: Int) {
     Task { [weak self] in
       guard let self else { return }
-      continuation.yield(.select(activity))
+      continuation.yield(.select(idx))
       await navigate(to: .detail)
     }
   }

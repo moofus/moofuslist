@@ -10,8 +10,6 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
-  typealias Activity = MoofuslistViewModel.Activity
-
   @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
   @State private var searchText: String = ""
   @Injected(\.moofuslistSource) var source: MoofuslistSource
@@ -50,7 +48,11 @@ struct MoofuslistView: View {
       MoofuslistContentView(source: source, viewModel: viewModel)
     } detail: {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      MoofuslistDetailView(activity: viewModel.selectedActivity)
+      if let idx = viewModel.selectedIdx {
+        MoofuslistDetailView(activity: $viewModel.activities[idx])
+      } else {
+        EmptyView()
+      }
     }
     .disabled(viewModel.isProcessing)
     .alert("\"City, State\" is invalid!", isPresented: $viewModel.inputError) {

@@ -22,7 +22,7 @@ class MoofuslistViewModel {
     let description: String
     let distance: Double
     let imageNames: [String]
-//    let isFavorite = false
+    var isFavorite = false
     let name: String
     let rating: Double
     let reviews: Int
@@ -45,7 +45,7 @@ class MoofuslistViewModel {
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistViewModel")
   private(set) var mapItem: MKMapItem?
   private(set) var searchedCityState = ""
-  var selectedActivity: Activity?
+  var selectedIdx: Int?
 
   init() {
     buildImageNames()
@@ -109,7 +109,7 @@ extension MoofuslistViewModel {
     imageNames["garden"] = ["leaf.fill"]
     imageNames["gardens"] = ["leaf.fill"]
     imageNames["golf"] = ["figure.golf"]
-    imageNames["graffiti"] = ["photo.artframe"]
+    imageNames["graffiti"] = ["photo.artframe","theatermask.and.paintbrush.fill"]
     imageNames["gyms"] = ["dumbbell.fill"]
     imageNames["harbor"] = ["water.waves"]
     imageNames["haight-ashbury"] = ["figure.walk","binoculars.fill"]
@@ -134,8 +134,9 @@ extension MoofuslistViewModel {
     imageNames["massage"] = ["carseat.right.massage.fill"]
     imageNames["movies"] = ["movieclapper.fill","ticket.fill"]
     imageNames["murals"] = ["paintpalette.fill"]
-    imageNames["museum"] = ["building.fill","figure.walk"]
-    imageNames["museums"] = ["building.2.fill","figure.walk"]
+    imageNames["museum"] = ["building.fill"]
+    imageNames["museums"] = ["building.2.fill"]
+    imageNames["museum of art"] = ["photo.artframe","paintpalette.fill"]
     imageNames["music"] = ["music.pages.fill"]
     imageNames["musicals"] = ["music.note.house.fill"]
     imageNames["nature"] = ["leaf.fill"]
@@ -299,8 +300,8 @@ extension MoofuslistViewModel {
           loading = true
         }
       case .processing: isProcessing = true
-      case .select(let activity):
-        selectedActivity = activity
+      case .select(let idx):
+        selectedIdx = idx
       }
     }
   }
