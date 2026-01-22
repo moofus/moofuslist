@@ -19,13 +19,13 @@ struct MoofuslistView: View {
     @Bindable var appCoordinator = appCoordinator
     @Bindable var viewModel = viewModel
 
-    let _ = print("isProcessing=\(viewModel.isProcessing)")
-
     NavigationSplitView(preferredCompactColumn: $appCoordinator.splitViewColum) {
       VStack {
         MoofuslistHeaderView()
 
-        MoofuslistMapView(displayButton: !viewModel.isProcessing, item: viewModel.mapItem, position: $viewModel.mapPosition) {
+        MoofuslistMapView(item: viewModel.mapItem, position: $viewModel.mapPosition)
+
+        FindActivitiesButton(text: "Search Current Location", padding: 5) {
           source.searchCurrentLocation()
         }
 

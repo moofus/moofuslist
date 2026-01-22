@@ -34,7 +34,6 @@ struct FindActivitiesButton: View {
       } icon: {
         GPSPinView()
       }
-      .padding(padding)
     }
     .buttonStyle(.glassProminent)
   }

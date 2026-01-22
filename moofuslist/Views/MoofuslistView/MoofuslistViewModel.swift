@@ -219,10 +219,10 @@ extension MoofuslistViewModel {
 ), requestKindString=PlaceRequest.REQUEST_TYPE_SEARCH, timeUntilReset=46, requestKind=769}
  */
       print("after start")
-      guard let coordinate = response.mapItems.first?.placemark.coordinate else {
+      guard let activityMapItem = response.mapItems.first  else {
         return activity.distance
       }
-      activityLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+      activityLocation = activityMapItem.location
       addressToLocationCache[activity.address] = activityLocation
     }
     let locationToSearch = await source.locationToSearch
@@ -253,8 +253,8 @@ extension MoofuslistViewModel {
           distance: distance,
           imageNames: imageNames(from: activity),
           name: activity.name,
-          rating: 3.9,
-          reviews: 45,
+          rating: activity.rating, // ljw
+          reviews: activity.reviews, // ljw
           somethingInteresting: activity.somethingInteresting,
           state: activity.state
         )
@@ -308,6 +308,7 @@ extension MoofuslistViewModel {
         if let cityState = mapItem.addressRepresentations?.cityWithContext {
           searchedCityState = cityState
         }
+        isProcessing = true
       case .processing:
         isProcessing = true
         activities = []

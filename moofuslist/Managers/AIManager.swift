@@ -72,6 +72,10 @@ actor AIManager {
     let state: String
     @Guide(description: "The category for this item")
     let category: String
+    @Guide(description: "The rating for this item")
+    let rating: Double
+    @Guide(description: "The number of reviews for the rating for this item")
+    let reviews: Int
     @Guide(description: "The distance in miles")
     let distance: Double
     @Guide(description: "A short description about of this place")
@@ -86,6 +90,8 @@ actor AIManager {
         city: city,
         state: state,
         category: category.lowercased(),
+        rating: rating,
+        reviews: reviews,
         distance: distance,
         description: description,
         somethingInteresting: somethingInteresting
@@ -99,6 +105,7 @@ actor AIManager {
                   Your job is to find activities to do and places to go.
                   
                   Always include a short description, and something interesting about the activity or place.
+                  Include a rating and the number of reviews for the rating.
                   """
   let continuation: AsyncStream<Message>.Continuation
   let stream: AsyncStream<Message>
@@ -169,6 +176,8 @@ extension AIManager {
           let city = activity.city,
           let state = activity.state,
           let category = activity.category?.lowercased() ?? activity.category,
+          let rating = activity.rating,
+          let reviews = activity.reviews,
           let distance = activity.distance,
           let description = activity.description?.lowercased() ?? activity.description,
           let somethingInteresting = activity.somethingInteresting else {
@@ -180,6 +189,8 @@ extension AIManager {
       city: city,
       state: state,
       category: category,
+      rating: rating,
+      reviews: reviews,
       distance: distance,
       description: description,
       somethingInteresting: somethingInteresting
