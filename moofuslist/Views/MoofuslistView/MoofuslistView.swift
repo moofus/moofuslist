@@ -25,18 +25,19 @@ struct MoofuslistView: View {
       VStack {
         MoofuslistHeaderView()
 
-        MoofuslistMapView(displayButton: !viewModel.isProcessing, item: viewModel.mapItem) {
+        MoofuslistMapView(displayButton: !viewModel.isProcessing, item: viewModel.mapItem, position: $viewModel.mapPosition) {
           source.searchCurrentLocation()
         }
 
+        Spacer()
+
         Label {
           Text("Using Apple Intelligent")
+            .font(.footnote)
         } icon: {
           Image(systemName: "sparkles")
             .foregroundStyle(.accent)
         }
-
-        Spacer()
       }
       .searchable(text: $searchText, prompt: "Search City, State, or Zip")
       .onSubmit(of: .search) {

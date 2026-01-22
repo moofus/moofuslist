@@ -22,7 +22,8 @@ final actor MoofuslistSource {
     case badInput
     case initial
     case loaded
-    case loading(MKMapItem?, [AIManager.Activity])
+    case loading([AIManager.Activity])
+    case mapItem(MKMapItem)
     case processing
     case select(Int) // the index of the selected activity
   }
@@ -90,7 +91,7 @@ extension MoofuslistSource {
     self.locationToSearch = mapItem.location
     if let cityState = mapItem.addressRepresentations?.cityWithContext {
      do {
-       continuation.yield(.loading(mapItem, []))
+       continuation.yield(.mapItem(mapItem))
        try await aiManager.findActivities(cityState: cityState)
      } catch {
        print("ljw \(Date()) \(#file):\(#function):\(#line)")
@@ -133,7 +134,7 @@ extension MoofuslistSource {
       case .error(_):
         assertionFailure() // ljw
       case .loading(let activities):
-        continuation.yield(.loading(nil, activities)) // ljw handle activities.isEmpty
+        continuation.yield(.loading(activities)) // ljw handle activities.isEmpty
       }
     }
   }
@@ -185,8 +186,8 @@ extension MoofuslistSource {
 
   nonisolated
   func searchCurrentLocation() {
+    continuation.yield(.processing)
     Task {
-      continuation.yield(.loading(nil, []))
       await locationManager.start(maxCount: 1)
     }
   }

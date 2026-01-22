@@ -44,6 +44,8 @@ class MoofuslistViewModel {
   private(set) var loading = false
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistViewModel")
   private(set) var mapItem: MKMapItem?
+  var mapPosition: MapCameraPosition = .automatic
+
   private(set) var searchedCityState = ""
   var selectedIdx: Int?
 
@@ -96,7 +98,7 @@ extension MoofuslistViewModel {
     imageNames["dining"] = ["fork.knife"]
     imageNames["district"] = ["storefront.fill"]
     imageNames["drive"] = ["car.fill"]
-    imageNames["education"] = ["book.fill", "text.book.closed.fill"] // TODO: delete one
+    imageNames["education"] = ["text.book.closed.fill"] // TODO: delete one
     imageNames["empire state building"] = ["building.columns.fill", "binoculars.fill"]
     imageNames["entertainment"] = ["popcorn.fill"]
     imageNames["events"] = ["calendar"]
@@ -180,7 +182,7 @@ extension MoofuslistViewModel {
     imageNames["tour"] = ["figure.walk"]
     imageNames["trails"] = ["figure.hiking"]
     imageNames["travel"] = ["airplane"]
-    imageNames["university campus"] = ["graduationcap.fill","books.vertical.fill","building.2.fill"]
+    imageNames["university"] = ["graduationcap.fill","books.vertical.fill","building.2.fill"]
     imageNames["yoga"] = ["figure.yoga"]
     imageNames["vibrant boardwalk"] = ["fork.knife","storefront.fill"]
     imageNames["views"] = ["binoculars.fill"]
@@ -283,23 +285,32 @@ extension MoofuslistViewModel {
         }
         haveError = true
       case .initial:
-        print("ljw initial \(Date()) \(#file):\(#function):\(#line)")
         mapItem = nil
+        mapPosition = .automatic
       case .loaded:
         print("ljw loaded \(Date()) \(#file):\(#function):\(#line)")
-        mapItem = nil
         print("loaded activities count=\(self.activities.count) \(activities.count)")
-      case .loading(let mapItem, let activities):
-        isProcessing = true
-        self.mapItem = mapItem
-        if let cityState = mapItem?.addressRepresentations?.cityWithContext {
-          searchedCityState = cityState
-        }
+      case .loading(let activities):
         self.activities = await convert(activities: activities)
         withAnimation {
           loading = true
         }
-      case .processing: isProcessing = true
+      case .mapItem(let mapItem):
+        self.mapItem = mapItem
+        let latitude = mapItem.location.coordinate.latitude
+        let longitude = mapItem.location.coordinate.longitude
+        let newCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let zoomOutDistance: CLLocationDistance = 5000 // meters, adjust as needed
+        mapPosition = MapCameraPosition.camera(
+          MapCamera(centerCoordinate: newCoordinate, distance: zoomOutDistance * 2) // doubling the distance to zoom out
+        )
+
+        if let cityState = mapItem.addressRepresentations?.cityWithContext {
+          searchedCityState = cityState
+        }
+      case .processing:
+        isProcessing = true
+        activities = []
       case .select(let idx):
         selectedIdx = idx
       }
@@ -341,6 +352,11 @@ extension MoofuslistViewModel {
   private func removeSimilarImages(result: inout [String]) -> [String] {
     if result.contains("building.columns.fill") {
       if let idx = result.firstIndex(of: "building.fill") {
+        result.remove(at: idx)
+      }
+    }
+    if result.contains("books.vertical.fill") {
+      if let idx = result.firstIndex(of: "text.book.closed.fill") {
         result.remove(at: idx)
       }
     }
