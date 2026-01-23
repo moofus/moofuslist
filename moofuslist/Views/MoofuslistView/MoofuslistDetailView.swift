@@ -12,7 +12,7 @@ import SwiftUI
 struct MoofuslistDetailView: View {
   @Binding var activity: MoofuslistViewModel.Activity
   @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
-  @State private var selectedIdx = 0
+  @State private var imageSelectedIdx = 0
   @State private var timedActionSelectedImage = false
   
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
@@ -25,7 +25,7 @@ struct MoofuslistDetailView: View {
       ScrollView {
         VStack(spacing: 0) {
           VStack {
-            TabView(selection: $selectedIdx) {
+            TabView(selection: $imageSelectedIdx) {
               ForEach(0..<activity.imageNames.count, id: \.self) { idx in
                 Image(systemName: activity.imageNames[idx])
                   .font(.system(size: 80))
@@ -40,7 +40,7 @@ struct MoofuslistDetailView: View {
             .onAppear {
               onAppearTabView()
             }
-            .onChange(of: selectedIdx) {
+            .onChange(of: imageSelectedIdx) {
               onChangeSelectedIdx()
             }
           }
@@ -138,7 +138,7 @@ struct MoofuslistDetailView: View {
       ToolbarItem(placement: .topBarLeading) {
         Button {
           timedAction.stop()
-          selectedIdx = 0
+          imageSelectedIdx = 0
           timedActionSelectedImage = false
           appCoordinator.navigate(to: .content)
         } label: {
@@ -161,18 +161,18 @@ struct MoofuslistDetailView: View {
       withAnimation {
         if starting {
           starting = false
-          selectedIdx = activity.imageNames.count > 1 ? 1 : 0
+          imageSelectedIdx = 1
         } else {
-          if (selectedIdx + 1) >= activity.imageNames.count {
-            selectedIdx = 0
+          if (imageSelectedIdx + 1) < activity.imageNames.count {
+            imageSelectedIdx += 1
           } else {
-            selectedIdx += 1
+            imageSelectedIdx = 0
           }
         }
         timedActionSelectedImage = true
       }
     } errorHandler: { error in
-      selectedIdx = 0
+      imageSelectedIdx = 0
     }
   }
   

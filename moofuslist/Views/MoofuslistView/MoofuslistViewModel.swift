@@ -77,7 +77,8 @@ extension MoofuslistViewModel {
     imageNames["biking"] = ["bicycle"]
     imageNames["bridge"] = ["figure.walk"]
     imageNames["boat"] = ["ferry.fill"]
-    imageNames["bookstores"] = ["books.vertical.fill"]
+    imageNames["bookstore"] = ["books.vertical.fill","book.pages"]
+    imageNames["bookstores"] = ["books.vertical.fill","book.pages"]
     imageNames["boutiques"] = ["handbag.fill"]
     imageNames["bowling"] = ["figure.bowling"]
     imageNames["brewery"] = ["cup.and.saucer.fill"]
@@ -190,8 +191,8 @@ extension MoofuslistViewModel {
     imageNames["waterfront"] = ["water.waves"]
     imageNames["wharf"] = ["water.waves"]
     imageNames["wildlife"] = ["pawprint.fill"]
-    imageNames["zoo"] = ["pawprint.fill"]
-    imageNames["zoos"] = ["pawprint.fill"]
+    imageNames["zoo"] = ["pawprint.fill","tortoise.fill","bird.fill"]
+    imageNames["zoos"] = ["pawprint.fill","tortoise.fill","bird.fill"]
   }
 
   // Returns the coordinate of the most relevant result

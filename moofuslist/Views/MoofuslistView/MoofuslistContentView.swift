@@ -81,6 +81,11 @@ struct MoofuslistContentView: View {
           .padding(16)
         }
       }
+      .disabled(viewModel.loading)
+
+      if viewModel.loading {
+        ProgressView() // ljw
+      }
     }
     .navigationBarTitleDisplayMode(.inline)
   }

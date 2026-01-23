@@ -120,7 +120,8 @@ extension AIManager {
   func findActivities(cityState: String) async throws {
     try isModelAvailable()
 
-    let session = LanguageModelSession(instructions: instructions)
+    let newInstructions = self.instructions + " Always include the distance from \(cityState)" // ljw
+    let session = LanguageModelSession(instructions: newInstructions)
     let text = "Generate a list of things to do near \(cityState)"
     do {
       let stream = session.streamResponse(to: text, generating: Activities.self) // Streaming partial generations
