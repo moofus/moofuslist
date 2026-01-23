@@ -22,7 +22,7 @@ struct MoofuslistContentView: View {
         // Header
         let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
         VStack(alignment: .leading, spacing: 16) {
-          Text("Results near \(viewModel.searchedCityState)")
+          Text("Activities near \(viewModel.searchedCityState)")
             .font(.system(size: 20, weight: .bold))
             .foregroundColor(.black)
 
@@ -74,7 +74,7 @@ struct MoofuslistContentView: View {
             ForEach(viewModel.activities.indices, id: \.self) { idx in
               MoofuslistCardView(activity: $viewModel.activities[idx])
                 .onTapGesture {
-                  source.select(idx: idx)
+                  source.select(activity: viewModel.activities[idx])
                 }
             }
           }

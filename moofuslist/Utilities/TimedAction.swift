@@ -12,10 +12,6 @@ class TimedAction {
   private var maxCount = UInt.max
   private var task: Task<Void, Never>?
 
-  deinit {
-    stop()
-  }
-
   func start(
     count maxCount: UInt = UInt.max,
     sleepTimeInSeconds: UInt = 2,
@@ -25,13 +21,16 @@ class TimedAction {
     self.maxCount = maxCount
     count = UInt.zero
 
+    print("\(Date()) calling stop")
+    stop()
+
     task = Task {
       repeat {
         do {
           try Task.checkCancellation()
-          try await Task.sleep(nanoseconds: UInt64(sleepTimeInSeconds) * 1_000_000_000)
-          count += 1
           action()
+          count += 1
+          try await Task.sleep(nanoseconds: UInt64(sleepTimeInSeconds) * 1_000_000_000)
         } catch {
           errorHandler?(error)
           break
@@ -41,6 +40,7 @@ class TimedAction {
   }
 
   func stop() {
+    print("stop")
     task?.cancel()
     task = nil
   }

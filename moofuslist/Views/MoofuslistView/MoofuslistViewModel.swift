@@ -47,7 +47,7 @@ class MoofuslistViewModel {
   var mapPosition: MapCameraPosition = .automatic
 
   private(set) var searchedCityState = ""
-  var selectedIdx: Int?
+  var selectedActivity: Activity?
 
   init() {
     buildImageNames()
@@ -99,12 +99,13 @@ extension MoofuslistViewModel {
     imageNames["dining"] = ["fork.knife"]
     imageNames["district"] = ["storefront.fill"]
     imageNames["drive"] = ["car.fill"]
-    imageNames["education"] = ["text.book.closed.fill"] // TODO: delete one
+    imageNames["education"] = ["text.book.closed.fill"]
     imageNames["empire state building"] = ["building.columns.fill", "binoculars.fill"]
     imageNames["entertainment"] = ["popcorn.fill"]
     imageNames["events"] = ["calendar"]
     imageNames["ferry"] = ["ferry.fill"]
     imageNames["farmers markets"] = ["leaf.arrow.trianglehead.clockwise"]
+    imageNames["festival"] = ["party.popper.fill"]
     imageNames["fishing"] = ["figure.fishing"]
     imageNames["food"] = ["fork.knife"]
     imageNames["food trucks"] = ["truck.box.fill"]
@@ -121,6 +122,7 @@ extension MoofuslistViewModel {
     imageNames["hiking"] = ["figure.hiking"]
     imageNames["historic site"] = ["building.columns.fill"]
     imageNames["historical"] = ["building.columns.fill"]
+    imageNames["hot air balloon festival"] = ["balloon.2.fill"]
     imageNames["innovation"] = ["lightbulb.max.fill"]
     imageNames["insect exhibit"] = ["ant.fill", "ladybug.fill"]
     imageNames["karaoke"] = ["music.mic","music.note.house.fill"]
@@ -312,9 +314,9 @@ extension MoofuslistViewModel {
         isProcessing = true
       case .processing:
         isProcessing = true
-        activities = []
-      case .select(let idx):
-        selectedIdx = idx
+        activities = [] // ljw pass this in
+      case .select(let activity):
+        selectedActivity = activity
       }
     }
   }

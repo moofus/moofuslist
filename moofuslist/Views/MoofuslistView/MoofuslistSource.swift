@@ -24,8 +24,8 @@ final actor MoofuslistSource {
     case loaded
     case loading([AIManager.Activity])
     case mapItem(MKMapItem)
-    case processing
-    case select(Int) // the index of the selected activity
+    case processing([AIManager.Activity])
+    case select(MoofuslistViewModel.Activity?) // the index of the selected activity
   }
 
   @Injected(\.aiManager) var aiManager: AIManager
@@ -43,6 +43,21 @@ final actor MoofuslistSource {
       async let aiWait: Void = handleAIManager()
       async let locationWait: () = handleLocationManager()
       _ = await(aiWait, locationWait)
+    }
+
+    Task { @MainActor in
+      @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
+
+      for await message in appCoordinator.stream {
+        switch message {
+        case .content:
+          print("source content")
+        case .detail:
+          print("source detail")
+        case .sidebar:
+          print("source sidebar")
+        }
+      }
     }
   }
 }
@@ -156,10 +171,11 @@ extension MoofuslistSource {
 // MARK: - Public Methods
 extension MoofuslistSource {
   nonisolated
-  func select(idx: Int) {
+  func select(activity: MoofuslistViewModel.Activity) {
     Task { [weak self] in
       guard let self else { return }
-      continuation.yield(.select(idx))
+      print("ljw \(Date()) \(#file):\(#function):\(#line)")
+      continuation.yield(.select(activity))
       await navigate(to: .detail)
     }
   }
@@ -171,7 +187,7 @@ extension MoofuslistSource {
         continuation.yield(.badInput)
         return
       }
-      continuation.yield(.processing)
+      continuation.yield(.processing([]))
       let request = MKGeocodingRequest(addressString: cityState) // TODO: use cache
       do {
         let mapItem = (try await request?.mapItems.first)!
@@ -186,7 +202,9 @@ extension MoofuslistSource {
 
   nonisolated
   func searchCurrentLocation() {
-    continuation.yield(.processing)
+    print("ljw \(Date()) \(#file):\(#function):\(#line)")
+    continuation.yield(.select(nil))
+    continuation.yield(.processing([]))
     Task {
       await locationManager.start(maxCount: 1)
     }

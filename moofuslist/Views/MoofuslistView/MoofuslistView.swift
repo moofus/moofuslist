@@ -49,11 +49,8 @@ struct MoofuslistView: View {
       MoofuslistContentView(source: source, viewModel: viewModel)
     } detail: {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      if let idx = viewModel.selectedIdx {
-        MoofuslistDetailView(activity: $viewModel.activities[idx])
-      } else {
-        EmptyView()
-      }
+      MoofuslistDetailView(activity: $viewModel.selectedActivity)
+//        .id(viewModel.selectedActivity?.id ?? UUID())
     }
     .disabled(viewModel.isProcessing)
     .alert("\"City, State\" is invalid!", isPresented: $viewModel.inputError) {
