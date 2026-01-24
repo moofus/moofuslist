@@ -22,7 +22,7 @@ struct MoofuslistContentView: View {
         // Header
         let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
         VStack(alignment: .leading, spacing: 16) {
-          Text("Activities near \(viewModel.searchedCityState)")
+          Text("Activities near \(viewModel.uiData.searchedCityState)")
             .font(.system(size: 20, weight: .bold))
             .foregroundColor(.black)
 
@@ -71,19 +71,19 @@ struct MoofuslistContentView: View {
 
         ScrollView {
           VStack(spacing: 12) {
-            ForEach(viewModel.activities.indices, id: \.self) { idx in
-              MoofuslistCardView(activity: $viewModel.activities[idx])
+            ForEach(viewModel.uiData.activities.indices, id: \.self) { idx in
+              MoofuslistCardView(activity: $viewModel.uiData.activities[idx])
                 .onTapGesture {
-                  source.select(activity: viewModel.activities[idx])
+                  source.select(activity: viewModel.uiData.activities[idx])
                 }
             }
           }
           .padding(16)
         }
       }
-      .disabled(viewModel.loading)
+      .disabled(viewModel.uiData.loading)
 
-      if viewModel.loading {
+      if viewModel.uiData.loading {
         ProgressView() // ljw
       }
     }

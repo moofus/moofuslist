@@ -12,20 +12,54 @@ import os
 import SwiftUI
 
 final actor MoofuslistSource {
-  enum SourceError: Error {
-    case location(description: String?, recoverySuggestion: String?)
-    case unknown(String)
-  }
+  typealias Activity = MoofuslistViewModel.Activity
 
   enum Message {
-    case error(SourceError)
-    case badInput
-    case initial
-    case loaded
-    case loading([AIManager.Activity])
-    case mapItem(MKMapItem)
-    case processing([AIManager.Activity])
-    case select(MoofuslistViewModel.Activity?) // the index of the selected activity
+    case error(MoofuslistUIData)
+    case loaded(MoofuslistUIData)
+    case loading([AIManager.Activity], MoofuslistUIData)
+    case processing(MoofuslistUIData)
+  }
+
+  @Observable
+  final class MoofuslistUIData {
+    var activities: [Activity]
+    var errorDescription: String
+    var errorRecoverySuggestion: String
+    var haveError: Bool
+    var inputError: Bool
+    var loading: Bool
+    var mapItem: MKMapItem?
+    var mapPosition: MapCameraPosition
+    var processing: Bool
+    var searchedCityState: String
+    var selectedActivity: Activity?
+
+    init(
+      activities: [Activity] = [],
+      errorDescription: String = "",
+      errorRecoverySuggestion: String = "",
+      haveError: Bool = false,
+      inputError: Bool = false,
+      loading: Bool = false,
+      mapItem: MKMapItem? = nil,
+      mapPosition: MapCameraPosition = .automatic,
+      processing: Bool = false,
+      searchedCityState: String = "",
+      selectedActivity: Activity? = nil
+    ) {
+      self.activities = activities
+      self.errorDescription = errorDescription
+      self.errorRecoverySuggestion = errorRecoverySuggestion
+      self.haveError = haveError
+      self.inputError = inputError
+      self.loading = loading
+      self.mapItem = mapItem
+      self.mapPosition = mapPosition
+      self.processing = processing
+      self.searchedCityState = searchedCityState
+      self.selectedActivity = selectedActivity
+    }
   }
 
   @Injected(\.aiManager) var aiManager: AIManager
@@ -34,6 +68,7 @@ final actor MoofuslistSource {
   private let continuation: AsyncStream<Message>.Continuation
   private(set) var locationToSearch = CLLocation()
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
+  private var uiData = MoofuslistUIData() // source of truth
   let stream: AsyncStream<Message>
 
   init() {
@@ -62,25 +97,16 @@ final actor MoofuslistSource {
   }
 }
 
-
 // MARK: - Private Location Methods
 extension MoofuslistSource {
-  private func handle(error: LocalizedError) async {
-    let error = SourceError.location(
-      description: error.errorDescription,
-      recoverySuggestion: error.recoverySuggestion
-    )
-    continuation.yield(.error(error))
-  }
-
   /// Given the CLLocation get the city and state
   /// - Parameter location: the location used to get the city and state
   /// - Returns: the "city, state"
   private func handle(location: CLLocation) async {
-    if let request = MKReverseGeocodingRequest(location: location) { // ljw use cache
+    if let request = MKReverseGeocodingRequest(location: location) { // TODO: use cache
       do {
         let mapItems = try await request.mapItems
-        if mapItems.count > 1 {
+        if mapItems.count > 1 { // TODO: remove
           print("mapItems.count=\(mapItems.count)")
           print(mapItems)
           assertionFailure()
@@ -90,48 +116,100 @@ extension MoofuslistSource {
           return
         } else {
           assertionFailure()
-          // ljw handle
+          // TODO: handle
         }
       } catch {
         logger.error("Error MKReverseGeocodingRequest: \(error)")
         assertionFailure("unknown error=\(error)")
-        continuation.yield(.error(.unknown(error.localizedDescription)))
+        sendError(description: error.localizedDescription)
+        return
       }
     }
-    let error = SourceError.location(description: "Can't get location", recoverySuggestion: nil)
-    continuation.yield(.error(error))
+    sendError(description: "Can't get location")
   }
+}
 
+// MARK: - Private Methods
+extension MoofuslistSource {
   private func handle(mapItem: MKMapItem) async {
     self.locationToSearch = mapItem.location
     if let cityState = mapItem.addressRepresentations?.cityWithContext {
-     do {
-       continuation.yield(.mapItem(mapItem))
-       try await aiManager.findActivities(cityState: cityState)
-     } catch {
-       print("ljw \(Date()) \(#file):\(#function):\(#line)")
-       print(error)
-       if let error = error as? AIManager.Error {
-         let error = SourceError.location(
-           description: error.errorDescription,
-           recoverySuggestion: error.recoverySuggestion
-         )
-         continuation.yield(.error(error))
-       } else {
-         assertionFailure("unknown error=\(error)")
-         continuation.yield(.error(.unknown(error.localizedDescription)))
-       }
-     }
-     return
+      do {
+        sendProcessing(mapItem: mapItem)
+        try await aiManager.findActivities(cityState: cityState)
+      } catch {
+        print("ljw \(Date()) \(#file):\(#function):\(#line)")
+        print(error)
+        if let error = error as? AIManager.Error {
+          sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
+        } else {
+          assertionFailure("unknown error=\(error)")
+          sendError(description: error.localizedDescription)
+        }
+      }
+      return
     } else {
-      // ljw handle
+      // TODO: handle
     }
+  }
+
+  private func initializeUIData() {
+    uiData.activities = []
+    uiData.inputError = false
+    uiData.haveError = false
+    uiData.loading = false
+// TODO:     uiData.mapItem = nil
+// TODO:     uiData.mapPosition = .automatic
+    uiData.processing = false
   }
 
   @MainActor
   private func navigate(to route: AppCoordinator.Route) {
     @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
     appCoordinator.navigate(to: route)
+  }
+
+  private func sendError(
+    description: String = "Error",
+    recoverySuggestion: String = "Try again later."
+  ) {
+    initializeUIData()
+    uiData.errorDescription = description
+    uiData.errorRecoverySuggestion = recoverySuggestion
+    continuation.yield(.error(uiData))
+  }
+
+  private func sendInputError() {
+    initializeUIData()
+    uiData.inputError = true
+    continuation.yield(.error(uiData))
+  }
+
+  private func sendLoaded(activity: Activity) {
+    uiData.selectedActivity = activity
+    continuation.yield(.loaded(uiData))
+  }
+
+  private func sendLoaded(loading: Bool) {
+    uiData.loading = false
+    uiData.processing = false
+    continuation.yield(.loaded(uiData))
+  }
+
+  private func sendLoading(activities: [AIManager.Activity]) {
+    uiData.processing = false
+    continuation.yield(.loading(activities, uiData)) // TODO: convert here?
+  }
+
+  private func sendProcessing(mapItem: MKMapItem) {
+    uiData.mapItem = mapItem
+    continuation.yield(.processing(uiData))
+  }
+
+  private func sendProcessing() {
+    initializeUIData()
+    uiData.processing = true // TODO: investigate, may not need processing just use loading
+    continuation.yield(.processing(uiData))
   }
 }
 
@@ -145,11 +223,11 @@ extension MoofuslistSource {
         await navigate(to: .content)
       case .end:
         print("ljw end \(Date()) \(#file):\(#function):\(#line)")
-        continuation.yield(.loaded) // ljw handle activities.isEmpty
+        sendLoaded(loading: false)
       case .error(_):
-        assertionFailure() // ljw
+        assertionFailure() // TODO: handle
       case .loading(let activities):
-        continuation.yield(.loading(activities)) // ljw handle activities.isEmpty
+        sendLoading(activities: activities)
       }
     }
   }
@@ -160,7 +238,10 @@ extension MoofuslistSource {
 
       switch message {
       case .error(let error):
-        await handle(error: error)
+        sendError(
+          description: error.errorDescription ?? "",
+          recoverySuggestion: error.recoverySuggestion ?? ""
+        )
       case .location(let location):
         await handle(location: location)
       }
@@ -175,7 +256,7 @@ extension MoofuslistSource {
     Task { [weak self] in
       guard let self else { return }
       print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      continuation.yield(.select(activity))
+      await sendLoaded(activity: activity)
       await navigate(to: .detail)
     }
   }
@@ -184,10 +265,10 @@ extension MoofuslistSource {
   func searchCityState(_ cityState: String) {
     Task {
       guard await cityState.validateTwoStringsSeparatedByComma() else {
-        continuation.yield(.badInput)
+        await sendInputError()
         return
       }
-      continuation.yield(.processing([]))
+      await sendProcessing()
       let request = MKGeocodingRequest(addressString: cityState) // TODO: use cache
       do {
         let mapItem = (try await request?.mapItems.first)!
@@ -195,17 +276,15 @@ extension MoofuslistSource {
       } catch {
         logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
         print(error.localizedDescription)
-        continuation.yield(.badInput)
+        await sendInputError()
       }
     }
   }
 
   nonisolated
   func searchCurrentLocation() {
-    print("ljw \(Date()) \(#file):\(#function):\(#line)")
-    continuation.yield(.select(nil))
-    continuation.yield(.processing([]))
     Task {
+      await sendProcessing()
       await locationManager.start(maxCount: 1)
     }
   }

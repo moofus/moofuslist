@@ -11,8 +11,9 @@ import MapKit
 import os
 import SwiftUI
 
-@MainActor
+//@MainActor
 @Observable
+final
 class MoofuslistViewModel {
   struct Activity: Hashable, Identifiable {
     let id = UUID()
@@ -33,26 +34,15 @@ class MoofuslistViewModel {
   @ObservationIgnored
   @Injected(\.moofuslistSource) var source: MoofuslistSource
 
-  var activities = [Activity]()
   private var addressToLocationCache = [String: CLLocation]()
-  private(set) var errorDescription = ""
-  private(set) var errorRecoverySuggestion = ""
-  var haveError = false
   private var imageNames = [String: [String]]()
-  var inputError = false
-  private(set) var isProcessing = false
-  private(set) var loading = false
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistViewModel")
-  private(set) var mapItem: MKMapItem?
-  var mapPosition: MapCameraPosition = .automatic
-
-  private(set) var searchedCityState = ""
-  var selectedActivity: Activity?
+  var uiData = MoofuslistSource.MoofuslistUIData()
 
   init() {
     buildImageNames()
 
-    Task { await handleSource() }
+    handleSource()
   }
 }
 
@@ -266,57 +256,42 @@ extension MoofuslistViewModel {
     return result
   }
 
-  private func handleSource() async {
-    for await message in source.stream {
-      loading = false
-      inputError = false
-      haveError = false
-      isProcessing = false
-
-      switch message {
-      case .badInput:
-        inputError = true
-      case .error(let error):
-        if case let .location(description, recoverySuggestion) = error {
-          errorDescription = description ?? "Error"
-          errorRecoverySuggestion = recoverySuggestion ?? "Try again later."
-        } else {
-          // unknown error
-          print("ljw \(Date()) \(#file):\(#function):\(#line)")
-          errorDescription = error.localizedDescription
-          errorRecoverySuggestion = ""
+  private func handleSource() {
+    Task { @MainActor [weak self] in
+      guard let self else { return }
+      for await message in await source.stream {
+        switch message {
+        case .error(let uiData):
+          self.uiData = uiData
+        case .loaded(let uiData):
+          self.uiData = uiData
+          print("ljw loaded \(Date()) \(#file):\(#function):\(#line)")
+          print("loaded activities count=\(uiData.activities.count)")
+        case .loading(let activities, let uiData):
+          self.uiData = uiData
+          self.uiData.activities = await convert(activities: activities)
+          print("loading activities count=\(uiData.activities.count)")
+          withAnimation {
+            uiData.loading = true
+          }
+        case .processing(let uiData):
+          self.uiData = uiData
+          if let mapItem = uiData.mapItem {
+            let latitude = mapItem.location.coordinate.latitude
+            let longitude = mapItem.location.coordinate.longitude
+            let newCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            let zoomOutDistance: CLLocationDistance = 5000 // meters, adjust as needed
+            self.uiData.mapPosition = MapCameraPosition.camera(
+              MapCamera(centerCoordinate: newCoordinate, distance: zoomOutDistance * 2) // doubling the distance to zoom out
+            )
+            if let cityState = mapItem.addressRepresentations?.cityWithContext {
+              self.uiData.searchedCityState = cityState
+            }
+            withAnimation {
+              self.uiData.mapItem = mapItem // TODO: test visually
+            }
+          }
         }
-        haveError = true
-      case .initial:
-        mapItem = nil
-        mapPosition = .automatic
-      case .loaded:
-        print("ljw loaded \(Date()) \(#file):\(#function):\(#line)")
-        print("loaded activities count=\(self.activities.count) \(activities.count)")
-      case .loading(let activities):
-        self.activities = await convert(activities: activities)
-        withAnimation {
-          loading = true
-        }
-      case .mapItem(let mapItem):
-        self.mapItem = mapItem
-        let latitude = mapItem.location.coordinate.latitude
-        let longitude = mapItem.location.coordinate.longitude
-        let newCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        let zoomOutDistance: CLLocationDistance = 5000 // meters, adjust as needed
-        mapPosition = MapCameraPosition.camera(
-          MapCamera(centerCoordinate: newCoordinate, distance: zoomOutDistance * 2) // doubling the distance to zoom out
-        )
-
-        if let cityState = mapItem.addressRepresentations?.cityWithContext {
-          searchedCityState = cityState
-        }
-        isProcessing = true
-      case .processing:
-        isProcessing = true
-        activities = [] // ljw pass this in
-      case .select(let activity):
-        selectedActivity = activity
       }
     }
   }
