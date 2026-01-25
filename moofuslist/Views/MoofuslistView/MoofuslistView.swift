@@ -23,14 +23,14 @@ struct MoofuslistView: View {
       VStack {
         MoofuslistHeaderView()
 
-        MoofuslistMapView(item: viewModel.uiData.mapItem, position: $viewModel.uiData.mapPosition)
+        MoofuslistMapView(item: viewModel.mapItem, position: $viewModel.mapPosition)
 
         FindActivitiesButton(text: "Search Current Location", padding: 5) {
           searchText = ""
           source.searchCurrentLocation()
         }
 
-        if viewModel.uiData.processing {
+        if viewModel.processing {
           ProgressView()
         }
 
@@ -54,16 +54,16 @@ struct MoofuslistView: View {
       MoofuslistContentView(source: source, viewModel: viewModel)
     } detail: {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      MoofuslistDetailView(activity: $viewModel.uiData.selectedActivity)
+      MoofuslistDetailView(activity: $viewModel.selectedActivity)
     }
-    .disabled(viewModel.uiData.processing)
-    .alert("\"City, State\" is invalid!", isPresented: $viewModel.uiData.inputError) {
+    .disabled(viewModel.processing)
+    .alert("\"City, State\" is invalid!", isPresented: $viewModel.inputError) {
       Button("OK") {}
     }
-    .alert(viewModel.uiData.errorDescription, isPresented: $viewModel.uiData.haveError, presenting: viewModel) {  viewModel in
+    .alert(viewModel.errorDescription, isPresented: $viewModel.haveError, presenting: viewModel) {  viewModel in
       Button("OK") {}
     } message: { error in
-      Text(viewModel.uiData.errorRecoverySuggestion)
+      Text(viewModel.errorRecoverySuggestion)
     }
   }
 }

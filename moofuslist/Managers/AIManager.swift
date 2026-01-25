@@ -141,7 +141,9 @@ extension AIManager {
           continuation.yield(.begin)
           beginSent = true
         }
-        continuation.yield(.loading(activities))
+        if !activities.isEmpty {
+          continuation.yield(.loading(activities))
+        }
       }
       continuation.yield(.end)
     }

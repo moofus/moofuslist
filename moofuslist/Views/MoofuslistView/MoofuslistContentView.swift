@@ -20,9 +20,8 @@ struct MoofuslistContentView: View {
 
       VStack(spacing: 0) {
         // Header
-        let _ = print("ljw loading=\(viewModel.uiData.loading) \(Date()) \(#file):\(#function):\(#line)")
         VStack(alignment: .leading, spacing: 16) {
-          Text("Activities near \(viewModel.uiData.searchedCityState)")
+          Text("Activities near \(viewModel.searchedCityState)")
             .font(.system(size: 20, weight: .bold))
             .foregroundColor(.black)
 
@@ -71,19 +70,19 @@ struct MoofuslistContentView: View {
 
         ScrollView {
           VStack(spacing: 12) {
-            ForEach(viewModel.uiData.activities.indices, id: \.self) { idx in // TODO: need to reset activities at selection, do in source via appCoordinator
-              MoofuslistCardView(activity: $viewModel.uiData.activities[idx])
+            ForEach($viewModel.activities, id: \.id) { $activity in
+              MoofuslistCardView(activity: $activity)
                 .onTapGesture {
-                  source.select(activity: viewModel.uiData.activities[idx])
+                  source.select(activity: activity)
                 }
             }
           }
           .padding(16)
         }
       }
-      .disabled(viewModel.uiData.loading)
+      .disabled(viewModel.loading)
 
-      if viewModel.uiData.loading {
+      if viewModel.loading {
         ProgressView()
       }
     }
@@ -171,5 +170,3 @@ struct MoofuslistContentView: View {
  //    ]
 
  */
-
-

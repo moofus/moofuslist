@@ -1,12 +1,12 @@
 //
-//  ImageNames.swift
+//  MoofuslistImageNames.swift
 //  moofuslist
 //
 //  Created by Lamar Williams III on 1/24/26.
 //
 
-struct ImageNames {
-  private var imageNames: [String: [String]] = [
+actor ImageNames {
+  private let imageNames: [String: [String]] = [
     "9/11 memorial": ["building.columns.fill"],
     "alcatraz": ["ferry.fill","binoculars.fill","figure.walk"],
     "arcade games": ["gamecontroller.fill"],
@@ -35,6 +35,7 @@ struct ImageNames {
     "cable cars": ["cablecar.fill"],
     "cafes": ["cup.and.saucer.fill"],
     "camping": ["tent.2.fill"],
+    "cemetery": ["cross.fill"],
     "children's activities": ["figure.child"],
     "chinatown": ["chineseyuanrenminbisign","fork.knife","storefront.fill"],
     "clubs": ["figure.socialdance","music.note.house.fill"],
@@ -86,6 +87,7 @@ struct ImageNames {
     "malls": ["building.2.fill"],
     "market": ["storefront.fill"],
     "massage": ["carseat.right.massage.fill"],
+    "medical": ["cross.case.fill"],
     "movies": ["movieclapper.fill","ticket.fill"],
     "murals": ["paintpalette.fill"],
     "museum": ["building.fill"],
@@ -106,6 +108,7 @@ struct ImageNames {
     "pubs": ["mug.fill"],
     "playgrounds": ["figure.play"],
     "racetrack": ["road.lanes.curved.right"],
+    "railway": ["train.side.front.car"],
     "restaurants": ["fork.knife"],
     "scenic views": ["binoculars.fill"],
     "scenic walk": ["binoculars.fill","figure.walk"],
@@ -145,6 +148,8 @@ struct ImageNames {
     "zoos": ["pawprint.fill","tortoise.fill","bird.fill"]
   ]
 
+  init() { }
+  
   func process(input: String, result: inout [String]) -> [String] {
     for (key, imageStrings) in imageNames {
       if input.contains(key) {
