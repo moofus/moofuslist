@@ -123,25 +123,10 @@ extension MoofuslistViewModel {
         case .error(let uiData):
           self.uiData = uiData
         case .loaded(let uiData):
-          //self.uiData = uiData
-          if uiData.activities.isEmpty {
-            print("activities should not be zero should be \(self.uiData)")
-            assertionFailure()
-          }
           self.uiData = MoofuslistUIData(activities: self.uiData.activities, uiData: uiData)
-          print("ljw loading=\(uiData.loading) \(Date()) \(#file):\(#function):\(#line)")
-          print("ljw processing=\(uiData.processing) \(Date()) \(#file):\(#function):\(#line)")
-          print("loaded activities count=\(self.uiData.activities.count)")
         case .loading(let activities, let uiData):
-          print("before loading activities count=\(activities.count)")
           let activities = await convert(activities: activities, location: uiData.location)
           self.uiData = MoofuslistUIData(activities: activities, uiData: uiData)
-
-
-//          self.uiData = uiData
-//          print("before loading activities count=\(activities.count)")
-//          self.uiData.activities = await convert(activities: activities, location: uiData.location)
-          print("after loading activities count=\(self.uiData.activities.count)")
         case .processing(let uiData):
           print("ljw processing activities.count=\(uiData.activities.count) \(Date()) \(#file):\(#function):\(#line)")
           self.uiData = uiData

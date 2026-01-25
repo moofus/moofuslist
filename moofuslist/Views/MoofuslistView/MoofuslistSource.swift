@@ -59,7 +59,7 @@ final actor MoofuslistSource {
 
   private let continuation: AsyncStream<Message>.Continuation
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
-  private var uiData = MoofuslistUIData() // source of truth
+  private var uiData = MoofuslistUIData() // Note: activities is always 0 in source, but not in viewModel
   let stream: AsyncStream<Message>
 
   init() {
@@ -250,7 +250,6 @@ extension MoofuslistSource {
   func select(activity: MoofuslistViewModel.Activity) {
     Task { [weak self] in
       guard let self else { return }
-      print("ljw \(Date()) \(#file):\(#function):\(#line)")
       await sendLoaded(activity: activity)
       await navigate(to: .detail)
     }

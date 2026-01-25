@@ -11,8 +11,7 @@ import SwiftUI
 
 struct MoofuslistDetailView: View {
   @Binding var activity: MoofuslistViewModel.Activity?
-  @State private var imageSelectedIdx = 0
-  @State private var timedActionSelectedImage = true // TODO: this is not working correctly
+  @State var selectedImageIdx = 0
 
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
   @State var timedAction = TimedAction()
@@ -25,7 +24,7 @@ struct MoofuslistDetailView: View {
         ScrollView {
           VStack(spacing: 0) {
             VStack {
-              TabView(selection: $imageSelectedIdx) {
+              TabView(selection: $selectedImageIdx) {
                 ForEach(0..<activity.imageNames.count, id: \.self) { idx in
                   Image(systemName: activity.imageNames[idx])
                     .font(.system(size: 80))
@@ -43,9 +42,6 @@ struct MoofuslistDetailView: View {
               .task {
                 print("task calling onAppearTabView ")
                 startTimedAction()
-              }
-              .onChange(of: imageSelectedIdx) {
-                onChangeSelectedIdx()
               }
             }
 
@@ -149,27 +145,19 @@ struct MoofuslistDetailView: View {
         return
       }
 
-      timedActionSelectedImage = true
       withAnimation {
         if starting {
           starting = false
-          imageSelectedIdx = 0
+          selectedImageIdx = 0
         } else {
-          if (imageSelectedIdx + 1) < activity.imageNames.count {
-            imageSelectedIdx += 1
+          if (selectedImageIdx + 1) < activity.imageNames.count {
+            selectedImageIdx += 1
           } else {
-            imageSelectedIdx = 0
+            selectedImageIdx = 0
           }
         }
       }
     }
-  }
-
-  private func onChangeSelectedIdx() {
-    if !timedActionSelectedImage {
-      timedAction.stop()
-    }
-    timedActionSelectedImage = false // TODO: need to reset at start/selection, make use viewModel
   }
 }
 
