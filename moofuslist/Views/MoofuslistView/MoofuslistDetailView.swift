@@ -169,7 +169,7 @@ struct MoofuslistDetailView: View {
     if !timedActionSelectedImage {
       timedAction.stop()
     }
-    timedActionSelectedImage = false
+    timedActionSelectedImage = false // TODO: need to reset at start/selection, make use viewModel
   }
 }
 

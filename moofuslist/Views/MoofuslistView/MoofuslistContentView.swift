@@ -20,7 +20,7 @@ struct MoofuslistContentView: View {
 
       VStack(spacing: 0) {
         // Header
-        let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
+        let _ = print("ljw loading=\(viewModel.uiData.loading) \(Date()) \(#file):\(#function):\(#line)")
         VStack(alignment: .leading, spacing: 16) {
           Text("Activities near \(viewModel.uiData.searchedCityState)")
             .font(.system(size: 20, weight: .bold))
@@ -71,7 +71,7 @@ struct MoofuslistContentView: View {
 
         ScrollView {
           VStack(spacing: 12) {
-            ForEach(viewModel.uiData.activities.indices, id: \.self) { idx in
+            ForEach(viewModel.uiData.activities.indices, id: \.self) { idx in // TODO: need to reset activities at selection, do in source via appCoordinator
               MoofuslistCardView(activity: $viewModel.uiData.activities[idx])
                 .onTapGesture {
                   source.select(activity: viewModel.uiData.activities[idx])
@@ -84,7 +84,7 @@ struct MoofuslistContentView: View {
       .disabled(viewModel.uiData.loading)
 
       if viewModel.uiData.loading {
-        ProgressView() // ljw
+        ProgressView()
       }
     }
     .navigationBarTitleDisplayMode(.inline)

@@ -26,7 +26,12 @@ struct MoofuslistView: View {
         MoofuslistMapView(item: viewModel.uiData.mapItem, position: $viewModel.uiData.mapPosition)
 
         FindActivitiesButton(text: "Search Current Location", padding: 5) {
+          searchText = ""
           source.searchCurrentLocation()
+        }
+
+        if viewModel.uiData.processing {
+          ProgressView()
         }
 
         Spacer()

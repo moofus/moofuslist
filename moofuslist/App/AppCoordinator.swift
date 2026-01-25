@@ -17,7 +17,7 @@ class AppCoordinator {
     case sidebar
   }
 
-  let continuation: AsyncStream<Route>.Continuation
+  private let continuation: AsyncStream<Route>.Continuation
   let stream: AsyncStream<Route>
   var splitViewColum: NavigationSplitViewColumn
 
