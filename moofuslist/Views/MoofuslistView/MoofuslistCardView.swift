@@ -12,7 +12,7 @@ import SwiftUI
 
 struct MoofuslistCardView: View {
   @Binding var activity: MoofuslistViewModel.Activity
-  var source: MoofuslistSource
+  @Injected(\.moofuslistSource) var source: MoofuslistSource
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {

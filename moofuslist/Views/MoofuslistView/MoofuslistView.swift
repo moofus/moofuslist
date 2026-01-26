@@ -51,10 +51,10 @@ struct MoofuslistView: View {
       .safeAreaPadding([.leading, .trailing])
     } content: {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      MoofuslistContentView(source: source, viewModel: viewModel)
+      MoofuslistContentView(viewModel: viewModel)
     } detail: {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      MoofuslistDetailView(activity: $viewModel.selectedActivity, source: source)
+      MoofuslistDetailView(activity: $viewModel.selectedActivity)
     }
     .disabled(viewModel.processing)
     .alert("\"City, State\" is invalid!", isPresented: $viewModel.inputError) {

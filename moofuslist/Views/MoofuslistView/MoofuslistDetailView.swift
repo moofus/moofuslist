@@ -12,7 +12,7 @@ import SwiftUI
 struct MoofuslistDetailView: View {
   @Binding var activity: MoofuslistViewModel.Activity?
   @State var selectedImageIdx = 0
-  var source: MoofuslistSource
+  @Injected(\.moofuslistSource) var source: MoofuslistSource
 
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
   @State var timedAction = TimedAction()

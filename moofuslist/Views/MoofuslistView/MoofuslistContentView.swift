@@ -10,7 +10,7 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistContentView: View {
-  var source: MoofuslistSource
+  @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Bindable var viewModel: MoofuslistViewModel
   @State private var selectedSort = "Relevance"
 
@@ -71,7 +71,7 @@ struct MoofuslistContentView: View {
         ScrollView {
           VStack(spacing: 12) {
             ForEach($viewModel.activities, id: \.id) { $activity in
-              MoofuslistCardView(activity: $activity, source: source)
+              MoofuslistCardView(activity: $activity)
                 .onTapGesture {
                   source.select(activity: activity)
                 }
