@@ -183,6 +183,7 @@ extension MoofuslistSource {
     if let cityState = mapItem.addressRepresentations?.cityWithContext {
       do {
         sendProcessing(mapItem: mapItem)
+        print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
         try await aiManager.findActivities(cityState: cityState)
       } catch {
         print("ljw \(Date()) \(#file):\(#function):\(#line)")
@@ -287,11 +288,13 @@ extension MoofuslistSource {
     send(message: .selectedActivity(activity))
   }
 
-  private func sendLoaded(activities: [Activity], loading: Bool, processing: Bool) {
-    uiData.activities = activities
+  private func sendLoaded(activities: [Activity]? = nil, loading: Bool, processing: Bool) {
+    if let activities {
+      uiData.activities = activities
+    }
     uiData.loading = loading
     uiData.processing = processing
-    send(message: .loaded(activities, loading, processing))
+    send(message: .loaded(uiData.activities, loading, processing))
   }
 
   private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
@@ -384,18 +387,54 @@ extension MoofuslistSource {
     }
   }
 
+  func loadMapItemsForActivities() async {
+    var mapItemUpdated = false
+    for activity in uiData.activities {
+      guard !activity.address.isEmpty else { continue }
+      guard activity.mapItem == nil else { continue }
+      if let item = await mapItem(from: activity.address) {
+        if let idx = uiData.activities.firstIndex(where: { $0.id == activity.id }) {
+          uiData.activities[idx].mapItem = item
+          mapItemUpdated = true
+        }
+      }
+    }
+    if mapItemUpdated {
+      sendLoaded(loading: uiData.loading, processing: uiData.processing)
+    }
+  }
+
+  private func mapItem(from address: String) async -> MKMapItem? {
+    let request = MKLocalSearch.Request() // TODO: use cache
+    request.naturalLanguageQuery = address
+    request.resultTypes = .address
+
+    // Optionally bias search around the user's current region if available
+    // If you have a region in your view model, you can // TODO: set: request.region = viewModel.searchRegion
+    let search = MKLocalSearch(request: request)
+    do {
+      let response = try await search.start()
+      return response.mapItems.first
+    } catch {
+      return nil
+    }
+  }
+
   nonisolated
   func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       guard let self else { return }
       await sendProcessing(processing: true)
       let mapItem: MKMapItem
+      print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
       if let item = await cityStateToMapItemCache[cityState] {
+        print("ljw address=\(item.address) \(Date()) \(#file):\(#function):\(#line)")
         mapItem = item
       } else {
         let request = MKGeocodingRequest(addressString: cityState)
         do {
           if let item = (try await request?.mapItems.first) {
+            print("ljw address=\(item.address) \(Date()) \(#file):\(#function):\(#line)")
             mapItem = item
             await setCityStateToMapItemCache(cityState: cityState, mapItem: mapItem)
           } else {

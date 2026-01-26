@@ -19,9 +19,10 @@ struct MoofuslistContentView: View {
   @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Bindable var viewModel: MoofuslistViewModel
   @AppStorage("selectedSort") private var selectedSortRawValue: String = SortOptions.relevance.rawValue
+  @State private var showSheet = false
 
   private var selectedSort: SortOptions {
-      SortOptions(rawValue: selectedSortRawValue) ?? .relevance
+    SortOptions(rawValue: selectedSortRawValue) ?? .relevance
   }
 
   private var sortedActivities: [MoofuslistActivity] {
@@ -66,7 +67,12 @@ struct MoofuslistContentView: View {
 
             Spacer()
 
-            Button(action: { }) {
+            Button {
+              Task {
+                await source.loadMapItemsForActivities()
+                await MainActor.run { showSheet = true }
+              }
+            } label: {
               HStack {
                 Image(systemName: "map")
                 Text("Map")
@@ -100,6 +106,30 @@ struct MoofuslistContentView: View {
           .padding(16)
         }
       }
+      .sheet(isPresented: $showSheet) {
+        ZStack(alignment: .topTrailing) {
+          Map {
+            ForEach(viewModel.activities, id: \.id) { activity in
+              if let mapItem = activity.mapItem {
+                Marker(item: mapItem)
+                  .tint(.accent)
+              }
+            }
+          }
+
+          Button {
+            withAnimation { showSheet = false }
+          } label: {
+            Image(systemName: "xmark")
+              .foregroundColor(.primary)
+              .padding()
+              .background(Color.white.opacity(0.8))
+              .clipShape(Circle())
+          }
+          .padding()
+        }
+      }
+      .presentationDetents([.medium, .large])
       .disabled(viewModel.loading)
 
       if viewModel.loading {
@@ -190,3 +220,4 @@ struct MoofuslistContentView: View {
  //    ]
 
  */
+

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MapKit
 import SwiftData
 
 @Model
@@ -18,6 +19,8 @@ class MoofuslistActivity: Hashable, Identifiable {
   var distance: Double
   var imageNames: [String]
   var isFavorite = false
+  @Transient
+  var mapItem: MKMapItem?
   var name: String
   var rating: Double
   var reviews: Int
@@ -32,6 +35,7 @@ class MoofuslistActivity: Hashable, Identifiable {
     distance: Double,
     imageNames: [String],
     isFavorite: Bool = false,
+    mapItem: MKMapItem? = nil,
     name: String,
     rating: Double,
     reviews: Int,
@@ -45,6 +49,7 @@ class MoofuslistActivity: Hashable, Identifiable {
     self.distance = distance
     self.imageNames = imageNames
     self.isFavorite = isFavorite
+    self.mapItem = mapItem
     self.name = name
     self.rating = rating
     self.reviews = reviews

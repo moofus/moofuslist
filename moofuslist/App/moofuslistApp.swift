@@ -15,7 +15,6 @@ struct moofuslistApp: App {
       MoofuslistView()
     }
   }
-
 }
 
 extension Container {

@@ -7,6 +7,7 @@
 
 actor ImageNames {
   private let imageNames: [String: [String]] = [
+    "360-degree view": ["binoculars.fill"],
     "9/11 memorial": ["building.columns.fill"],
     "alcatraz": ["ferry.fill","binoculars.fill","figure.walk"],
     "arcade games": ["gamecontroller.fill"],
@@ -58,6 +59,7 @@ actor ImageNames {
     "fishing": ["figure.fishing"],
     "food": ["fork.knife"],
     "food trucks": ["truck.box.fill"],
+    "funicular": ["cablecar.fill"],
     "galleries": ["photo.fill.on.rectangle.fill"],
     "garden": ["leaf.fill"],
     "gardens": ["leaf.fill"],
