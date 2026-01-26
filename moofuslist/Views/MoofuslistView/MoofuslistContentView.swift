@@ -10,9 +10,27 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistContentView: View {
+  enum SortOptions: String {
+    case distance
+    case rating
+    case relevance
+  }
+
   @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Bindable var viewModel: MoofuslistViewModel
-  @State private var selectedSort = "Relevance"
+  @AppStorage("selectedSort") private var selectedSortRawValue: String = SortOptions.relevance.rawValue
+
+  private var selectedSort: SortOptions {
+      SortOptions(rawValue: selectedSortRawValue) ?? .relevance
+  }
+
+  private var sortedActivities: [MoofuslistActivity] {
+    switch selectedSort {
+    case .distance: viewModel.activities.sorted { $0.distance < $1.distance }
+    case .relevance: viewModel.activities
+    case .rating: viewModel.activities.sorted { $0.rating > $1.rating }
+    }
+  }
 
   var body: some View {
     ZStack {
@@ -27,13 +45,13 @@ struct MoofuslistContentView: View {
 
           HStack(spacing: 10) {
             Menu {
-              Button("Relevance") { selectedSort = "Relevance" }
-              Button("Rating") { selectedSort = "Rating" }
-              Button("Distance") { selectedSort = "Distance" }
+              Button(SortOptions.relevance.rawValue) { selectedSortRawValue = SortOptions.relevance.rawValue }
+              Button(SortOptions.rating.rawValue) { selectedSortRawValue = SortOptions.rating.rawValue }
+              Button(SortOptions.distance.rawValue) { selectedSortRawValue = SortOptions.distance.rawValue }
             } label: {
               HStack {
                 Image(systemName: "arrow.up.arrow.down")
-                Text(selectedSort)
+                Text(selectedSort.rawValue)
                   .font(.system(size: 14, weight: .medium))
               }
               .foregroundColor(.accent)
@@ -70,11 +88,13 @@ struct MoofuslistContentView: View {
 
         ScrollView {
           VStack(spacing: 12) {
-            ForEach($viewModel.activities, id: \.id) { $activity in
-              MoofuslistCardView(activity: $activity)
-                .onTapGesture {
-                  source.select(activity: activity)
-                }
+            ForEach(sortedActivities, id: \.id) { activity in
+              if let index = viewModel.activities.firstIndex(where: { $0.id == activity.id }) {
+                MoofuslistCardView(activity: $viewModel.activities[index])
+                  .onTapGesture {
+                    source.select(activity: activity)
+                  }
+              }
             }
           }
           .padding(16)
