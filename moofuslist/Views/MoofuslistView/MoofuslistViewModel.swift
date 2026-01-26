@@ -64,7 +64,6 @@ extension MoofuslistViewModel {
         case let .error(uiData):
           setAll(uiData: uiData)
         case let .loaded(activities, loading, processing):
-          print("ljw loaded setting activities.count=\(activities.count) \(Date()) \(#file):\(#function):\(#line)")
           self.activities = activities
           self.loading = loading
           self.processing = processing
@@ -73,7 +72,6 @@ extension MoofuslistViewModel {
           self.loading = loading
           self.processing = processing
         case let .processing(uiData):
-          print("ljw processing setting activities.count=\(uiData.activities.count) \(Date()) \(#file):\(#function):\(#line)")
           setAll(uiData: uiData)
           processeMapItem(uiData: uiData)
         case let .selectedActivity(activity):
@@ -83,7 +81,7 @@ extension MoofuslistViewModel {
     }
   }
 
-  private func processeMapItem(uiData: MoofuslistSource.MoofuslistUIData) {
+  private func processeMapItem(uiData: MoofuslistSource.MoofuslistViewModelData) {
     guard let mapItem = uiData.mapItem else {
       return
     }
@@ -103,7 +101,7 @@ extension MoofuslistViewModel {
     }
   }
 
-  private func setAll(uiData: MoofuslistSource.MoofuslistUIData) {
+  private func setAll(uiData: MoofuslistSource.MoofuslistViewModelData) {
     activities = uiData.activities
     errorDescription = uiData.errorDescription
     errorRecoverySuggestion = uiData.errorRecoverySuggestion

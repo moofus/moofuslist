@@ -15,10 +15,10 @@ final actor MoofuslistSource {
   typealias Activity = MoofuslistViewModel.Activity
 
   enum Message {
-    case error(MoofuslistUIData)
+    case error(MoofuslistViewModelData)
     case loaded([Activity], Bool, Bool)
     case loading([Activity], Bool, Bool)
-    case processing(MoofuslistUIData)
+    case processing(MoofuslistViewModelData)
     case selectedActivity(Activity)
   }
 
@@ -27,7 +27,7 @@ final actor MoofuslistSource {
     let longitude: Double
   }
 
-  final class MoofuslistUIData {
+  final class MoofuslistViewModelData {
     // keep the following properties insync with MoofuslistViewModel
     var activities: [Activity] = []
     var errorDescription: String = ""
@@ -53,7 +53,7 @@ final actor MoofuslistSource {
   private var locationToMapItemCache = [LocationKey: MKMapItem]()
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
   let stream: AsyncStream<Message>
-  private var uiData = MoofuslistUIData()
+  private var uiData = MoofuslistViewModelData()
 
   init() {
     (stream, continuation) = AsyncStream.makeStream(of: Message.self)
@@ -106,7 +106,6 @@ extension MoofuslistSource {
             return
           }
           mapItem = item
-          print("ljw add latitude=\(location.coordinate.latitude) longitude=\(location.coordinate.longitude)")
           locationToMapItemCache[locationKey] = mapItem
         } catch {
           logger.error("Error MKReverseGeocodingRequest: \(error)")
@@ -131,7 +130,6 @@ extension MoofuslistSource {
       do {
         distance = try await getDistance(from: activity, location: location)
       } catch {
-        print("ljw \(Date()) \(#file):\(#function):\(#line)")
         logger.error("\(error.localizedDescription)")
         distance = activity.distance
       }
