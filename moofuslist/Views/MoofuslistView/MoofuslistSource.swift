@@ -47,7 +47,7 @@ final actor MoofuslistSource {
   @Injected(\.locationManager) private var locationManager: LocationManager
   @Injected(\.storageManager) private var storageManager: StorageManager
 
-  private var addressToLocationCache = [String: CLLocation]()
+  private var addressToMapItemCache = [String: MKMapItem]()
   private var cityStateToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
@@ -156,8 +156,8 @@ extension MoofuslistSource {
 
   private func getDistance(from activity: AIManager.Activity, location: CLLocation) async throws -> Double {
     let activityLocation: CLLocation
-    if let location = addressToLocationCache[activity.address] {
-      activityLocation = location
+    if let mapItem = addressToMapItemCache[activity.address] {
+      activityLocation = mapItem.location
     } else {
       let request = MKLocalSearch.Request()
       request.naturalLanguageQuery = activity.address
@@ -167,11 +167,11 @@ extension MoofuslistSource {
       print("after search")
       let response = try await search.start()
       print("after start")
-      guard let activityMapItem = response.mapItems.first  else {
+      guard let mapItem = response.mapItems.first  else {
         return activity.distance
       }
-      activityLocation = activityMapItem.location
-      addressToLocationCache[activity.address] = activityLocation
+      activityLocation = mapItem.location
+      addressToMapItemCache[activity.address] = mapItem
     }
     let meters = activityLocation.distance(from: location)
     let distanceInMeters = Measurement(value: meters, unit: UnitLength.meters)
