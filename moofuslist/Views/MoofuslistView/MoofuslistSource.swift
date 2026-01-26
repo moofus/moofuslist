@@ -22,6 +22,11 @@ final actor MoofuslistSource {
     case selectedActivity(Activity)
   }
 
+  private struct LocationKey: Hashable {
+    let latitude: Double
+    let longitude: Double
+  }
+
   final class MoofuslistUIData {
     // keep the following properties insync with MoofuslistViewModel
     var activities: [Activity] = []
@@ -38,12 +43,14 @@ final actor MoofuslistSource {
     var selectedActivity: Activity? = nil
   }
 
-  @Injected(\.aiManager) var aiManager: AIManager
-  @Injected(\.locationManager) var locationManager: LocationManager
+  @Injected(\.aiManager) private var aiManager: AIManager
+  @Injected(\.locationManager) private var locationManager: LocationManager
 
   private var addressToLocationCache = [String: CLLocation]()
+  private var cityStateToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
+  private var locationToMapItemCache = [LocationKey: MKMapItem]()
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
   let stream: AsyncStream<Message>
   private var uiData = MoofuslistUIData()
@@ -80,31 +87,40 @@ extension MoofuslistSource {
   /// - Parameter location: the location used to get the city and state
   /// - Returns: the "city, state"
   private func handle(location: CLLocation) async {
-    if let request = MKReverseGeocodingRequest(location: location) { // TODO: use cache
-      do {
-        let mapItems = try await request.mapItems
-        if mapItems.count > 1 { // TODO: remove
-          print("mapItems.count=\(mapItems.count)")
-          print(mapItems)
-          assertionFailure()
-        }
-        if let mapItem = mapItems.first {
-          await handle(mapItem: mapItem)
+    let mapItem: MKMapItem
+    let locationKey = LocationKey(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+    if let item = locationToMapItemCache[locationKey] {
+      mapItem = item
+    } else {
+      if let request = MKReverseGeocodingRequest(location: location) {
+        do {
+          let mapItems = try await request.mapItems
+          if mapItems.count > 1 { // TODO: remove
+            print("mapItems.count=\(mapItems.count)")
+            print(mapItems)
+            assertionFailure()
+          }
+          guard let item = mapItems.first else {
+            assertionFailure()
+            // TODO: handle
+            return
+          }
+          mapItem = item
+          print("ljw add latitude=\(location.coordinate.latitude) longitude=\(location.coordinate.longitude)")
+          locationToMapItemCache[locationKey] = mapItem
+        } catch {
+          logger.error("Error MKReverseGeocodingRequest: \(error)")
+          assertionFailure("unknown error=\(error)")
+          sendError(description: error.localizedDescription)
           return
-        } else {
-          assertionFailure()
-          // TODO: handle
         }
-      } catch {
-        logger.error("Error MKReverseGeocodingRequest: \(error)")
-        assertionFailure("unknown error=\(error)")
-        sendError(description: error.localizedDescription)
+      } else {
+        sendError(description: "Can't get location")
         return
       }
     }
-    sendError(description: "Can't get location")
-  }
-}
+    await handle(mapItem: mapItem)
+  }}
 
 // MARK: - Private Methods
 extension MoofuslistSource {
@@ -143,7 +159,6 @@ extension MoofuslistSource {
     let activityLocation: CLLocation
     if let location = addressToLocationCache[activity.address] {
       activityLocation = location
-      print("used cached")
     } else {
       let request = MKLocalSearch.Request()
       request.naturalLanguageQuery = activity.address
@@ -152,7 +167,7 @@ extension MoofuslistSource {
       let search = MKLocalSearch(request: request)
       print("after search")
       let response = try await search.start()
-     print("after start")
+      print("after start")
       guard let activityMapItem = response.mapItems.first  else {
         return activity.distance
       }
@@ -243,7 +258,12 @@ extension MoofuslistSource {
     }
     return result
   }
+
+  private func setCityStateToMapItemCache(cityState: String, mapItem: MKMapItem) {
+    cityStateToMapItemCache[cityState] = mapItem
+  }
 }
+
 
 // MARK: - Methods to send messages to MoofuslistViewModel
 extension MoofuslistSource {
@@ -352,19 +372,28 @@ extension MoofuslistSource {
   func searchCityState(_ cityState: String) {
     Task {
       await sendProcessing(processing: true)
-      let request = MKGeocodingRequest(addressString: cityState) // TODO: use cache
-      do {
-        if let mapItem = (try await request?.mapItems.first) {
-          await handle(mapItem: mapItem)
-        } else {
-          assertionFailure()
-          await sendError(description: "MKGeocodingRequest")
+      let mapItem: MKMapItem
+      if let item = await cityStateToMapItemCache[cityState] {
+        mapItem = item
+      } else {
+        let request = MKGeocodingRequest(addressString: cityState)
+        do {
+          if let item = (try await request?.mapItems.first) {
+            mapItem = item
+            await setCityStateToMapItemCache(cityState: cityState, mapItem: mapItem)
+          } else {
+            assertionFailure()
+            await sendError(description: "MKGeocodingRequest")
+            return
+          }
+        } catch {
+          logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
+          print(error.localizedDescription)
+          await sendInputError(inputError: true)
+          return
         }
-      } catch {
-        logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
-        print(error.localizedDescription)
-        await sendInputError(inputError: true)
       }
+      await handle(mapItem: mapItem)
     }
   }
 
