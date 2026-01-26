@@ -86,7 +86,14 @@ struct MoofuslistDetailView: View {
 
               // Action Buttons
               VStack(spacing: 12) {
-                Button(action: { }) {
+                Button {
+                  if let url = URL(string: "tel://\(activity.phoneNumber)"),
+                     UIApplication.shared.canOpenURL(url) {
+                      UIApplication.shared.open(url)
+                  } else {
+                    // TODO: handle error
+                  }
+                } label: {
                   HStack {
                     Image(systemName: "phone.fill")
                     Text("Call")

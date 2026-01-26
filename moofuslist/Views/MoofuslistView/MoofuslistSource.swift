@@ -146,6 +146,7 @@ extension MoofuslistSource {
           name: activity.name,
           rating: activity.rating, // TODO: rating
           reviews: activity.reviews, // TODO: reviews
+          phoneNumber: activity.phoneNumber,
           somethingInteresting: activity.somethingInteresting,
           state: activity.state
         )
@@ -224,7 +225,7 @@ extension MoofuslistSource {
       return mapItem
     }
 
-/*
+
     let request = MKLocalSearch.Request()
     request.naturalLanguageQuery = address
     request.resultTypes = .address
@@ -245,8 +246,8 @@ extension MoofuslistSource {
       print(error)
     }
     return nil
-*/
 
+/*
     let request = MKGeocodingRequest(addressString: address)
     do {
       if let mapItem = try await request?.mapItems.first {
@@ -260,7 +261,7 @@ extension MoofuslistSource {
       print(error.localizedDescription)
     }
     return nil
-
+*/
   }
 
   @MainActor

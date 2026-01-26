@@ -24,6 +24,7 @@ class MoofuslistActivity: Hashable, Identifiable {
   var name: String
   var rating: Double
   var reviews: Int
+  var phoneNumber: String
   var somethingInteresting: String
   var state: String
 
@@ -39,6 +40,7 @@ class MoofuslistActivity: Hashable, Identifiable {
     name: String,
     rating: Double,
     reviews: Int,
+    phoneNumber: String,
     somethingInteresting: String,
     state: String
   ) {
@@ -53,6 +55,7 @@ class MoofuslistActivity: Hashable, Identifiable {
     self.name = name
     self.rating = rating
     self.reviews = reviews
+    self.phoneNumber = phoneNumber
     self.somethingInteresting = somethingInteresting
     self.state = state
   }

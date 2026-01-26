@@ -76,6 +76,8 @@ actor AIManager {
     let reviews: Int
     @Guide(description: "The distance in miles")
     let distance: Double
+    @Guide(description: "The phone number for this item")
+    let phoneNumber: String
     @Guide(description: "A short description about of this place")
     let description: String
     @Guide(description: "Something interesting about this place")
@@ -91,6 +93,7 @@ actor AIManager {
         rating: rating,
         reviews: reviews,
         distance: distance,
+        phoneNumber: phoneNumber,
         description: description,
         somethingInteresting: somethingInteresting
       )
@@ -104,6 +107,7 @@ actor AIManager {
                   
                   Always include a short description, and something interesting about the activity or place.
                   Include a rating and the number of reviews for the rating.
+                  Include the phone number.
                   """
   let continuation: AsyncStream<Message>.Continuation
   let stream: AsyncStream<Message>
@@ -180,6 +184,7 @@ extension AIManager {
           let rating = activity.rating,
           let reviews = activity.reviews,
           let distance = activity.distance,
+          let phoneNumber = activity.phoneNumber,
           let description = activity.description?.lowercased() ?? activity.description,
           let somethingInteresting = activity.somethingInteresting else {
       return nil
@@ -193,6 +198,7 @@ extension AIManager {
       rating: rating,
       reviews: reviews,
       distance: distance,
+      phoneNumber: phoneNumber,
       description: description,
       somethingInteresting: somethingInteresting
     )
