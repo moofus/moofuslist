@@ -12,7 +12,7 @@ import os
 import SwiftUI
 
 final actor MoofuslistSource {
-  typealias Activity = MoofuslistViewModel.Activity
+  typealias Activity = MoofuslistActivity
 
   enum Message {
     case error(MoofuslistViewModelData)
@@ -45,6 +45,7 @@ final actor MoofuslistSource {
 
   @Injected(\.aiManager) private var aiManager: AIManager
   @Injected(\.locationManager) private var locationManager: LocationManager
+  @Injected(\.storageManager) private var storageManager: StorageManager
 
   private var addressToLocationCache = [String: CLLocation]()
   private var cityStateToMapItemCache = [String: MKMapItem]()
@@ -139,7 +140,7 @@ extension MoofuslistSource {
           address: activity.address,
           category: activity.category,
           city: activity.city,
-          description: activity.description,
+          desc: activity.description,
           distance: distance,
           imageNames: await imageNames(for: activity),
           name: activity.name,
@@ -358,8 +359,25 @@ extension MoofuslistSource {
 // MARK: - Public Methods
 extension MoofuslistSource {
   nonisolated
+  func favoriteChanged(activity: Activity) {
+    Task.detached { [weak self] in
+      guard let self else { return }
+      do {
+        if activity.isFavorite {
+          try await storageManager.insert(activity: activity)
+        } else {
+          try await storageManager.delete(activity: activity)
+        }
+      } catch {
+        print(error)
+        assertionFailure() // TODO: handle
+      }
+    }
+  }
+
+  nonisolated
   func select(activity: MoofuslistViewModel.Activity) {
-    Task { [weak self] in
+    Task.detached { [weak self] in
       guard let self else { return }
       await sendActivity(activity: activity)
       await navigate(to: .detail)
@@ -368,7 +386,8 @@ extension MoofuslistSource {
 
   nonisolated
   func searchCityState(_ cityState: String) {
-    Task {
+    Task.detached { [weak self] in
+      guard let self else { return }
       await sendProcessing(processing: true)
       let mapItem: MKMapItem
       if let item = await cityStateToMapItemCache[cityState] {
@@ -397,7 +416,8 @@ extension MoofuslistSource {
 
   nonisolated
   func searchCurrentLocation() {
-    Task {
+    Task.detached { [weak self] in
+      guard let self else { return }
       await sendProcessing(processing: true)
       await locationManager.start(maxCount: 1)
     }

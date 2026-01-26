@@ -12,6 +12,7 @@ import SwiftUI
 
 struct MoofuslistCardView: View {
   @Binding var activity: MoofuslistViewModel.Activity
+  var source: MoofuslistSource
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
@@ -49,7 +50,10 @@ struct MoofuslistCardView: View {
 
         Spacer()
 
-        Button(action: { activity.isFavorite.toggle() }) {
+        Button {
+          activity.isFavorite.toggle()
+          source.favoriteChanged(activity: activity)
+        } label: {
           Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
             .font(.system(size: 18))
             .foregroundColor(activity.isFavorite ? .accent : .gray)

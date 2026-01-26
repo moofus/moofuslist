@@ -28,6 +28,9 @@ extension Container {
   var locationManager: Factory<LocationManager> {
     self { LocationManager() }.singleton
   }
+  var storageManager: Factory<StorageManager> {
+    self { StorageManager() }.singleton
+  }
   var moofuslistSource: Factory<MoofuslistSource> {
     self { MoofuslistSource() }.singleton
   }

@@ -71,7 +71,7 @@ struct MoofuslistContentView: View {
         ScrollView {
           VStack(spacing: 12) {
             ForEach($viewModel.activities, id: \.id) { $activity in
-              MoofuslistCardView(activity: $activity)
+              MoofuslistCardView(activity: $activity, source: source)
                 .onTapGesture {
                   source.select(activity: activity)
                 }
@@ -90,75 +90,75 @@ struct MoofuslistContentView: View {
   }
 }
 
-#Preview("ContentView") {
+//#Preview("ContentView") {
+//
+//  @Previewable @State var activities = [
+//    MoofuslistViewModel.Activity(
+//      address: "address",
+//      category: "category",
+//      city: "City",
+//      description: "description",
+//      distance: 1.5,
+//      imageNames: ["house"],
+//      name: "name",
+//      rating: 1.7,
+//      reviews: 327,
+//      somethingInteresting: "somethingInteresting",
+//      state: "State"
+//    ),
+//    MoofuslistViewModel.Activity(
+//      address: "address",
+//      category: "category",
+//      city: "City",
+//      description: "description",
+//      distance: 1.5,
+//      imageNames: ["house"],
+//      name: "name",
+//      rating: 1.7,
+//      reviews: 327,
+//      somethingInteresting: "somethingInteresting",
+//      state: "State"
+//    )
+//  ]
+//
+//  @Injected(\.moofuslistSource) var source: MoofuslistSource
+//  @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
+//
+//  MoofuslistContentView(source: source, viewModel: viewModel)
+//}
 
-  @Previewable @State var activities = [
-    MoofuslistViewModel.Activity(
-      address: "address",
-      category: "category",
-      city: "City",
-      description: "description",
-      distance: 1.5,
-      imageNames: ["house"],
-      name: "name",
-      rating: 1.7,
-      reviews: 327,
-      somethingInteresting: "somethingInteresting",
-      state: "State"
-    ),
-    MoofuslistViewModel.Activity(
-      address: "address",
-      category: "category",
-      city: "City",
-      description: "description",
-      distance: 1.5,
-      imageNames: ["house"],
-      name: "name",
-      rating: 1.7,
-      reviews: 327,
-      somethingInteresting: "somethingInteresting",
-      state: "State"
-    )
-  ]
-
-  @Injected(\.moofuslistSource) var source: MoofuslistSource
-  @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
-
-  MoofuslistContentView(source: source, viewModel: viewModel)
-}
-
-#Preview("ContentView2") {
-  @Previewable @State var activities = [
-    MoofuslistViewModel.Activity(
-      address: "address",
-      category: "category",
-      city: "City",
-      description: "description",
-      distance: 1.5,
-      imageNames: ["house"],
-      name: "name",
-      rating: 1.7,
-      reviews: 327,
-      somethingInteresting: "somethingInteresting",
-      state: "State"
-    ),
-    MoofuslistViewModel.Activity(
-      address: "address",
-      category: "category",
-      city: "City",
-      description: "description",
-      distance: 1.5,
-      imageNames: ["house"],
-      name: "name",
-      rating: 1.7,
-      reviews: 327,
-      somethingInteresting: "somethingInteresting",
-      state: "State"
-    )
-  ]
-
-//  ContentView(activities: $activities, location: "Oakland")
-}
+//#Preview("ContentView2") {
+//  @Previewable @State var activities = [
+//    MoofuslistViewModel.Activity(
+//      address: "address",
+//      category: "category",
+//      city: "City",
+//      description: "description",
+//      distance: 1.5,
+//      imageNames: ["house"],
+//      name: "name",
+//      rating: 1.7,
+//      reviews: 327,
+//      somethingInteresting: "somethingInteresting",
+//      state: "State"
+//    ),
+//    MoofuslistViewModel.Activity(
+//      address: "address",
+//      category: "category",
+//      city: "City",
+//      description: "description",
+//      distance: 1.5,
+//      imageNames: ["house"],
+//      name: "name",
+//      rating: 1.7,
+//      reviews: 327,
+//      somethingInteresting: "somethingInteresting",
+//      state: "State"
+//    )
+//  ]
+//
+////  ContentView(activities: $activities, location: "Oakland")
+//}
 /*
  //    let activities = [
  //        Activity(name: "Downtown Pizza Co.", category: "Restaurants", rating: 4.8, distance: 0.3, address: "123 Main St", image: "fork.knife", reviews: 245, isFavorite: false),

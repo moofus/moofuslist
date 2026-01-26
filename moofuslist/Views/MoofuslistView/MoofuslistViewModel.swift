@@ -15,21 +15,7 @@ import SwiftUI
 @Observable
 final
 class MoofuslistViewModel {
-  struct Activity: Hashable, Identifiable {
-    let id = UUID()
-    let address: String
-    let category: String
-    let city: String
-    let description: String
-    let distance: Double
-    let imageNames: [String]
-    var isFavorite = false
-    let name: String
-    let rating: Double
-    let reviews: Int
-    let somethingInteresting: String
-    let state: String
-  }
+  typealias Activity = MoofuslistActivity
 
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 

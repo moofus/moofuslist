@@ -12,6 +12,7 @@ import SwiftUI
 struct MoofuslistDetailView: View {
   @Binding var activity: MoofuslistViewModel.Activity?
   @State var selectedImageIdx = 0
+  var source: MoofuslistSource
 
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
   @State var timedAction = TimedAction()
@@ -20,7 +21,7 @@ struct MoofuslistDetailView: View {
     ZStack {
       Color(.listBackground).ignoresSafeArea()
 
-      if var activity {
+      if let activity {
         ScrollView {
           VStack(spacing: 0) {
             VStack {
@@ -36,11 +37,7 @@ struct MoofuslistDetailView: View {
               .tabViewStyle(.page)
               .frame(height: 250)
               .frame(maxWidth: .infinity)
-              .onAppear {
-                print("tabview onAppear")
-              }
               .task {
-                print("task calling onAppearTabView ")
                 startTimedAction()
               }
             }
@@ -69,7 +66,10 @@ struct MoofuslistDetailView: View {
 
                 Spacer()
 
-                Button(action: { activity.isFavorite.toggle() }) {
+                Button {
+                  activity.isFavorite.toggle()
+                  source.favoriteChanged(activity: activity)
+                } label: {
                   Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
                     .font(.system(size: 24))
                     .foregroundColor(activity.isFavorite ? .accent : .gray)
@@ -191,24 +191,24 @@ struct InfoRow: View {
   }
 }
 
-#Preview {
-  @Previewable @State var activity: MoofuslistViewModel.Activity? =
-  MoofuslistViewModel.Activity(
-    address: "address",
-    category: "category",
-    city: "City",
-    description: "description",
-    distance: 1.5,
-    imageNames: ["house"],
-    name: "name",
-    rating: 1.7,
-    reviews: 327,
-    somethingInteresting: "somethingInteresting",
-    state: "State"
-  )
-  
-  NavigationStack {
-    MoofuslistDetailView(activity: $activity)
-  }
-}
+//#Preview {
+//  @Previewable @State var activity: MoofuslistViewModel.Activity? =
+//  MoofuslistViewModel.Activity(
+//    address: "address",
+//    category: "category",
+//    city: "City",
+//    description: "description",
+//    distance: 1.5,
+//    imageNames: ["house"],
+//    name: "name",
+//    rating: 1.7,
+//    reviews: 327,
+//    somethingInteresting: "somethingInteresting",
+//    state: "State"
+//  )
+//  
+//  NavigationStack {
+//    MoofuslistDetailView(activity: $activity)
+//  }
+//}
 
