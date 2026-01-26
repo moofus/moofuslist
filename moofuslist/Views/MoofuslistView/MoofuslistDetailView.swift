@@ -165,22 +165,18 @@ struct MoofuslistDetailView: View {
 
   private func openInMaps(activity: MoofuslistViewModel.Activity) {
     Task {
-      if let mapItem = activity.mapItem {
-        print("ljw \(Date()) \(#file):\(#function):\(#line)")
-        mapItem.name = activity.name
-        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+      let mapItem: MKMapItem
+      if let item = activity.mapItem {
+        mapItem = item
+      } else if let item = await source.mapItemFor(activity: activity) {
+        mapItem = item
       } else {
-        let address = activity.address
-        let request = MKGeocodingRequest(addressString: address) // TODO: use cache
-        do {
-          if let mapItem = try await request?.mapItems.first {
-            mapItem.name = activity.name
-            mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
-          }
-        } catch {
-          logger.error("Failed to geocode address: \(error.localizedDescription)") // TODO: handle
-        }
+        logger.error("Failed to mapItem") // TODO: handle
+        assertionFailure()
+        return
       }
+      mapItem.name = activity.name
+      mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
     }
   }
 }

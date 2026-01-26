@@ -48,7 +48,6 @@ final actor MoofuslistSource {
   @Injected(\.storageManager) private var storageManager: StorageManager
 
   private var addressToMapItemCache = [String: MKMapItem]()
-  private var cityStateToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
   private var locationToMapItemCache = [LocationKey: MKMapItem]()
@@ -120,7 +119,8 @@ extension MoofuslistSource {
       }
     }
     await handle(mapItem: mapItem)
-  }}
+  }
+}
 
 // MARK: - Private Methods
 extension MoofuslistSource {
@@ -155,25 +155,10 @@ extension MoofuslistSource {
   }
 
   private func getDistance(from activity: AIManager.Activity, location: CLLocation) async throws -> Double {
-    let activityLocation: CLLocation
-    if let mapItem = addressToMapItemCache[activity.address] {
-      activityLocation = mapItem.location
-    } else {
-      let request = MKLocalSearch.Request()
-      request.naturalLanguageQuery = activity.address
-      request.resultTypes = .address
-      print("before search")
-      let search = MKLocalSearch(request: request)
-      print("after search")
-      let response = try await search.start()
-      print("after start")
-      guard let mapItem = response.mapItems.first  else {
-        return activity.distance
-      }
-      activityLocation = mapItem.location
-      addressToMapItemCache[activity.address] = mapItem
+    guard let mapItem = await mapItem(from: activity.address) else {
+      return activity.distance
     }
-    let meters = activityLocation.distance(from: location)
+    let meters = mapItem.location.distance(from: location)
     let distanceInMeters = Measurement(value: meters, unit: UnitLength.meters)
     let distanceInMiles = distanceInMeters.converted(to: UnitLength.miles)
     return distanceInMiles.value
@@ -234,6 +219,50 @@ extension MoofuslistSource {
     uiData.selectedActivity = nil
   }
 
+  private func mapItem(from address: String) async -> MKMapItem? {
+    if let mapItem = addressToMapItemCache[address] {
+      return mapItem
+    }
+
+/*
+    let request = MKLocalSearch.Request()
+    request.naturalLanguageQuery = address
+    request.resultTypes = .address
+    print("before search")
+    let search = MKLocalSearch(request: request)
+//    print("after search")
+    do {
+      let response = try await search.start()
+      print("after start")
+      if let mapItem = response.mapItems.first {
+//        print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
+//        print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
+        addressToMapItemCache[address] = mapItem
+        return mapItem
+      }
+    } catch {
+      logger.error("ljw address=\(address) \(Date()) \(#file):\(#function):\(#line)")
+      print(error)
+    }
+    return nil
+*/
+
+    let request = MKGeocodingRequest(addressString: address)
+    do {
+      if let mapItem = try await request?.mapItems.first {
+//        print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
+//        print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
+        addressToMapItemCache[address] = mapItem
+        return mapItem
+      }
+    } catch {
+      logger.error("ljw address=\(address) \(Date()) \(#file):\(#function):\(#line)")
+      print(error.localizedDescription)
+    }
+    return nil
+
+  }
+
   @MainActor
   private func navigate(to route: AppCoordinator.Route) {
     @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
@@ -258,12 +287,7 @@ extension MoofuslistSource {
     }
     return result
   }
-
-  private func setCityStateToMapItemCache(cityState: String, mapItem: MKMapItem) {
-    cityStateToMapItemCache[cityState] = mapItem
-  }
 }
-
 
 // MARK: - Methods to send messages to MoofuslistViewModel
 extension MoofuslistSource {
@@ -378,6 +402,17 @@ extension MoofuslistSource {
     }
   }
 
+  func mapItemFor(activity: Activity) async -> MKMapItem? {
+    guard let mapItem = await mapItem(from: activity.address) else {
+      return nil
+    }
+    mapItem.name = activity.name
+    if let idx = uiData.activities.firstIndex(of: activity) {
+      uiData.activities[idx].mapItem = mapItem
+    }
+    return mapItem
+  }
+
   nonisolated
   func select(activity: MoofuslistViewModel.Activity) {
     Task.detached { [weak self] in
@@ -404,52 +439,17 @@ extension MoofuslistSource {
     }
   }
 
-  private func mapItem(from address: String) async -> MKMapItem? {
-    let request = MKLocalSearch.Request() // TODO: use cache
-    request.naturalLanguageQuery = address
-    request.resultTypes = .address
-
-    // Optionally bias search around the user's current region if available
-    // If you have a region in your view model, you can // TODO: set: request.region = viewModel.searchRegion
-    let search = MKLocalSearch(request: request)
-    do {
-      let response = try await search.start()
-      return response.mapItems.first
-    } catch {
-      return nil
-    }
-  }
-
   nonisolated
   func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       guard let self else { return }
       await sendProcessing(processing: true)
-      let mapItem: MKMapItem
-      print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
-      if let item = await cityStateToMapItemCache[cityState] {
-        print("ljw address=\(String(describing: item.address)) \(Date()) \(#file):\(#function):\(#line)")
-        mapItem = item
+      if let mapItem = await mapItem(from: cityState) {
+        await handle(mapItem: mapItem)
       } else {
-        let request = MKGeocodingRequest(addressString: cityState)
-        do {
-          if let item = (try await request?.mapItems.first) {
-            print("ljw address=\(String(describing: item.address)) \(Date()) \(#file):\(#function):\(#line)")
-            mapItem = item
-            await setCityStateToMapItemCache(cityState: cityState, mapItem: mapItem)
-          } else {
-            assertionFailure()
-            await sendError(description: "MKGeocodingRequest")
-            return
-          }
-        } catch {
-          logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
-          print(error.localizedDescription)
-          await sendInputError(inputError: true)
-          return
-        }
+        logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
+        await sendInputError(inputError: true)
       }
-      await handle(mapItem: mapItem)
     }
   }
 
