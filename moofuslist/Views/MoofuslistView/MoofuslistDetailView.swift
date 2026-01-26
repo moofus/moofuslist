@@ -8,6 +8,7 @@
 import FactoryKit
 import os
 import SwiftUI
+import MapKit
 
 struct MoofuslistDetailView: View {
   @Binding var activity: MoofuslistViewModel.Activity?
@@ -98,7 +99,9 @@ struct MoofuslistDetailView: View {
                   .cornerRadius(12)
                 }
 
-                Button(action: { }) {
+                Button(action: {
+                  openInMaps(activity: activity)
+                }) {
                   HStack {
                     Image(systemName: "map.fill")
                     Text("Get Directions")
@@ -159,6 +162,27 @@ struct MoofuslistDetailView: View {
       }
     }
   }
+
+  private func openInMaps(activity: MoofuslistViewModel.Activity) {
+    Task {
+      if let mapItem = activity.mapItem {
+        print("ljw \(Date()) \(#file):\(#function):\(#line)")
+        mapItem.name = activity.name
+        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+      } else {
+        let address = activity.address
+        let request = MKGeocodingRequest(addressString: address) // TODO: use cache
+        do {
+          if let mapItem = try await request?.mapItems.first {
+            mapItem.name = activity.name
+            mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+          }
+        } catch {
+          logger.error("Failed to geocode address: \(error.localizedDescription)") // TODO: handle
+        }
+      }
+    }
+  }
 }
 
 // MARK: - Info Row
@@ -211,4 +235,3 @@ struct InfoRow: View {
 //    MoofuslistDetailView(activity: $activity)
 //  }
 //}
-

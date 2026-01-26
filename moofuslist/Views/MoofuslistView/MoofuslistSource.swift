@@ -428,13 +428,13 @@ extension MoofuslistSource {
       let mapItem: MKMapItem
       print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
       if let item = await cityStateToMapItemCache[cityState] {
-        print("ljw address=\(item.address) \(Date()) \(#file):\(#function):\(#line)")
+        print("ljw address=\(String(describing: item.address)) \(Date()) \(#file):\(#function):\(#line)")
         mapItem = item
       } else {
         let request = MKGeocodingRequest(addressString: cityState)
         do {
           if let item = (try await request?.mapItems.first) {
-            print("ljw address=\(item.address) \(Date()) \(#file):\(#function):\(#line)")
+            print("ljw address=\(String(describing: item.address)) \(Date()) \(#file):\(#function):\(#line)")
             mapItem = item
             await setCityStateToMapItemCache(cityState: cityState, mapItem: mapItem)
           } else {
