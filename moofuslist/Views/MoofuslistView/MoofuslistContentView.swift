@@ -94,7 +94,7 @@ struct MoofuslistContentView: View {
 
         ScrollView {
           VStack(spacing: 12) {
-            ForEach(viewModel.activities, id: \.id) { activity in // TODO: ljw
+            ForEach(sortedActivities, id: \.id) { activity in // TODO: research
               if let index = viewModel.activities.firstIndex(where: { $0.id == activity.id }) {
                 MoofuslistCardView(activity: viewModel.activities[index])
                   .onTapGesture {
@@ -133,7 +133,19 @@ struct MoofuslistContentView: View {
       .disabled(viewModel.loading)
 
       if viewModel.loading {
-        ProgressView()
+        ZStack {
+          Color(.systemGray6).ignoresSafeArea()
+
+          ZStack {
+            RoundedRectangle(cornerRadius: 15)
+              .fill(Color(.secondarySystemBackground))
+              .shadow(radius: 10)
+            
+            ProgressView("Loading Activities: \(viewModel.activities.count)")
+              .foregroundStyle(Color.primary)
+          }
+        }
+        .frame(width: 240, height: 130)
       }
     }
     .navigationBarTitleDisplayMode(.inline)

@@ -68,8 +68,9 @@ struct MoofuslistView: View {
 
 extension MoofuslistView {
   struct MoofuslistHeaderView: View {
-    var body: some View {
+    @State private var displayProfile = false
 
+    var body: some View {
       VStack(spacing: 10) {
         Text("Moofuslist")
           .font(.system(size: 42, weight: .bold, design: .serif))
@@ -79,10 +80,13 @@ extension MoofuslistView {
           .font(.headline)
           .foregroundColor(.secondary)
       }
+      .sheet(isPresented: $displayProfile) {
+        ProfileView()
+      }
       .toolbar {
         ToolbarItem {
           Button {
-            print("pushed profile")
+            displayProfile = true
           } label: {
             Image(systemName: "person.fill")
               .foregroundStyle(.accent)

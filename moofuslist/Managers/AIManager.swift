@@ -53,8 +53,7 @@ actor AIManager {
 
   @Generable(description: "A container for a list of activities")
   struct Activities {
- //   @Guide(description: "A list of activities to do", .count(6...10))
-    @Guide(description: "A list of activities to do", .count(2...3))
+    @Guide(description: "A list of activities to do", .count(6...10))
     let activities: [Activity]
   }
 
@@ -102,7 +101,7 @@ actor AIManager {
 
   let logger = Logger(subsystem: "com.moofus.moofuslist", category: "AIManager")
 
-  static let instructions = """
+  let instructions = """
                   Your job is to find activities to do and places to go.
                   
                   Always include a short description, and something interesting about the activity or place.
@@ -111,7 +110,6 @@ actor AIManager {
                   """
   let continuation: AsyncStream<Message>.Continuation
   let stream: AsyncStream<Message>
-  let session = LanguageModelSession(instructions: instructions)
 
   init() {
     (stream, continuation) = AsyncStream.makeStream(of: Message.self)
@@ -123,15 +121,11 @@ extension AIManager {
   func findActivities(cityState: String) async throws {
     try isModelAvailable()
 
-//    let newInstructions = self.instructions + " Always include the distance to \(cityState)" // TODO: ljw
-//    let session = LanguageModelSession(instructions: newInstructions)
+    let newInstructions = instructions + "\n Always include the distance to \(cityState)"
+    let session = LanguageModelSession(instructions: newInstructions)
     let text = "Generate a list of things to do near \(cityState)"
     do {
-      let stream = session.streamResponse(
-        to: text,
-        generating: Activities.self,
-        options: GenerationOptions(sampling: .random(probabilityThreshold: 0))
-      )
+      let stream = session.streamResponse(to: text, generating: Activities.self)
       var beginSent = false
 
       for try await partial in stream {
@@ -173,7 +167,7 @@ extension AIManager {
     }
     catch {
       print("Error")
-      print(error.localizedDescription) // ljw
+      print(error.localizedDescription) // TODO: handle errors
     }
   }
 }
@@ -219,88 +213,3 @@ extension AIManager {
     }
   }
 }
-
-/*
- To find places for a specific activity like fishing in an iOS Swift app, you should use the MapKit framework and its MKLocalSearch functionality to query points of interest (POIs) based on the user's current location.
- Core Steps to Implement
- Import MapKit & CoreLocation: Needed for map display and user positioning.
- Request User Location: Use CLLocationManager to get the current coordinates.
- Perform MKLocalSearch: Use a natural language query like "fishing spot" or "boat ramp" within a defined region around the user.
- Display Results: Annotate the map with pins (MKMarkerAnnotationView) for found locations.
- Swift Code Example (SwiftUI)
- This example demonstrates searching for "fishing" near the user's current location:
- swift
- import SwiftUI
- import MapKit
-
- struct FishingSpotFinder: View {
-     @State private var region = MKCoordinateRegion(
-         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-     )
-     @State private var searchResults: [MKMapItem] = []
-
-     var body: some View {
-         Map(coordinateRegion: $region, annotationItems: searchResults) { item in
-             MapMarker(coordinate: item.placemark.coordinate)
-         }
-         .onAppear {
-             searchForFishingSpots()
-         }
-     }
-
-     func searchForFishingSpots() {
-         let request = MKLocalSearch.Request()
-         // Keyword search for the activity
-         request.naturalLanguageQuery = "fishing"
-         request.region = region
-
-         let search = MKLocalSearch(request: request)
-         search.start { response, error in
-             guard let response = response else {
-                 print("Error: \(error?.localizedDescription ?? "Unknown error")")
-                 return
-             }
-             searchResults = response.mapItems
-         }
-     }
- }
- Techniques to Improve Accuracy
- Refine the Query: Instead of just "fishing," use specific terms like "boat ramp," "fishing pier," or "lake" to find specialized locations.
- Filter by Region: Set the MKLocalSearch.Request.region to the visible area of the map to prevent results from being too far away.
- Use MKLocalSearchCompleter: Implement this to provide auto-complete suggestions as the user types.
- Third-Party APIs: For more specialized data (like water depth or species), consider integrating APIs from services like Fishbrain or Google Places, which offer specific filters for activity-based searches.
- */
-
-
-/*
- func generateImages() async throws {
-   print("ljw \(Date()) \(#file):\(#function):\(#line)")
-   do {
-     print("ljw \(Date()) \(#file):\(#function):\(#line)")
-     let creator = try await ImageCreator()
-     print("ljw \(Date()) \(#file):\(#function):\(#line)")
-     let generatedImages = creator.images(
-//        for: [.text("A cat wearing mittens.")],
-//        for: [.text("A beach in Hawaii")],
-       for: [.text("An american football game")],
-//        style: .illustration,
-//        style: .animation,
-       style: .sketch,
-       limit: 1
-     )
-
-     for try await generatedImage in generatedImages {
-       print("ljw \(Date()) \(#file):\(#function):\(#line)")
-       images.append(generatedImage.cgImage)
-     }
-   } catch {
- print("ljw \(Date()) \(#file):\(#function):\(#line)")
- print("error=\(error)")
- assertionFailure() // ljw
-   }
-   print("ljw \(Date()) \(#file):\(#function):\(#line)")
- }
-
- */
-

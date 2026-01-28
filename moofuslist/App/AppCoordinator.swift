@@ -29,15 +29,12 @@ class AppCoordinator {
   func navigate(to route: Route) {
     switch route {
     case .content:
-      print("ljw selecting content")
       continuation.yield(.content)
       splitViewColum = .content
     case .detail:
-      print("ljw selecting detail")
       continuation.yield(.detail)
       splitViewColum = .detail
     case .sidebar:
-      print("ljw selecting sidebar")
       continuation.yield(.sidebar)
       splitViewColum = .sidebar
     }

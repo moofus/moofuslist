@@ -145,21 +145,23 @@ struct MoofuslistDetailView: View {
           }
         }
 
-        VStack {
-          HStack {
-            Spacer()
-            Button {
-              autoManualSwitch.toggle()
-            } label: {
-              if autoManualSwitch {
-                Text("auto")
-              } else {
-                Text("manual")
+        if activity.imageNames.count > 1 {
+          VStack {
+            HStack {
+              Spacer()
+              Button {
+                autoManualSwitch.toggle()
+              } label: {
+                if autoManualSwitch {
+                  Text("auto")
+                } else {
+                  Text("manual")
+                }
               }
+              .padding()
             }
-            .padding()
+            Spacer()
           }
-          Spacer()
         }
       } else {
         Text("Select an activity")
