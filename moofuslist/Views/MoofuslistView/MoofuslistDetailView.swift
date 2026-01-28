@@ -11,10 +11,10 @@ import SwiftUI
 import MapKit
 
 struct MoofuslistDetailView: View {
-  @State var selectedImageIdx = 0
-  @Injected(\.moofuslistSource) var source: MoofuslistSource
+  @AppStorage("autoManualSwitch") private var autoManualSwitch = true // initially switch automatically
+  @State private var selectedImageIdx = 0
+  @Injected(\.moofuslistSource) private var source: MoofuslistSource
   @Bindable var viewModel: MoofuslistViewModel
-
 
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
   @State var timedAction = TimedAction()
@@ -144,6 +144,23 @@ struct MoofuslistDetailView: View {
             .padding(20)
           }
         }
+
+        VStack {
+          HStack {
+            Spacer()
+            Button {
+              autoManualSwitch.toggle()
+            } label: {
+              if autoManualSwitch {
+                Text("auto")
+              } else {
+                Text("manual")
+              }
+            }
+            .padding()
+          }
+          Spacer()
+        }
       } else {
         Text("Select an activity")
       }
@@ -154,6 +171,10 @@ struct MoofuslistDetailView: View {
     var starting = true
 
     timedAction.start(sleepTimeInSeconds: 3) {
+      guard autoManualSwitch else {
+        return
+      }
+
       guard let activity = viewModel.selectedActivity, activity.imageNames.count > 1 else {
         return
       }

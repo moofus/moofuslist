@@ -50,10 +50,8 @@ struct MoofuslistView: View {
       }
       .safeAreaPadding([.leading, .trailing])
     } content: {
-      let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
       MoofuslistContentView(viewModel: viewModel)
     } detail: {
-      let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
       MoofuslistDetailView(viewModel: viewModel)
     }
     .disabled(viewModel.processing)

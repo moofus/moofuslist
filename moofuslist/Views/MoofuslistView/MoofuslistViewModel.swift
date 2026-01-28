@@ -35,7 +35,6 @@ final class MoofuslistViewModel {
 
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 
-  // keep the following properties insync with MoofuslistUIData
   var activities: [Activity] = []
   private(set) var errorDescription: String = ""
   private(set) var errorRecoverySuggestion: String = ""
@@ -77,7 +76,6 @@ extension MoofuslistViewModel {
       case .loadMapItems: await loadMapItems()
       case .mapItem(let mapItem):
         processeMapItem(mapItem)
-        self.mapItem = mapItem
       case .processing: processing = true
       case .selectActivity(let id): selectActivity(id: id)
       }
@@ -133,7 +131,7 @@ extension MoofuslistViewModel {
       searchedCityState = cityState
     }
     withAnimation {
-      self.mapItem = mapItem // TODO: test visually
+      self.mapItem = mapItem
     }
   }
 
