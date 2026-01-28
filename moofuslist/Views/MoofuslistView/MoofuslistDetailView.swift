@@ -11,18 +11,21 @@ import SwiftUI
 import MapKit
 
 struct MoofuslistDetailView: View {
-  @Binding var activity: MoofuslistViewModel.Activity?
   @State var selectedImageIdx = 0
   @Injected(\.moofuslistSource) var source: MoofuslistSource
+  @Bindable var viewModel: MoofuslistViewModel
+
 
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
   @State var timedAction = TimedAction()
 
   var body: some View {
+    let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
+    
     ZStack {
       Color(.listBackground).ignoresSafeArea()
 
-      if let activity {
+      if let activity = viewModel.selectedActivity {
         ScrollView {
           VStack(spacing: 0) {
             VStack {
@@ -68,9 +71,9 @@ struct MoofuslistDetailView: View {
                 Spacer()
 
                 Button {
-                  activity.isFavorite.toggle()
-                  source.favoriteChanged(activity: activity)
+                  source.changeFavorite(id: activity.id)
                 } label: {
+                  let _ = print("ljw id=\(activity.id) isFavorite=\(activity.isFavorite) \(Date()) \(#file):\(#function):\(#line)")
                   Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
                     .font(.system(size: 24))
                     .foregroundColor(activity.isFavorite ? .accent : .gray)
@@ -151,7 +154,7 @@ struct MoofuslistDetailView: View {
     var starting = true
 
     timedAction.start(sleepTimeInSeconds: 3) {
-      guard let activity, activity.imageNames.count > 1 else {
+      guard let activity = viewModel.selectedActivity, activity.imageNames.count > 1 else {
         return
       }
 
@@ -175,7 +178,7 @@ struct MoofuslistDetailView: View {
       let mapItem: MKMapItem
       if let item = activity.mapItem {
         mapItem = item
-      } else if let item = await source.mapItemFor(activity: activity) {
+      } else if let item = await source.mapItemFrom(address: activity.address) {
         mapItem = item
       } else {
         logger.error("Failed to mapItem") // TODO: handle

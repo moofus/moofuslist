@@ -13,65 +13,115 @@ import SwiftUI
 
 @MainActor
 @Observable
-final
-class MoofuslistViewModel {
-  typealias Activity = MoofuslistActivity
+final class MoofuslistViewModel {
+  // keep insync with MoofuslistActivity
+  struct Activity: Hashable, Identifiable {
+    var id = UUID()
+    var address: String
+    var category: String
+    var city: String
+    var desc: String
+    var distance: Double
+    var imageNames: [String]
+    var isFavorite = false
+    var mapItem: MKMapItem?
+    var name: String
+    var rating: Double
+    var reviews: Int
+    var phoneNumber: String
+    var somethingInteresting: String
+    var state: String
+  }
 
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 
   // keep the following properties insync with MoofuslistUIData
   var activities: [Activity] = []
-  var errorDescription: String = ""
-  var errorRecoverySuggestion: String = ""
+  private(set) var errorDescription: String = ""
+  private(set) var errorRecoverySuggestion: String = ""
   var haveError: Bool = false
   var inputError: Bool = false
-  var loading: Bool = false
-  var location = CLLocation()
-  var mapItem: MKMapItem? = nil
+  private(set) var loading: Bool = false
+  private(set) var location = CLLocation()
+  private(set) var mapItem: MKMapItem? = nil
   var mapPosition: MapCameraPosition = .automatic
-  var processing: Bool = false
-  var searchedCityState: String = ""
+  private(set) var processing: Bool = false
+  private(set) var searchedCityState: String = ""
   var selectedActivity: Activity? = nil
 
   init() {
-    handleSource()
+    Task { @MainActor in
+      await handleSource()
+    }
   }
 }
 
-// MARK: - Private Methods
+// MARK: Methods
 extension MoofuslistViewModel {
-  private func handleSource() {
-    Task { @MainActor [weak self] in
-      guard let self else { return }
-      for await message in await source.stream {
-        print("ljw handleSource message \(Date()) \(#file):\(#function):\(#line)")
-        print(message)
-        switch message {
-        case let .error(uiData):
-          setAll(uiData: uiData)
-        case let .loaded(activities, loading, processing):
-          self.activities = activities
-          self.loading = loading
-          self.processing = processing
-        case let .loading(activities, loading, processing):
-          self.activities = activities
-          self.loading = loading
-          self.processing = processing
-        case let .processing(uiData):
-          setAll(uiData: uiData)
-          processeMapItem(uiData: uiData)
-        case let .selectedActivity(activity):
-          selectedActivity = activity
+  @MainActor
+  private func handleSource() async {
+    for await message in source.stream {
+      print(message)
+      switch message {
+      case .changeFavorite(let id): changeFavorite(id: id)
+      case let .error(description, recoverySuggestion):
+        errorDescription = description
+        errorRecoverySuggestion = recoverySuggestion
+      case .initialize: initialize()
+      case .inputError: inputError = true
+      case .loaded(let loading): self.loading = loading
+      case let .loading(activities, loading, processing):
+        self.activities = activities
+        self.loading = loading
+        self.processing = processing
+      case .loadMapItems: await loadMapItems()
+      case .mapItem(let mapItem):
+        processeMapItem(mapItem)
+        self.mapItem = mapItem
+      case .processing: processing = true
+      case .selectActivity(let id): selectActivity(id: id)
+      }
+    }
+  }
+
+  private func changeFavorite(id: UUID) {
+    if let idx = activities.firstIndex(where: { $0.id == id }) {
+      activities[idx].isFavorite.toggle()
+      selectedActivity = activities[idx]
+    } else {
+      assertionFailure() // TODO: handle this
+    }
+  }
+
+  private func initialize() {
+    activities = []
+    errorDescription = ""
+    errorRecoverySuggestion = ""
+    haveError = false
+    inputError = false
+    loading = false
+    location = CLLocation()
+    mapItem = nil
+    mapPosition = .automatic
+    processing = false
+    searchedCityState = ""
+    selectedActivity = nil
+  }
+
+  private func loadMapItems() async {
+    for activity in activities {
+      guard !activity.address.isEmpty else { continue }
+      guard activity.mapItem == nil else { continue }
+      if let mapItem = await source.mapItemFrom(address: activity.address) {
+        mapItem.name = activity.name
+        if let idx = activities.firstIndex(where: { $0.id == activity.id }) {
+          activities[idx].mapItem = mapItem
         }
       }
     }
   }
 
-  private func processeMapItem(uiData: MoofuslistSource.MoofuslistViewModelData) {
-    guard let mapItem = uiData.mapItem else {
-      return
-    }
-
+  private func processeMapItem(_ mapItem: MKMapItem) {
     let latitude = mapItem.location.coordinate.latitude
     let longitude = mapItem.location.coordinate.longitude
     let newCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -87,18 +137,11 @@ extension MoofuslistViewModel {
     }
   }
 
-  private func setAll(uiData: MoofuslistSource.MoofuslistViewModelData) {
-    activities = uiData.activities
-    errorDescription = uiData.errorDescription
-    errorRecoverySuggestion = uiData.errorRecoverySuggestion
-    haveError = uiData.haveError
-    inputError = uiData.inputError
-    loading = uiData.loading
-    location = uiData.location
-    mapItem = uiData.mapItem
-    mapPosition = uiData.mapPosition
-    processing = uiData.processing
-    searchedCityState = uiData.searchedCityState
-    selectedActivity = uiData.selectedActivity
+  private func selectActivity(id: UUID) {
+    if let idx = activities.firstIndex(where: { $0.id == id }) {
+      selectedActivity = activities[idx]
+    } else {
+      assertionFailure() // TODO: handle this
+    }
   }
 }

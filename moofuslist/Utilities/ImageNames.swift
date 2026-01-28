@@ -151,7 +151,26 @@ actor ImageNames {
   ]
 
   init() { }
-  
+
+  func imageNames(for activity: AIManager.Activity) async -> [String] {
+    print("------------------------------")
+    let activity = activity.lowercased()
+    print(activity)
+
+    var result = [String]()
+    result = process(input: activity.name, result: &result)
+    result = process(input: activity.category, result: &result)
+    result = process(input: activity.description, result: &result)
+    result = removeSimilarImages(result: &result)
+
+    if result.count < 1 {
+      print(activity)
+      assertionFailure()
+      return ["mappin.circle.fill"]
+    }
+    return result
+  }
+
   func process(input: String, result: inout [String]) -> [String] {
     for (key, imageStrings) in imageNames {
       if input.contains(key) {
@@ -162,6 +181,25 @@ actor ImageNames {
       }
     }
     print("input=\(input) \(result)")
+    return result
+  }
+
+  private func removeSimilarImages(result: inout [String]) -> [String] {
+    if result.contains("building.columns.fill") {
+      if let idx = result.firstIndex(of: "building.fill") {
+        result.remove(at: idx)
+      }
+    }
+    if result.contains("books.vertical.fill") {
+      if let idx = result.firstIndex(of: "text.book.closed.fill") {
+        result.remove(at: idx)
+      }
+    }
+    if result.contains("building.2.fill") {
+      if let idx = result.firstIndex(of: "building.fill") {
+        result.remove(at: idx)
+      }
+    }
     return result
   }
 }

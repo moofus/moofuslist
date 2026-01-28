@@ -37,7 +37,7 @@ struct MoofuslistView: View {
         Spacer()
 
         Label {
-          Text("Using Apple Intelligent")
+          Text("Using Apple Intelligence")
             .font(.footnote)
         } icon: {
           Image(systemName: "sparkles")
@@ -54,7 +54,7 @@ struct MoofuslistView: View {
       MoofuslistContentView(viewModel: viewModel)
     } detail: {
       let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-      MoofuslistDetailView(activity: $viewModel.selectedActivity)
+      MoofuslistDetailView(viewModel: viewModel)
     }
     .disabled(viewModel.processing)
     .alert("\"City, State\" is invalid!", isPresented: $viewModel.inputError) {

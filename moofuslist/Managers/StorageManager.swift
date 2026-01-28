@@ -9,18 +9,16 @@ import Foundation
 import SwiftData
 
 actor StorageManager {
+  private var context: ModelContext! = nil
   private let container: ModelContainer
-  private let context: ModelContext
 
-  init() {
-    do {
-      let container = try ModelContainer(for: MoofuslistActivity.self)
-      self.container = container
-      self.context = ModelContext(container)
-    } catch {
-      print("error=\(error)")
-      assertionFailure()
-      fatalError("Failed to initialize StorageManager's ModelContainer")
+  init(container: ModelContainer) {
+    self.container = container
+  }
+
+  func initialize() {
+    if context == nil {
+      context = ModelContext(self.container)
     }
   }
 

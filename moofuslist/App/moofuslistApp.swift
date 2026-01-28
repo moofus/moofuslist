@@ -6,6 +6,7 @@
 //
 
 import FactoryKit
+import SwiftData
 import SwiftUI
 
 @main
@@ -27,13 +28,13 @@ extension Container {
   var locationManager: Factory<LocationManager> {
     self { LocationManager() }.singleton
   }
-  var storageManager: Factory<StorageManager> {
-    self { StorageManager() }.singleton
+  var storageManager: ParameterFactory<ModelContainer, StorageManager> {
+    self { StorageManager(container: $0) }
   }
   var moofuslistSource: Factory<MoofuslistSource> {
     self { MoofuslistSource() }.singleton
   }
   @MainActor var moofuslistViewModel: Factory<MoofuslistViewModel> {
-    self { @MainActor in MoofuslistViewModel() }
+    self { @MainActor in MoofuslistViewModel() }.singleton
   }
 }

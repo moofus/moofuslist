@@ -102,7 +102,7 @@ actor AIManager {
 
   let logger = Logger(subsystem: "com.moofus.moofuslist", category: "AIManager")
 
-  let instructions = """
+  static let instructions = """
                   Your job is to find activities to do and places to go.
                   
                   Always include a short description, and something interesting about the activity or place.
@@ -111,6 +111,7 @@ actor AIManager {
                   """
   let continuation: AsyncStream<Message>.Continuation
   let stream: AsyncStream<Message>
+  let session = LanguageModelSession(instructions: instructions)
 
   init() {
     (stream, continuation) = AsyncStream.makeStream(of: Message.self)
@@ -122,11 +123,15 @@ extension AIManager {
   func findActivities(cityState: String) async throws {
     try isModelAvailable()
 
-    let newInstructions = self.instructions + " Always include the distance from \(cityState)" // ljw
-    let session = LanguageModelSession(instructions: newInstructions)
+//    let newInstructions = self.instructions + " Always include the distance to \(cityState)" // TODO: ljw
+//    let session = LanguageModelSession(instructions: newInstructions)
     let text = "Generate a list of things to do near \(cityState)"
     do {
-      let stream = session.streamResponse(to: text, generating: Activities.self) // Streaming partial generations
+      let stream = session.streamResponse(
+        to: text,
+        generating: Activities.self,
+        options: GenerationOptions(sampling: .random(probabilityThreshold: 0))
+      )
       var beginSent = false
 
       for try await partial in stream {

@@ -25,7 +25,7 @@ struct MoofuslistContentView: View {
     SortOptions(rawValue: selectedSortRawValue) ?? .relevance
   }
 
-  private var sortedActivities: [MoofuslistActivity] {
+  private var sortedActivities: [MoofuslistViewModel.Activity] {
     switch selectedSort {
     case .distance: viewModel.activities.sorted { $0.distance < $1.distance }
     case .relevance: viewModel.activities
@@ -69,8 +69,8 @@ struct MoofuslistContentView: View {
 
             Button {
               Task {
-                await source.loadMapItemsForActivities()
-                await MainActor.run { showSheet = true }
+                showSheet = true
+                await source.loadMapItems()
               }
             } label: {
               HStack {
@@ -94,11 +94,11 @@ struct MoofuslistContentView: View {
 
         ScrollView {
           VStack(spacing: 12) {
-            ForEach(sortedActivities, id: \.id) { activity in
+            ForEach(viewModel.activities, id: \.id) { activity in // TODO: ljw
               if let index = viewModel.activities.firstIndex(where: { $0.id == activity.id }) {
-                MoofuslistCardView(activity: $viewModel.activities[index])
+                MoofuslistCardView(activity: viewModel.activities[index])
                   .onTapGesture {
-                    source.select(activity: activity)
+                    source.selectActivity(id: activity.id)
                   }
               }
             }

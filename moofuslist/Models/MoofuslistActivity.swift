@@ -11,7 +11,8 @@ import SwiftData
 
 @Model
 class MoofuslistActivity: Hashable, Identifiable {
-  var id = UUID()
+  // keep insync with MoofuslistViewModel.Activity
+  var id: UUID
   var address: String
   var category: String
   var city: String
@@ -29,6 +30,7 @@ class MoofuslistActivity: Hashable, Identifiable {
   var state: String
 
   init(
+    id: UUID,
     address: String,
     category: String,
     city: String,
@@ -44,6 +46,7 @@ class MoofuslistActivity: Hashable, Identifiable {
     somethingInteresting: String,
     state: String
   ) {
+    self.id = id
     self.address = address
     self.category = category
     self.city = city

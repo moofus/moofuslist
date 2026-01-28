@@ -9,58 +9,62 @@ import Foundation
 import FactoryKit
 import MapKit
 import os
+import SwiftData
 import SwiftUI
 
+
 final actor MoofuslistSource {
-  typealias Activity = MoofuslistActivity
+  typealias Activity = MoofuslistViewModel.Activity
 
   enum Message {
-    case error(MoofuslistViewModelData)
-    case loaded([Activity], Bool, Bool)
+    case changeFavorite(UUID)
+    case error(String, String)
+    case initialize
+    case inputError(Bool)
+    case loaded(Bool)
     case loading([Activity], Bool, Bool)
-    case processing(MoofuslistViewModelData)
-    case selectedActivity(Activity)
+    case loadMapItems
+    case mapItem(MKMapItem)
+    case processing
+    case selectActivity(UUID)
   }
 
-  private struct LocationKey: Hashable {
+ private struct LocationKey: Hashable {
     let latitude: Double
     let longitude: Double
   }
 
-  final class MoofuslistViewModelData {
-    // keep the following properties insync with MoofuslistViewModel
-    var activities: [Activity] = []
-    var errorDescription: String = ""
-    var errorRecoverySuggestion: String = ""
-    var haveError: Bool = false
-    var inputError: Bool = false
-    var loading: Bool = false
-    var location = CLLocation()
-    var mapItem: MKMapItem? = nil
-    var mapPosition: MapCameraPosition = .automatic
-    var processing: Bool = false
-    var searchedCityState: String = ""
-    var selectedActivity: Activity? = nil
-  }
-
   @Injected(\.aiManager) private var aiManager: AIManager
   @Injected(\.locationManager) private var locationManager: LocationManager
-  @Injected(\.storageManager) private var storageManager: StorageManager
+  private var storageManager: StorageManager
 
+  private var activities = [Activity]()
   private var addressToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
+  private var location = CLLocation()
   private var locationToMapItemCache = [LocationKey: MKMapItem]()
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
   let stream: AsyncStream<Message>
-  private var uiData = MoofuslistViewModelData()
 
   init() {
     (stream, continuation) = AsyncStream.makeStream(of: Message.self)
+
+    do {
+      let schema = Schema([MoofuslistActivity.self])
+      let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+      let container = try ModelContainer(for: schema, configurations: [configuration])
+      storageManager = Container.shared.storageManager(container)
+    } catch {
+      print(error)
+      fatalError()
+    }
+
     Task.detached { [weak self] in
       guard let self else { return }
+      await storageManager.initialize()
       async let aiWait: Void = handleAIManager()
-      async let locationWait: () = handleLocationManager()
+      async let locationWait: Void = handleLocationManager()
       _ = await(aiWait, locationWait)
     }
 
@@ -76,6 +80,76 @@ final actor MoofuslistSource {
         case .sidebar:
           print("source sidebar")
         }
+      }
+    }
+  }
+}
+
+// MARK: - Methods to send messages to MoofuslistViewModel
+extension MoofuslistSource {
+  private func sendError(description: String = "Error", recoverySuggestion: String = "Try again later.") {
+    send(message: .initialize)
+    send(message: .error(description, recoverySuggestion))
+  }
+
+  private func sendInputError(inputError: Bool) {
+    send(message: .initialize)
+    send(message: .inputError(true))
+  }
+
+  private func sendLoaded(loading: Bool) {
+    send(message: .loaded(loading))
+  }
+
+  private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
+    self.activities = await convert(activities: activities, location: location)
+    send(message: .loading(self.activities, loading, processing))
+  }
+
+  private func sendProcessing(processing: Bool) {
+    send(message: .initialize)
+    send(message: .processing)
+  }
+
+  private func send(message: Message) {
+    Task { @MainActor in
+      continuation.yield(message)
+    }
+  }
+}
+
+// MARK: - Private Handle Managers
+extension MoofuslistSource {
+  private func handleAIManager() async {
+    for await message in aiManager.stream {
+      switch message {
+      case .begin:
+        await navigate(to: .content)
+      case .end:
+        send(message: .loaded(false))
+      case .error(_):
+        assertionFailure() // TODO: handle
+      case .loading(let activities):
+        await sendLoading(activities: activities, loading: true, processing: false)
+      }
+    }
+  }
+
+  private func handleLocationManager() async {
+    for await message in locationManager.stream {
+      print(message) // ljw add warnings for print statements
+
+      switch message {
+      case .error(let error):
+        if let description = error.errorDescription, let recoverySuggestion = error.recoverySuggestion {
+          sendError(description: description, recoverySuggestion: recoverySuggestion)
+        } else if let description = error.errorDescription {
+          sendError(description: description)
+        } else {
+          sendError()
+        }
+      case .location(let location):
+        await handle(location: location)
       }
     }
   }
@@ -101,20 +175,22 @@ extension MoofuslistSource {
             assertionFailure()
           }
           guard let item = mapItems.first else {
+            logger.error("MapItem not found \(#file):\(#line)")
+            sendError(description: "MapItem not found")
             assertionFailure()
-            // TODO: handle
             return
           }
           mapItem = item
           locationToMapItemCache[locationKey] = mapItem
         } catch {
           logger.error("Error MKReverseGeocodingRequest: \(error)")
-          assertionFailure("unknown error=\(error)")
           sendError(description: error.localizedDescription)
+          assertionFailure("unknown error=\(error)")
           return
         }
       } else {
         sendError(description: "Can't get location")
+        assertionFailure()
         return
       }
     }
@@ -142,7 +218,7 @@ extension MoofuslistSource {
           city: activity.city,
           desc: activity.description,
           distance: distance,
-          imageNames: await imageNames(for: activity),
+          imageNames: await imageNames.imageNames(for: activity),
           name: activity.name,
           rating: activity.rating, // TODO: rating
           reviews: activity.reviews, // TODO: reviews
@@ -156,7 +232,7 @@ extension MoofuslistSource {
   }
 
   private func getDistance(from activity: AIManager.Activity, location: CLLocation) async throws -> Double {
-    guard let mapItem = await mapItem(from: activity.address) else {
+    guard let mapItem = await mapItemFrom(address: activity.address) else {
       return activity.distance
     }
     let meters = mapItem.location.distance(from: location)
@@ -168,11 +244,9 @@ extension MoofuslistSource {
   private func handle(mapItem: MKMapItem) async {
     if let cityState = mapItem.addressRepresentations?.cityWithContext {
       do {
-        sendProcessing(mapItem: mapItem)
-        print("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
+        send(message: .mapItem(mapItem))
         try await aiManager.findActivities(cityState: cityState)
       } catch {
-        print("ljw \(Date()) \(#file):\(#function):\(#line)")
         print(error)
         if let error = error as? AIManager.Error {
           sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
@@ -182,86 +256,9 @@ extension MoofuslistSource {
         }
       }
     } else {
+      assertionFailure()
       // TODO: handle
     }
-  }
-
-  private func imageNames(for activity: AIManager.Activity) async -> [String] {
-    print("------------------------------")
-    let activity = activity.lowercased()
-    print(activity)
-
-    var result = [String]()
-    result = await imageNames.process(input: activity.name, result: &result)
-    result = await imageNames.process(input: activity.category, result: &result)
-    result = await imageNames.process(input: activity.description, result: &result)
-    result = removeSimilarImages(result: &result)
-
-    if result.count < 1 {
-      print(activity)
-      assertionFailure()
-      return ["mappin.circle.fill"]
-    }
-    return result
-  }
-
-  private func initializeUIData() {
-    uiData.activities = []
-    uiData.errorDescription = ""
-    uiData.errorRecoverySuggestion = ""
-    uiData.haveError = false
-    uiData.inputError = false
-    uiData.loading = false
-    uiData.location = CLLocation()
-    uiData.mapItem = nil
-    uiData.mapPosition = .automatic
-    uiData.processing = false
-    uiData.searchedCityState = ""
-    uiData.selectedActivity = nil
-  }
-
-  private func mapItem(from address: String) async -> MKMapItem? {
-    if let mapItem = addressToMapItemCache[address] {
-      return mapItem
-    }
-
-
-    let request = MKLocalSearch.Request()
-    request.naturalLanguageQuery = address
-    request.resultTypes = .address
-    print("before search")
-    let search = MKLocalSearch(request: request)
-//    print("after search")
-    do {
-      let response = try await search.start()
-      print("after start")
-      if let mapItem = response.mapItems.first {
-//        print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
-//        print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
-        addressToMapItemCache[address] = mapItem
-        return mapItem
-      }
-    } catch {
-      logger.error("ljw address=\(address) \(Date()) \(#file):\(#function):\(#line)")
-      print(error)
-    }
-    return nil
-
-/*
-    let request = MKGeocodingRequest(addressString: address)
-    do {
-      if let mapItem = try await request?.mapItems.first {
-//        print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
-//        print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
-        addressToMapItemCache[address] = mapItem
-        return mapItem
-      }
-    } catch {
-      logger.error("ljw address=\(address) \(Date()) \(#file):\(#function):\(#line)")
-      print(error.localizedDescription)
-    }
-    return nil
-*/
   }
 
   @MainActor
@@ -269,183 +266,68 @@ extension MoofuslistSource {
     @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
     appCoordinator.navigate(to: route)
   }
-
-  private func removeSimilarImages(result: inout [String]) -> [String] {
-    if result.contains("building.columns.fill") {
-      if let idx = result.firstIndex(of: "building.fill") {
-        result.remove(at: idx)
-      }
-    }
-    if result.contains("books.vertical.fill") {
-      if let idx = result.firstIndex(of: "text.book.closed.fill") {
-        result.remove(at: idx)
-      }
-    }
-    if result.contains("building.2.fill") {
-      if let idx = result.firstIndex(of: "building.fill") {
-        result.remove(at: idx)
-      }
-    }
-    return result
-  }
-}
-
-// MARK: - Methods to send messages to MoofuslistViewModel
-extension MoofuslistSource {
-  private func sendError(
-    description: String = "Error",
-    recoverySuggestion: String = "Try again later."
-  ) {
-    initializeUIData()
-    uiData.errorDescription = description
-    uiData.errorRecoverySuggestion = recoverySuggestion
-    send(message: .error(uiData))
-  }
-
-  private func sendInputError(inputError: Bool) {
-    initializeUIData()
-    uiData.inputError = inputError
-    send(message: .error(uiData))
-  }
-
-  private func sendActivity(activity: Activity) {
-    uiData.selectedActivity = activity
-    send(message: .selectedActivity(activity))
-  }
-
-  private func sendLoaded(activities: [Activity]? = nil, loading: Bool, processing: Bool) {
-    if let activities {
-      uiData.activities = activities
-    }
-    uiData.loading = loading
-    uiData.processing = processing
-    send(message: .loaded(uiData.activities, loading, processing))
-  }
-
-  private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
-    uiData.activities = await convert(activities: activities, location: uiData.location)
-    uiData.loading = loading
-    uiData.processing = processing
-    send(message: .loading(uiData.activities, loading, processing))
-  }
-
-  private func sendProcessing(mapItem: MKMapItem) {
-    uiData.mapItem = mapItem
-    uiData.location = mapItem.location
-    send(message: .processing(uiData))
-  }
-
-  private func sendProcessing(processing: Bool) {
-    initializeUIData()
-    uiData.processing = processing
-    send(message: .processing(uiData))
-  }
-
-  private func send(message: Message) {
-    Task { @MainActor in
-      continuation.yield(message)
-    }
-  }
-}
-
-// MARK: - Private Handle Managers
-extension MoofuslistSource {
-  private func handleAIManager() async {
-    for await message in aiManager.stream {
-      switch message {
-      case .begin:
-        print("ljw begin \(Date()) \(#file):\(#function):\(#line)")
-        await navigate(to: .content)
-      case .end:
-        print("ljw end \(Date()) \(#file):\(#function):\(#line)")
-        sendLoaded(activities: uiData.activities, loading: false, processing: false)
-      case .error(_):
-        assertionFailure() // TODO: handle
-      case .loading(let activities):
-        await sendLoading(activities: activities, loading: true, processing: false)
-      }
-    }
-  }
-
-  private func handleLocationManager() async {
-    for await message in locationManager.stream {
-      print(message) // ljw add warnings for print statements
-
-      switch message {
-      case .error(let error):
-        sendError(
-          description: error.errorDescription ?? "",
-          recoverySuggestion: error.recoverySuggestion ?? ""
-        )
-      case .location(let location):
-        await handle(location: location)
-      }
-    }
-  }
 }
 
 // MARK: - Public Methods
 extension MoofuslistSource {
-  nonisolated
-  func favoriteChanged(activity: Activity) {
+  nonisolated func changeFavorite(id: UUID) {
     Task.detached { [weak self] in
-      guard let self else { return }
-      do {
-        if activity.isFavorite {
-          try await storageManager.insert(activity: activity)
-        } else {
-          try await storageManager.delete(activity: activity)
-        }
-      } catch {
-        print(error)
-        assertionFailure() // TODO: handle
+      await self?.send(message: .changeFavorite(id))
+    }
+  }
+
+  nonisolated func loadMapItems() async {
+    await send(message: .loadMapItems)
+  }
+
+  func mapItemFrom(address: String) async -> MKMapItem? {
+    if let mapItem = addressToMapItemCache[address] {
+      return mapItem
+    }
+
+    let request = MKLocalSearch.Request()
+    request.naturalLanguageQuery = address
+    request.resultTypes = .address
+    //    print("before search")
+    let search = MKLocalSearch(request: request)
+    print("after search")
+    do {
+      let response = try await search.start()
+      print("after start")
+      if let mapItem = response.mapItems.first {
+        //        print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
+        //        print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
+        addressToMapItemCache[address] = mapItem
+        return mapItem
       }
+    } catch {
+      logger.error("address=\(address) \(Date()) \(#file):\(#function):\(#line)")
+      print(error)
     }
+
+    /*
+     let request = MKGeocodingRequest(addressString: address)
+     do {
+     if let mapItem = try await request?.mapItems.first {
+     print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
+     print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
+     addressToMapItemCache[address] = mapItem
+     return mapItem
+     }
+     } catch {
+     logger.error("ljw address=\(address) \(Date()) \(#file):\(#function):\(#line)")
+     print(error.localizedDescription)
+     }
+     */
+
+    return nil
   }
 
-  func mapItemFor(activity: Activity) async -> MKMapItem? {
-    guard let mapItem = await mapItem(from: activity.address) else {
-      return nil
-    }
-    mapItem.name = activity.name
-    if let idx = uiData.activities.firstIndex(of: activity) {
-      uiData.activities[idx].mapItem = mapItem
-    }
-    return mapItem
-  }
-
-  nonisolated
-  func select(activity: MoofuslistViewModel.Activity) {
-    Task.detached { [weak self] in
-      guard let self else { return }
-      await sendActivity(activity: activity)
-      await navigate(to: .detail)
-    }
-  }
-
-  func loadMapItemsForActivities() async {
-    var mapItemUpdated = false
-    for activity in uiData.activities {
-      guard !activity.address.isEmpty else { continue }
-      guard activity.mapItem == nil else { continue }
-      if let item = await mapItem(from: activity.address) {
-        if let idx = uiData.activities.firstIndex(where: { $0.id == activity.id }) {
-          uiData.activities[idx].mapItem = item
-          mapItemUpdated = true
-        }
-      }
-    }
-    if mapItemUpdated {
-      sendLoaded(loading: uiData.loading, processing: uiData.processing)
-    }
-  }
-
-  nonisolated
-  func searchCityState(_ cityState: String) {
+  nonisolated func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       guard let self else { return }
       await sendProcessing(processing: true)
-      if let mapItem = await mapItem(from: cityState) {
+      if let mapItem = await mapItemFrom(address: cityState) {
         await handle(mapItem: mapItem)
       } else {
         logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
@@ -454,12 +336,19 @@ extension MoofuslistSource {
     }
   }
 
-  nonisolated
-  func searchCurrentLocation() {
+  nonisolated func searchCurrentLocation() {
     Task.detached { [weak self] in
       guard let self else { return }
       await sendProcessing(processing: true)
       await locationManager.start(maxCount: 1)
+    }
+  }
+
+  nonisolated func selectActivity(id: UUID) {
+    Task.detached { [weak self] in
+      guard let self else { return }
+      await send(message: .selectActivity(id))
+      await navigate(to: .detail)
     }
   }
 }
