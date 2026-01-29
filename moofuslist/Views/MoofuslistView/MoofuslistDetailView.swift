@@ -20,8 +20,6 @@ struct MoofuslistDetailView: View {
   @State var timedAction = TimedAction()
 
   var body: some View {
-    let _ = print("ljw \(Date()) \(#file):\(#function):\(#line)")
-    
     ZStack {
       Color(.listBackground).ignoresSafeArea()
 
@@ -69,7 +67,6 @@ struct MoofuslistDetailView: View {
                 Button {
                   source.changeFavorite(id: activity.id)
                 } label: {
-                  let _ = print("ljw id=\(activity.id) isFavorite=\(activity.isFavorite) \(Date()) \(#file):\(#function):\(#line)")
                   Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
                     .fontSizeForegroundStyle(size: 24, color: activity.isFavorite ? .accent : .gray)
                 }

@@ -132,7 +132,6 @@ extension LocationManager {
           }
         }
       } catch {
-        print("ljw \(Date()) \(#file):\(#function):\(#line)")
         print("error=\(error)")
         assertionFailure() // TODO: handle error
       }

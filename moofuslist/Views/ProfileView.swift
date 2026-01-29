@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ProfileView: View {
-    let themeColor = Color(red: 255/255, green: 129/255, blue: 66/255)
-
     var body: some View {
         ZStack {
             Color(red: 0.98, green: 0.98, blue: 0.99).ignoresSafeArea()
@@ -18,21 +16,18 @@ struct ProfileView: View {
                 // Profile Header
                 VStack(spacing: 16) {
                     Circle()
-                        .fill(themeColor.opacity(0.2))
+                    .fill(.accent.opacity(0.2))
                         .overlay(
                             Image(systemName: "person.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(themeColor)
+                              .fontSizeForegroundStyle(size: 40, color: .accent)
                         )
                         .frame(width: 80, height: 80)
 
                     VStack(spacing: 4) {
                         Text("Sarah Johnson")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
+                        .fontSizeWeightForegroundStyle(size: 20, weight: .bold, color: .black)
                         Text("San Francisco, CA")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                        .fontSizeForegroundStyle(size: 14, color: .gray)
                     }
                 }
                 .padding(24)
@@ -69,19 +64,15 @@ struct StatCard: View {
     let icon: String
     let count: String
     let label: String
-    let themeColor = Color(red: 255/255, green: 129/255, blue: 66/255)
 
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(themeColor)
+            .fontSizeForegroundStyle(size: 20, color: .accent)
             Text(count)
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.black)
+            .fontSizeWeightForegroundStyle(size: 18, weight: .bold, color: .black)
             Text(label)
-                .font(.system(size: 12))
-                .foregroundColor(.gray)
+            .fontSizeForegroundStyle(size: 12, color: .gray)
         }
         .frame(maxWidth: .infinity)
         .padding(16)
@@ -95,30 +86,25 @@ struct ProfileButton: View {
     let icon: String
     let label: String
     let value: String?
-    let themeColor = Color(red: 255/255, green: 129/255, blue: 66/255)
 
     var body: some View {
         HStack {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(themeColor)
-                .frame(width: 24)
+          Image(systemName: icon)
+            .fontSizeWeightForegroundStyle(size: 16, weight: .semibold, color: .accent)
+            .frame(width: 24)
 
             Text(label)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.black)
+            .fontSizeWeightForegroundStyle(size: 16, weight: .medium, color: .black)
 
             Spacer()
 
             if let value = value {
                 Text(value)
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                .fontSizeForegroundStyle(size: 14, color: .gray)
             }
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
+            .fontSizeWeightForegroundStyle(size: 14, weight: .semibold, color: .gray)
         }
         .padding(16)
         .background(Color.white)
@@ -126,3 +112,8 @@ struct ProfileButton: View {
     }
 }
 
+
+
+#Preview {
+    ProfileView()
+}

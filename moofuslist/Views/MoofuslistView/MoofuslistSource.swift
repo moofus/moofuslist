@@ -69,9 +69,9 @@ final actor MoofuslistSource {
     }
 
     Task { @MainActor in
-      @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
+      @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
 
-      for await message in appCoordinator.stream {
+      for await message in moofuslistCoordinator.stream {
         switch message {
         case .content:
           print("source content")
@@ -262,9 +262,9 @@ extension MoofuslistSource {
   }
 
   @MainActor
-  private func navigate(to route: AppCoordinator.Route) {
-    @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
-    appCoordinator.navigate(to: route)
+  private func navigate(to route: MoofuslistCoordinator.Route) {
+    @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
+    moofuslistCoordinator.navigate(to: route)
   }
 }
 

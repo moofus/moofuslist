@@ -19,8 +19,8 @@ struct moofuslistApp: App {
 }
 
 extension Container {
-  @MainActor var appCoordinator: Factory<AppCoordinator> {
-    self { @MainActor in AppCoordinator() }.singleton
+  @MainActor var moofuslistCoordinator: Factory<MoofuslistCoordinator> {
+    self { @MainActor in MoofuslistCoordinator() }.singleton
   }
   var aiManager: Factory<AIManager> {
     self { AIManager() }.singleton

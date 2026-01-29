@@ -7,15 +7,12 @@
 
 import SwiftUI
 
-struct FindActivitiesButton: View {
+struct GPSPinButton: View {
   private let action: (() async -> ())?
   private let padding: Double
-  private let text: String // ljw hardcode? localize
+  private let text: String
 
-  init(text: String,
-       padding: Double = 16,
-       action: (() -> ())? = nil
-  ) {
+  init(text: String, padding: Double = 16, action: (() -> ())? = nil) {
     self.action = action
     self.padding = padding
     self.text = text
@@ -40,5 +37,5 @@ struct FindActivitiesButton: View {
 }
 
 #Preview {
-  FindActivitiesButton(text: "Find Nearby Activities", padding: 5)
+  GPSPinButton(text: "Find Nearby Activities", padding: 5)
 }

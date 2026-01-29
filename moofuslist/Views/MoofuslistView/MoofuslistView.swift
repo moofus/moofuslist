@@ -10,22 +10,22 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistView: View {
-  @Injected(\.appCoordinator) var appCoordinator: AppCoordinator
+  @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
   @State private var searchText: String = ""
   @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
 
   var body: some View {
-    @Bindable var appCoordinator = appCoordinator
+    @Bindable var moofuslistCoordinator = moofuslistCoordinator
     @Bindable var viewModel = viewModel
 
-    NavigationSplitView(preferredCompactColumn: $appCoordinator.splitViewColum) {
+    NavigationSplitView(preferredCompactColumn: $moofuslistCoordinator.splitViewColum) {
       VStack {
         MoofuslistHeaderView()
 
         MoofuslistMapView(item: viewModel.mapItem, position: $viewModel.mapPosition)
 
-        FindActivitiesButton(text: "Search Current Location", padding: 5) {
+        GPSPinButton(text: "Search Current Location", padding: 5) {
           searchText = ""
           source.searchCurrentLocation()
         }
