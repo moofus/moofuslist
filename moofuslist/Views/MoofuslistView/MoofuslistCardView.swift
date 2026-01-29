@@ -19,33 +19,27 @@ struct MoofuslistCardView: View {
     VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 12) {
         Image(systemName: activity.imageNames[0])
-          .font(.system(size: 32))
-          .foregroundColor(.accent)
+          .fontSizeForegroundStyle(size: 32, color: .accent)
           .frame(width: 60, height: 60)
           .background(Color(red: 1, green: 0.9, blue: 0.8))
           .cornerRadius(12)
 
         VStack(alignment: .leading, spacing: 4) {
           Text(activity.name)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.black)
+            .fontSizeWeightForegroundStyle(size: 16, weight: .semibold, color: .black)
 
           HStack(spacing: 8) {
             Image(systemName: "star.fill")
-              .font(.system(size: 12))
-              .foregroundColor(.orange)
+              .fontSizeForegroundStyle(size: 12, color: .orange)
             Text("\(String(format: "%.1f", activity.rating)) (\(activity.reviews))")
-              .font(.system(size: 12, weight: .medium))
-              .foregroundColor(.gray)
+              .fontSizeWeightForegroundStyle(size: 12, weight: .medium, color: .gray)
           }
 
           HStack(spacing: 8) {
             Image(systemName: "location.fill")
-              .font(.system(size: 10))
-              .foregroundColor(.gray)
+              .fontSizeForegroundStyle(size: 10, color: .gray)
             Text("\(String(format: "%.1f", activity.distance)) mi away")
-              .font(.system(size: 12))
-              .foregroundColor(.gray)
+              .fontSizeForegroundStyle(size: 12, color: .gray)
           }
         }
 
@@ -55,14 +49,12 @@ struct MoofuslistCardView: View {
           source.changeFavorite(id: activity.id)
         } label: {
           Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
-            .font(.system(size: 18))
-            .foregroundColor(activity.isFavorite ? .accent : .gray)
+            .fontSizeForegroundStyle(size: 18, color: activity.isFavorite ? .accent : .gray)
         }
       }
 
       Text(activity.address)
-        .font(.system(size: 12))
-        .foregroundColor(.gray)
+        .fontSizeForegroundStyle(size: 12, color: .gray)
     }
     .padding(12)
     .background(Color.white)

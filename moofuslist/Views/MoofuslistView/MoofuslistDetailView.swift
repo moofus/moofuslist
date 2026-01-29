@@ -32,8 +32,7 @@ struct MoofuslistDetailView: View {
               TabView(selection: $selectedImageIdx) {
                 ForEach(0..<activity.imageNames.count, id: \.self) { idx in
                   Image(systemName: activity.imageNames[idx])
-                    .font(.system(size: 80))
-                    .foregroundColor(.accent)
+                    .fontSizeForegroundStyle(size: 80, color: .accent)
                     .tag(idx)
                 }
               }
@@ -50,21 +49,18 @@ struct MoofuslistDetailView: View {
               HStack {
                 VStack(alignment: .leading, spacing: 8) {
                   Text(activity.name)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.black)
+                    .fontSizeWeightForegroundStyle(size: 24, weight: .bold, color: .black)
 
                   HStack(spacing: 12) {
                     HStack(spacing: 4) {
                       Image(systemName: "star.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.orange)
+                        .fontSizeForegroundStyle(size: 14, color: .orange)
                       Text("\(String(format: "%.1f", activity.rating))")
                         .font(.system(size: 14, weight: .semibold))
                     }
 
                     Text("(\(activity.reviews) reviews)")
-                      .font(.system(size: 12))
-                      .foregroundColor(.gray)
+                      .fontSizeForegroundStyle(size: 12, color: .gray)
                   }
                 }
 
@@ -75,8 +71,7 @@ struct MoofuslistDetailView: View {
                 } label: {
                   let _ = print("ljw id=\(activity.id) isFavorite=\(activity.isFavorite) \(Date()) \(#file):\(#function):\(#line)")
                   Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
-                    .font(.system(size: 24))
-                    .foregroundColor(activity.isFavorite ? .accent : .gray)
+                    .fontSizeForegroundStyle(size: 24, color: activity.isFavorite ? .accent : .gray)
                 }
               }
 
@@ -132,12 +127,10 @@ struct MoofuslistDetailView: View {
               // Description
               VStack(alignment: .leading, spacing: 8) {
                 Text("About")
-                  .font(.system(size: 16, weight: .semibold))
-                  .foregroundColor(.black)
+                  .fontSizeWeightForegroundStyle(size: 16, weight: .semibold, color: .black)
 
                 Text(activity.somethingInteresting)
-                  .font(.system(size: 14))
-                  .foregroundColor(.gray)
+                  .fontSizeForegroundStyle(size: 14, color: .gray)
                   .lineSpacing(2)
               }
             }
@@ -223,17 +216,14 @@ struct InfoRow: View {
   var body: some View {
     HStack(spacing: 12) {
       Image(systemName: icon)
-        .font(.system(size: 16, weight: .semibold))
-        .foregroundColor(.accent)
+        .fontSizeWeightForegroundStyle(size: 16, weight: .semibold, color: .accent)
         .frame(width: 24)
       
       VStack(alignment: .leading, spacing: 4) {
         Text(title)
-          .font(.system(size: 12, weight: .medium))
-          .foregroundColor(.gray)
+          .fontSizeWeightForegroundStyle(size: 12, weight: .medium, color: .gray)
         Text(value)
-          .font(.system(size: 14, weight: .semibold))
-          .foregroundColor(.black)
+          .fontSizeWeightForegroundStyle(size: 14, weight: .semibold, color: .black)
       }
       
       Spacer()
