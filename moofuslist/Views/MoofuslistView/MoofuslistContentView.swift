@@ -38,11 +38,9 @@ struct MoofuslistContentView: View {
       Color(.listBackground).ignoresSafeArea()
 
       VStack(spacing: 0) {
-        // Header
         VStack(alignment: .leading, spacing: 16) {
           Text("Activities near \(viewModel.searchedCityState)")
-            .font(.system(size: 20, weight: .bold))
-            .foregroundColor(.black)
+            .fontSizeWeightForegroundStyle(size: 20, weight: .bold, color: .black)
 
           HStack(spacing: 10) {
             Menu {
@@ -67,88 +65,104 @@ struct MoofuslistContentView: View {
 
             Spacer()
 
-            Button {
-              Task {
-                showSheet = true
-                await source.loadMapItems()
-              }
-            } label: {
-              HStack {
-                Image(systemName: "map")
-                Text("Map")
-                  .font(.system(size: 14, weight: .medium))
-              }
-              .foregroundColor(.accent)
-              .padding(8)
-              .background(Color.white)
-              .cornerRadius(8)
-              .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                  .stroke(.accent.opacity(0.3), lineWidth: 1)
-              )
-            }
+            MapButtonView(showSheet: $showSheet, source: source)
           }
-        }
-        .padding(20)
-        .background(Color.white)
+          .padding(20)
+          .background(Color.white)
 
-        ScrollView {
-          VStack(spacing: 12) {
-            ForEach(sortedActivities, id: \.id) { activity in // TODO: research
-              if let index = viewModel.activities.firstIndex(where: { $0.id == activity.id }) {
-                MoofuslistCardView(activity: viewModel.activities[index])
+          ScrollView {
+            VStack(spacing: 12) {
+              ForEach(sortedActivities, id: \.id) { activity in
+                MoofuslistCardView(activity: activity)
                   .onTapGesture {
                     source.selectActivity(id: activity.id)
                   }
               }
             }
+            .padding(16)
           }
-          .padding(16)
         }
-      }
-      .sheet(isPresented: $showSheet) {
-        ZStack(alignment: .topTrailing) {
-          Map {
-            ForEach(viewModel.activities, id: \.id) { activity in
-              if let mapItem = activity.mapItem {
-                Marker(item: mapItem)
-                  .tint(.accent)
+        .sheet(isPresented: $showSheet) {
+          ZStack(alignment: .topTrailing) {
+            Map {
+              ForEach(viewModel.activities, id: \.id) { activity in
+                if let mapItem = activity.mapItem {
+                  Marker(item: mapItem)
+                    .tint(.accent)
+                }
               }
             }
-          }
 
-          Button {
-            withAnimation { showSheet = false }
-          } label: {
-            Image(systemName: "xmark")
-              .foregroundColor(.primary)
-              .padding()
-              .background(Color.white.opacity(0.8))
-              .clipShape(Circle())
+            Button {
+              withAnimation { showSheet = false }
+            } label: {
+              Image(systemName: "xmark")
+                .foregroundColor(.primary)
+                .padding()
+                .background(Color.white.opacity(0.8))
+                .clipShape(Circle())
+            }
+            .padding()
           }
-          .padding()
         }
+        .presentationDetents([.medium, .large])
+        .disabled(viewModel.loading)
+
       }
-      .presentationDetents([.medium, .large])
-      .disabled(viewModel.loading)
+      .navigationBarTitleDisplayMode(.inline)
 
       if viewModel.loading {
         ZStack {
           Color(.systemGray6).ignoresSafeArea()
 
-          ZStack {
-            RoundedRectangle(cornerRadius: 15)
-              .fill(Color(.secondarySystemBackground))
-              .shadow(radius: 10)
-            
-            ProgressView("Loading Activities: \(viewModel.activities.count)")
-              .foregroundStyle(Color.primary)
+          RoundedRectangle(cornerRadius: 15)
+            .fill(Color(.secondarySystemBackground))
+            .shadow(radius: 10)
+
+          ProgressView(value: Double(viewModel.activities.count) / 9.0) {
+            Text("\(getPercent())% progress")
           }
+          .foregroundStyle(Color.primary)
+          .padding()
+          .cornerRadius(6)
         }
-        .frame(width: 240, height: 130)
+        .padding()
+        .frame(width: 180, height: 100)
       }
     }
-    .navigationBarTitleDisplayMode(.inline)
+  }
+
+  private func getPercent() -> Int {
+    viewModel.activities.count * 100 / 9
+  }
+
+  private struct MapButtonView: View {
+    @Binding var showSheet: Bool
+    var source: MoofuslistSource
+
+    var body: some View {
+
+      Button {
+        Task {
+          showSheet = true
+          await source.loadMapItems()
+        }
+      } label: {
+        HStack {
+          Image(systemName: "map")
+          Text("Map")
+            .font(.system(size: 14, weight: .medium))
+        }
+        .foregroundColor(.accent)
+        .padding(8)
+        .background(Color.white)
+        .cornerRadius(8)
+        .overlay(
+          RoundedRectangle(cornerRadius: 8)
+            .stroke(.accent.opacity(0.3), lineWidth: 1)
+        )
+      }
+    }
   }
 }
 

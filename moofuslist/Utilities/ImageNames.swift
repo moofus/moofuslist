@@ -45,6 +45,7 @@ actor ImageNames {
     "comedy clubs": ["person.wave.2.fill"],
     "concert hall": ["music.note.house.fill","music.note.list"],
     "concert halls": ["music.note.house.fill","music.note.list"],
+    "dam": ["water.waves","bolt.fill"],
     "dance clubs": ["figure.socialdance"],
     "dining": ["fork.knife"],
     "district": ["storefront.fill"],
@@ -153,8 +154,6 @@ actor ImageNames {
     "zoo": ["pawprint.fill","tortoise.fill","bird.fill"],
     "zoos": ["pawprint.fill","tortoise.fill","bird.fill"]
   ]
-
-  init() { }
 
   func imageNames(for activity: AIManager.Activity) async -> [String] {
     print("------------------------------")

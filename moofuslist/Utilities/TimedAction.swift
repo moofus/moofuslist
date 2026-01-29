@@ -1,5 +1,5 @@
 //
-//  TimedActions.swift
+//  TimedAction.swift
 //  Moofuslist
 //
 //  Created by Lamar Williams III on 1/14/26.
@@ -21,7 +21,6 @@ class TimedAction {
     self.maxCount = maxCount
     count = UInt.zero
 
-    print("\(Date()) calling stop")
     stop()
 
     task = Task {
@@ -40,7 +39,6 @@ class TimedAction {
   }
 
   func stop() {
-    print("stop")
     task?.cancel()
     task = nil
   }

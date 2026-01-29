@@ -16,6 +16,7 @@ extension LocationManager {
     case authorizationDeniedGlobally
     case authorizationRestricted
     case locationUnavailable
+    case unknown
 
     var failureReason: String? {
       switch self {
@@ -24,6 +25,7 @@ extension LocationManager {
       case .authorizationDeniedGlobally: "Location Services are disabled for this device."
       case .authorizationRestricted: "Moofuslist can't access your location. Do you have Parental Controls enabled?"
       case .locationUnavailable: "Location Unabailable"
+      case .unknown: "Unknown Error"
       }
     }
 
@@ -37,6 +39,7 @@ extension LocationManager {
       case .authorizationDeniedGlobally: "Please enable Location Services by going to Settings -> Privacy & Security"
       case .authorizationRestricted: "Maybe disable Parental Controls?"
       case .locationUnavailable: "Location Unabailable"
+      case .unknown: "Unknown Error"
       }
     }
   }
@@ -48,12 +51,11 @@ extension LocationManager {
 }
 
 actor LocationManager {
-  let stream: AsyncStream<Message>
-
   private let continuation: AsyncStream<Message>.Continuation
   private(set) var count = 0
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
   private var maxCount = Int.max
+  let stream: AsyncStream<Message>
   private var task: Task<Void,Never>? = nil
 
   private(set) var started = false {
@@ -84,8 +86,8 @@ extension LocationManager {
       do {
         let liveUpdates = CLLocationUpdate.liveUpdates()
         for try await update in liveUpdates {
-          if Task.isCancelled { print("ljw break"); break }
-          if !started { print("ljw started break"); break }
+          if Task.isCancelled { break }
+          if !started { break }
           if let location = update.location {
             continuation.yield(.location(location))
             count += 1
@@ -133,7 +135,8 @@ extension LocationManager {
         }
       } catch {
         print("error=\(error)")
-        assertionFailure() // TODO: handle error
+        assertionFailure()
+        continuation.yield(.error(.unknown))
       }
       started = false
       logger.info("LocationManager stopped")
