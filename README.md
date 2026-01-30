@@ -1,6 +1,6 @@
 
 # Moofuslist 📍
-#### An AI-powered travel application that provides a gathered list of places to go and things to do for any city in the United States.
+#### An AI-powered application that provides a list of places to go and things to do for any city in the United States.
 
 ### 🏛️ Project Purpose & Design Philosophy
 #### This project was built to demonstrate my specific approach to how iOS software applications should be designed and implemented. It prioritizes a clean design to ensure the app is:
@@ -31,7 +31,7 @@
 <img width="262" height="500" alt="Screenshot1 2026-01-30 at 10 39 42 AM" src="https://github.com/user-attachments/assets/0a7fbe61-43b2-493b-8e9c-aed7b58b7455" />
 <img width="262" height="500" alt="Screenshot2 2026-01-30 at 10 39 54 AM" src="https://github.com/user-attachments/assets/93305547-379f-45cb-b924-7f193c9b06ed" />
 <img width="262" height="500" alt="Screenshot3 2026-01-30 at 10 40 03 AM" src="https://github.com/user-attachments/assets/5fc37219-ef39-4634-b02a-37888a25bcb9" />
-<img width="262" height="500" alt="Screenshot4 2026-01-30 at 10 40 22 AM" src="https://github.com/user-attachments/assets/5091c893-20ee-460a-abc3-d77a740c2358" />
+<img width="262" height="500" alt="Screenshot4 2026-01-30 at 12 53 12 PM" src="https://github.com/user-attachments/assets/23f8b9a9-9545-4458-a5ec-11ec60a8a0c1" />
 <img width="262" height="500" alt="Screenshot5 2026-01-30 at 10 40 36 AM" src="https://github.com/user-attachments/assets/277a39a8-990f-4df7-b037-37648231d2e7" />
 
 
