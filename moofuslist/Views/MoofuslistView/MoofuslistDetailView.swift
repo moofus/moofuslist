@@ -134,6 +134,9 @@ struct MoofuslistDetailView: View {
             .padding(20)
           }
         }
+        .onAppear {
+          selectedImageIdx = 0
+        }
 
         if activity.imageNames.count > 1 {
           VStack {
