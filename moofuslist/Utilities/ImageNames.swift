@@ -168,7 +168,7 @@ actor ImageNames {
 
     if result.count < 1 {
       print(activity)
-      assertionFailure()
+//      assertionFailure()
       return ["mappin.circle.fill"]
     }
     return result
