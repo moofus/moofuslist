@@ -1,13 +1,13 @@
 
-Moofuslist 📍
-Moofuslist is an AI-powered travel application that provides a gathered list of places to go and things to do for any city in the United States.
+# Moofuslist 📍
+## An AI-powered travel application that provides a gathered list of places to go and things to do for any city in the United States.
 ------------------------------------------------------------------------------------------------------------------------------------------------
-🏛️ Project Purpose & Design Philosophy
-This project was built to demonstrate my specific approach to how iOS software applications should be designed and implemented. It prioritizes a clean design to ensure the app is:
+# 🏛️ Project Purpose & Design Philosophy
+## This project was built to demonstrate my specific approach to how iOS software applications should be designed and implemented. It prioritizes a clean design to ensure the app is:
 
-Easy to understand.
-Easily maintainable.
-Highly scalable.
+* Easy to understand.
+* Easily maintainable.
+* Highly scalable.
 
 🛠️ Technical Stack
 This application leverages the latest Apple frameworks to provide a modern, high-performance user experience.
