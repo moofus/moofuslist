@@ -47,7 +47,7 @@ actor AIManager {
   enum Message {
     case begin
     case end
-    case error(String)
+    case error(LocalizedError)
     case loading([Activity])
   }
 

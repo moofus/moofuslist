@@ -38,7 +38,6 @@ final actor MoofuslistSource {
   @Injected(\.locationManager) private var locationManager: LocationManager
   private var storageManager: StorageManager
 
-  private var activities = [Activity]()
   private var addressToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
@@ -56,7 +55,7 @@ final actor MoofuslistSource {
       let container = try ModelContainer(for: schema, configurations: [configuration])
       storageManager = Container.shared.storageManager(container)
     } catch {
-      print(error)
+      logger.error("\(error)")
       fatalError()
     }
 
@@ -102,8 +101,8 @@ extension MoofuslistSource {
   }
 
   private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
-    self.activities = await convert(activities: activities, location: location)
-    send(message: .loading(self.activities, loading, processing))
+    let activities = await convert(activities: activities, location: location)
+    send(message: .loading(activities, loading, processing))
   }
 
   private func sendProcessing(processing: Bool) {
@@ -127,8 +126,13 @@ extension MoofuslistSource {
         await navigate(to: .content)
       case .end:
         send(message: .loaded(false))
-      case .error(_):
-        assertionFailure() // TODO: handle
+      case .error(let error):
+        if let description = error.errorDescription, let recoverySuggestion = error.recoverySuggestion {
+          sendError(description: description, recoverySuggestion: recoverySuggestion)
+        } else {
+          assertionFailure()
+          sendError()
+        }
       case .loading(let activities):
         await sendLoading(activities: activities, loading: true, processing: false)
       }
@@ -146,6 +150,7 @@ extension MoofuslistSource {
         } else if let description = error.errorDescription {
           sendError(description: description)
         } else {
+          assertionFailure()
           sendError()
         }
       case .location(let location):
@@ -257,7 +262,7 @@ extension MoofuslistSource {
       }
     } else {
       assertionFailure()
-      // TODO: handle
+      sendError()
     }
   }
 
@@ -330,7 +335,7 @@ extension MoofuslistSource {
       if let mapItem = await mapItemFrom(address: cityState) {
         await handle(mapItem: mapItem)
       } else {
-        logger.error("ljw cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
+        logger.error("cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
         await sendInputError(inputError: true)
       }
     }

@@ -16,6 +16,7 @@ struct ErrorView: View {
       HStack {
         Image(systemName: "exclamationmark.triangle")
           .resizable()
+          .foregroundStyle(Color.red)
           .frame(width: 50, height: 50)
         Text(errorText)
       }

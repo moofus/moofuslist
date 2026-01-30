@@ -139,6 +139,7 @@ extension MoofuslistViewModel {
     if let idx = activities.firstIndex(where: { $0.id == id }) {
       selectedActivity = activities[idx]
     } else {
+      print("activity.id=\(id) not found \(Date()) \(#file):\(#function):\(#line)")
       assertionFailure() // TODO: handle this
     }
   }
