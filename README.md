@@ -27,15 +27,15 @@
 + Contextual Awareness: Integrates Core Location and MapKit to provide relevant, location-based information.
 + Architectural Excellence: Designed with a focus on code readability and long-term maintenance.
 
-#### 📸 Screenshots
+### 📸 Screenshots
 <img width="262" height="500" alt="Screenshot1 2026-01-30 at 10 39 42 AM" src="https://github.com/user-attachments/assets/0a7fbe61-43b2-493b-8e9c-aed7b58b7455" />
 <img width="262" height="500" alt="Screenshot2 2026-01-30 at 10 39 54 AM" src="https://github.com/user-attachments/assets/93305547-379f-45cb-b924-7f193c9b06ed" />
 <img width="262" height="500" alt="Screenshot3 2026-01-30 at 10 40 03 AM" src="https://github.com/user-attachments/assets/5fc37219-ef39-4634-b02a-37888a25bcb9" />
 <img width="262" height="500" alt="Screenshot4 2026-01-30 at 10 40 22 AM" src="https://github.com/user-attachments/assets/5091c893-20ee-460a-abc3-d77a740c2358" />
-<img width="568" height="1084" alt="Screenshot5 2026-01-30 at 10 40 36 AM" src="https://github.com/user-attachments/assets/277a39a8-990f-4df7-b037-37648231d2e7" />
+<img width="262" height="500" alt="Screenshot5 2026-01-30 at 10 40 36 AM" src="https://github.com/user-attachments/assets/277a39a8-990f-4df7-b037-37648231d2e7" />
 
 
-#### 🏗️ Requirements & Setup
+### 🏗️ Requirements & Setup
 * iOS 18.0+ (Required for Apple Intelligence and SwiftData features).
 * Xcode 16.0+.
 * Swift 6.0.
@@ -44,7 +44,7 @@
 * Build and run on an iOS Simulator or Device.
 
 
-#### 📬 Contact
+### 📬 Contact
 * Developer: Lamar Williams
 * Email: moofusljw@gmail.com
 * LinkedIn: https://www.linkedin.com/in/moofus/
