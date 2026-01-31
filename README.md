@@ -11,13 +11,13 @@
 ### 🛠️ Technical Stack
 #### This application leverages the latest Apple frameworks to provide a modern, high-performance user experience.
 **Feature**         **Technology**          **Implement Detail**
-- UI Framework    SwiftUI	            Used for all UI elements to ensure a declarative and responsive interface.
-- AI Integration  Apple Intelligence  Leveraged to intelligently retrieve activities for the user.
-- Concurrency	    Swift Concurrency	  Implemented in place of Combine for modern, efficient asynchronous code.
-- Persistence	    SwiftData	          Utilized as the primary data storage solution.
-- Communication	  AsyncStreams	      Used for sending messages throughout the application.
-- Location	      Core Location	      Used for retrieving the user's current location.
-- Mapping	        MapKit	            MK methods are utilized for various geocoding requests.
+- UI Framework:     SwiftUI	            Used for all UI elements to ensure a declarative and responsive interface.
+- AI Integration:   Apple Intelligence  Leveraged to intelligently retrieve activities for the user.
+- Concurrency:      Swift Concurrency	  Implemented in place of Combine for modern, efficient asynchronous code.
+- Persistence:      SwiftData	          Utilized as the primary data storage solution.
+- Communication:    AsyncStreams	      Used for sending messages throughout the application.
+- Location:         Core Location	      Used for retrieving the user's current location.
+- Mapping:          MapKit	            MK methods are utilized for various geocoding requests.
 
 ### 🏛️ Architectural Overview
 #### The architecture of Moofuslist is built to demonstrate a modern, decoupled approach to iOS development. By moving away from legacy patterns, the project achieves a high degree of testability and scalability.
