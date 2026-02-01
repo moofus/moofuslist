@@ -174,11 +174,6 @@ extension MoofuslistSource {
       if let request = MKReverseGeocodingRequest(location: location) {
         do {
           let mapItems = try await request.mapItems
-          if mapItems.count > 1 { // TODO: remove
-            print("mapItems.count=\(mapItems.count)")
-            print(mapItems)
-            assertionFailure()
-          }
           guard let item = mapItems.first else {
             logger.error("MapItem not found \(#file):\(#line)")
             sendError(description: "MapItem not found")

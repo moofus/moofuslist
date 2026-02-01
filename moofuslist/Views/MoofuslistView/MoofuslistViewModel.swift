@@ -87,7 +87,7 @@ extension MoofuslistViewModel {
       activities[idx].isFavorite.toggle()
       selectedActivity = activities[idx]
     } else {
-      assertionFailure() // TODO: handle this
+      assertionFailure()
     }
   }
 
@@ -140,7 +140,7 @@ extension MoofuslistViewModel {
       selectedActivity = activities[idx]
     } else {
       print("activity.id=\(id) not found \(Date()) \(#file):\(#function):\(#line)")
-      assertionFailure() // TODO: handle this
+      assertionFailure()
     }
   }
 }

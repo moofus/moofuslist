@@ -41,6 +41,7 @@ struct MoofuslistContentView: View {
         VStack(alignment: .leading, spacing: 16) {
           Text("Activities near \(viewModel.searchedCityState)")
             .fontSizeWeightForegroundStyle(size: 20, weight: .bold, color: .black)
+            .padding(.leading, 16)
 
           HStack(spacing: 10) {
             Menu {

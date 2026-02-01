@@ -12,6 +12,8 @@ import MapKit
 
 struct MoofuslistDetailView: View {
   @AppStorage("autoManualSwitch") private var autoManualSwitch = true // initially switch automatically
+  @State var errorText = ""
+  @State private var haveError = false
   @State private var selectedImageIdx = 0
   @Injected(\.moofuslistSource) private var source: MoofuslistSource
   @Bindable var viewModel: MoofuslistViewModel
@@ -86,7 +88,8 @@ struct MoofuslistDetailView: View {
                      UIApplication.shared.canOpenURL(url) {
                       UIApplication.shared.open(url)
                   } else {
-                    // TODO: handle error
+                    haveError = true
+                    errorText = "Could not call phone number: \(activity.phoneNumber)"
                   }
                 } label: {
                   HStack {
@@ -160,6 +163,9 @@ struct MoofuslistDetailView: View {
         Text("Select an activity")
       }
     }
+    .alert("Error", isPresented: $haveError) {
+      ErrorView(errorText: errorText)
+    }
   }
 
   private func startTimedAction() {
@@ -197,7 +203,7 @@ struct MoofuslistDetailView: View {
       } else if let item = await source.mapItemFrom(address: activity.address) {
         mapItem = item
       } else {
-        logger.error("Failed to mapItem") // TODO: handle
+        logger.error("Failed to mapItem for address=\(activity.address)") 
         assertionFailure()
         return
       }
