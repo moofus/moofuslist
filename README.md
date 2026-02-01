@@ -32,8 +32,7 @@
 <img width="262" height="500" alt="Screenshot2 2026-01-30 at 10 39 54 AM" src="https://github.com/user-attachments/assets/93305547-379f-45cb-b924-7f193c9b06ed" />
 <img width="262" height="500" alt="Screenshot3 2026-01-30 at 12 55 56 PM" src="https://github.com/user-attachments/assets/7bef53ac-1073-4e04-b356-f66c7f7c98ca" />
 <img width="262" height="500" alt="Screenshot4 2026-01-30 at 12 53 12 PM" src="https://github.com/user-attachments/assets/23f8b9a9-9545-4458-a5ec-11ec60a8a0c1" />
-<img width="262" height="500" alt="Screenshot5 2026-01-30 at 10 40 36 AM" src="https://github.com/user-attachments/assets/277a39a8-990f-4df7-b037-37648231d2e7" />
-
+<img width="262" height="500" alt="Screenshot5 2026-01-30 at 10 40 36 AM" src="https://github.com/user-attachments/assets/c2609e29-18ce-46ac-8a23-8fbfe8db5e78" />
 
 ### 🏗️ Requirements & Setup
 * iOS 18.0+ (Required for Apple Intelligence and SwiftData features).
