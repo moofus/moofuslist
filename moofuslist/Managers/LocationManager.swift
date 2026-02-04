@@ -98,7 +98,7 @@ extension LocationManager {
           }
           if await update.authorizationRestricted {
             continuation.yield(.error(.authorizationRestricted))
-            logger.info("Location authorizationDenied, maybe disable Parental Controls?")
+            logger.info("Location authorizationRestricted, maybe disable Parental Controls?")
             break
           }
           if await update.insufficientlyInUse {
@@ -106,7 +106,7 @@ extension LocationManager {
             logger.info("Location insufficientlyInUse")
           }
           if await update.locationUnavailable {
-            continuation.yield(.error(.authorizationRestricted))
+            continuation.yield(.error(.locationUnavailable))
             logger.info("Location locationUnavailable")
             break
           }
