@@ -121,7 +121,7 @@ actor AIManager {
   let stream: AsyncStream<Message>
 
   init() {
-    (stream, continuation) = AsyncStream.makeStream(of: Message.self)
+    (stream, continuation) = AsyncStream<Message>.makeStream()
   }
 }
 

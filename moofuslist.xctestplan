@@ -1,0 +1,46 @@
+{
+  "configurations" : [
+    {
+      "id" : "46C8EB81-537E-4BB6-B861-CD2EEBFC319A",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:moofuslist.xcodeproj",
+      "identifier" : "2AC7B4A12EF9E40800A8401A",
+      "name" : "moofuslist"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:moofuslist.xcodeproj",
+        "identifier" : "2AC7B4AE2EF9E40900A8401A",
+        "name" : "moofuslistTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:moofuslist.xcodeproj",
+        "identifier" : "2AC7B4B82EF9E40900A8401A",
+        "name" : "moofuslistUITests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:moofuslist.xcodeproj",
+        "identifier" : "2A0937072F32661E00911D42",
+        "name" : "LocationManagerTests"
+      }
+    }
+  ],
+  "version" : 1
+}

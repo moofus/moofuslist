@@ -22,7 +22,7 @@ class MoofuslistCoordinator {
   var splitViewColum: NavigationSplitViewColumn
 
   init() {
-    (stream, continuation) = AsyncStream.makeStream(of: Route.self)
+    (stream, continuation) = AsyncStream<Route>.makeStream()
     self.splitViewColum = .sidebar
   }
 

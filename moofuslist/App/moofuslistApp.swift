@@ -5,6 +5,7 @@
 //  Created by Lamar Williams III on 12/22/25.
 //
 
+import CoreLocation
 import FactoryKit
 import SwiftData
 import SwiftUI
@@ -19,14 +20,17 @@ struct moofuslistApp: App {
 }
 
 extension Container {
-  @MainActor var moofuslistCoordinator: Factory<MoofuslistCoordinator> {
-    self { @MainActor in MoofuslistCoordinator() }.singleton
-  }
   var aiManager: Factory<AIManager> {
     self { AIManager() }.singleton
   }
+  var liveUpdates: Factory<any LocationUpdateStream> {
+    self { CLLocationUpdate.liveUpdates() }
+  }
   var locationManager: Factory<LocationManager> {
     self { LocationManager() }.singleton
+  }
+  @MainActor var moofuslistCoordinator: Factory<MoofuslistCoordinator> {
+    self { @MainActor in MoofuslistCoordinator() }.singleton
   }
   var storageManager: ParameterFactory<ModelContainer, StorageManager> {
     self { StorageManager(container: $0) }

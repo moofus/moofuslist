@@ -10,9 +10,17 @@
 		2A67A7AF2F0076D40021309F /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = 2A67A7AE2F0076D40021309F /* Factory */; };
 		2A67A7B12F0076D40021309F /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2A67A7B02F0076D40021309F /* FactoryKit */; };
 		2A67A7B32F0076D40021309F /* FactoryTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 2A67A7B22F0076D40021309F /* FactoryTesting */; };
+		2AFEDEF02F32A83700BE64DA /* FactoryTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 2AFEDEEF2F32A83700BE64DA /* FactoryTesting */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2A09370C2F32661F00911D42 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AC7B49A2EF9E40800A8401A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AC7B4A12EF9E40800A8401A;
+			remoteInfo = moofuslist;
+		};
 		2AC7B4B02EF9E40900A8401A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2AC7B49A2EF9E40800A8401A /* Project object */;
@@ -30,10 +38,29 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2A0937082F32661E00911D42 /* LocationManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AC7B4A22EF9E40800A8401A /* moofuslist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moofuslist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AC7B4AF2EF9E40900A8401A /* moofuslistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = moofuslistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AC7B4B92EF9E40900A8401A /* moofuslistUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = moofuslistUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AFEDEF12F3322AA00BE64DA /* moofuslist.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = moofuslist.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2A0937142F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "moofuslistTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LocationManagerTests.swift,
+			);
+			target = 2AC7B4AE2EF9E40900A8401A /* moofuslistTests */;
+		};
+		2A0937152F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "LocationManagerTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LocationManagerTests.swift,
+			);
+			target = 2A0937072F32661E00911D42 /* LocationManagerTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2AC7B4A42EF9E40800A8401A /* moofuslist */ = {
@@ -43,6 +70,10 @@
 		};
 		2AC7B4B22EF9E40900A8401A /* moofuslistTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2A0937142F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "moofuslistTests" target */,
+				2A0937152F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "LocationManagerTests" target */,
+			);
 			path = moofuslistTests;
 			sourceTree = "<group>";
 		};
@@ -54,6 +85,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2A0937052F32661E00911D42 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AFEDEF02F32A83700BE64DA /* FactoryTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2AC7B49F2EF9E40800A8401A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -81,12 +120,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2A0937162F3271EF00911D42 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		2AC7B4992EF9E40800A8401A = {
 			isa = PBXGroup;
 			children = (
+				2AFEDEF12F3322AA00BE64DA /* moofuslist.xctestplan */,
 				2AC7B4A42EF9E40800A8401A /* moofuslist */,
 				2AC7B4B22EF9E40900A8401A /* moofuslistTests */,
 				2AC7B4BC2EF9E40900A8401A /* moofuslistUITests */,
+				2A0937162F3271EF00911D42 /* Frameworks */,
 				2AC7B4A32EF9E40800A8401A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +145,7 @@
 				2AC7B4A22EF9E40800A8401A /* moofuslist.app */,
 				2AC7B4AF2EF9E40900A8401A /* moofuslistTests.xctest */,
 				2AC7B4B92EF9E40900A8401A /* moofuslistUITests.xctest */,
+				2A0937082F32661E00911D42 /* LocationManagerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,6 +153,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2A0937072F32661E00911D42 /* LocationManagerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2A0937102F32661F00911D42 /* Build configuration list for PBXNativeTarget "LocationManagerTests" */;
+			buildPhases = (
+				2A0937042F32661E00911D42 /* Sources */,
+				2A0937052F32661E00911D42 /* Frameworks */,
+				2A0937062F32661E00911D42 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2A09370D2F32661F00911D42 /* PBXTargetDependency */,
+			);
+			name = LocationManagerTests;
+			packageProductDependencies = (
+				2AFEDEEF2F32A83700BE64DA /* FactoryTesting */,
+			);
+			productName = LocationManagerTests;
+			productReference = 2A0937082F32661E00911D42 /* LocationManagerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		2AC7B4A12EF9E40800A8401A /* moofuslist */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2AC7B4C32EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslist" */;
@@ -185,6 +255,10 @@
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					2A0937072F32661E00911D42 = {
+						CreatedOnToolsVersion = 26.1.1;
+						TestTargetID = 2AC7B4A12EF9E40800A8401A;
+					};
 					2AC7B4A12EF9E40800A8401A = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
@@ -218,11 +292,19 @@
 				2AC7B4A12EF9E40800A8401A /* moofuslist */,
 				2AC7B4AE2EF9E40900A8401A /* moofuslistTests */,
 				2AC7B4B82EF9E40900A8401A /* moofuslistUITests */,
+				2A0937072F32661E00911D42 /* LocationManagerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2A0937062F32661E00911D42 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2AC7B4A02EF9E40800A8401A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -247,6 +329,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2A0937042F32661E00911D42 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2AC7B49E2EF9E40800A8401A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -271,6 +360,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2A09370D2F32661F00911D42 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AC7B4A12EF9E40800A8401A /* moofuslist */;
+			targetProxy = 2A09370C2F32661F00911D42 /* PBXContainerItemProxy */;
+		};
 		2AC7B4B12EF9E40900A8401A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 2AC7B4A12EF9E40800A8401A /* moofuslist */;
@@ -284,6 +378,48 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		2A09370E2F32661F00911D42 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QSFP52FBJ9;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = moofus.com.LocationManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/moofuslist";
+			};
+			name = Debug;
+		};
+		2A09370F2F32661F00911D42 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QSFP52FBJ9;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = moofus.com.LocationManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/moofuslist";
+			};
+			name = Release;
+		};
 		2AC7B4C12EF9E40900A8401A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -558,6 +694,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2A0937102F32661F00911D42 /* Build configuration list for PBXNativeTarget "LocationManagerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2A09370E2F32661F00911D42 /* Debug */,
+				2A09370F2F32661F00911D42 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		2AC7B49D2EF9E40800A8401A /* Build configuration list for PBXProject "moofuslist" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -619,6 +764,11 @@
 			productName = FactoryKit;
 		};
 		2A67A7B22F0076D40021309F /* FactoryTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryTesting;
+		};
+		2AFEDEEF2F32A83700BE64DA /* FactoryTesting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2A67A7AD2F0076D40021309F /* XCRemoteSwiftPackageReference "Factory" */;
 			productName = FactoryTesting;

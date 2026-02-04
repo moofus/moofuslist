@@ -47,7 +47,7 @@ final actor MoofuslistSource {
   let stream: AsyncStream<Message>
 
   init() {
-    (stream, continuation) = AsyncStream.makeStream(of: Message.self)
+    (stream, continuation) = AsyncStream<Message>.makeStream()
 
     do {
       let schema = Schema([MoofuslistActivity.self])
@@ -153,6 +153,8 @@ extension MoofuslistSource {
           assertionFailure()
           sendError()
         }
+      case .info(let info):
+        logger.info("From LocationManager: \(info.rawValue)")
       case .location(let location):
         await handle(location: location)
       }
