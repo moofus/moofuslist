@@ -12,6 +12,10 @@ class TimedAction {
   private var maxCount = UInt.max
   private var task: Task<Void, Never>?
 
+  deinit {
+    stop()
+  }
+
   func start(
     count maxCount: UInt = UInt.max,
     sleepTimeInSeconds: UInt = 2,
