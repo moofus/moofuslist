@@ -20,7 +20,7 @@ final actor MoofuslistSource {
     case changeFavorite(UUID)
     case error(String, String)
     case initialize
-    case inputError(Bool)
+    case inputError
     case loaded(Bool)
     case loading([Activity], Bool, Bool)
     case loadMapItems
@@ -36,14 +36,15 @@ final actor MoofuslistSource {
 
   @Injected(\.aiManager) private var aiManager: AIManager
   @Injected(\.locationManager) private var locationManager: LocationManager
-  private var storageManager: StorageManager
 
+  private var activities = [MoofuslistSource.Activity]()
   private var addressToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
   private var location = CLLocation()
   private var locationToMapItemCache = [LocationKey: MKMapItem]()
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
+  private var storageManager: StorageManager
   let stream: AsyncStream<Message>
 
   init() {
@@ -87,13 +88,7 @@ final actor MoofuslistSource {
 // MARK: - Methods to send messages to MoofuslistViewModel
 extension MoofuslistSource {
   private func sendError(description: String = "Error", recoverySuggestion: String = "Try again later.") {
-    send(message: .initialize)
     send(message: .error(description, recoverySuggestion))
-  }
-
-  private func sendInputError(inputError: Bool) {
-    send(message: .initialize)
-    send(message: .inputError(true))
   }
 
   private func sendLoaded(loading: Bool) {
@@ -103,11 +98,6 @@ extension MoofuslistSource {
   private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
     let activities = await convert(activities: activities, location: location)
     send(message: .loading(activities, loading, processing))
-  }
-
-  private func sendProcessing(processing: Bool) {
-    send(message: .initialize)
-    send(message: .processing)
   }
 
   private func send(message: Message) {
@@ -127,6 +117,7 @@ extension MoofuslistSource {
       case .end:
         send(message: .loaded(false))
       case .error(let error):
+        send(message: .initialize)
         if let description = error.errorDescription, let recoverySuggestion = error.recoverySuggestion {
           sendError(description: description, recoverySuggestion: recoverySuggestion)
         } else {
@@ -145,6 +136,7 @@ extension MoofuslistSource {
 
       switch message {
       case .error(let error):
+        send(message: .initialize)
         if let description = error.errorDescription, let recoverySuggestion = error.recoverySuggestion {
           sendError(description: description, recoverySuggestion: recoverySuggestion)
         } else if let description = error.errorDescription {
@@ -165,8 +157,7 @@ extension MoofuslistSource {
 // MARK: - Private Location Methods
 extension MoofuslistSource {
   /// Given the CLLocation get the city and state
-  /// - Parameter location: the location used to get the city and state
-  /// - Returns: the "city, state"
+  /// - Parameter location: the location used to get the mapItem
   private func handle(location: CLLocation) async {
     let mapItem: MKMapItem
     let locationKey = LocationKey(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
@@ -178,6 +169,7 @@ extension MoofuslistSource {
           let mapItems = try await request.mapItems
           guard let item = mapItems.first else {
             logger.error("MapItem not found \(#file):\(#line)")
+            send(message: .initialize)
             sendError(description: "MapItem not found")
             assertionFailure()
             return
@@ -186,11 +178,13 @@ extension MoofuslistSource {
           locationToMapItemCache[locationKey] = mapItem
         } catch {
           logger.error("Error MKReverseGeocodingRequest: \(error)")
+          send(message: .initialize)
           sendError(description: error.localizedDescription)
           assertionFailure("unknown error=\(error)")
           return
         }
       } else {
+        send(message: .initialize)
         sendError(description: "Can't get location")
         assertionFailure()
         return
@@ -250,6 +244,7 @@ extension MoofuslistSource {
         try await aiManager.findActivities(cityState: cityState)
       } catch {
         print(error)
+        send(message: .initialize)
         if let error = error as? AIManager.Error {
           sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
         } else {
@@ -259,6 +254,7 @@ extension MoofuslistSource {
       }
     } else {
       assertionFailure()
+      send(message: .initialize)
       sendError()
     }
   }
@@ -328,12 +324,14 @@ extension MoofuslistSource {
   nonisolated func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       guard let self else { return }
-      await sendProcessing(processing: true)
+      await send(message: .initialize)
+      await send(message: .processing)
       if let mapItem = await mapItemFrom(address: cityState) {
         await handle(mapItem: mapItem)
       } else {
         logger.error("cityState=\(cityState) \(Date()) \(#file):\(#function):\(#line)")
-        await sendInputError(inputError: true)
+        await send(message: .initialize)
+        await send(message: .inputError)
       }
     }
   }
@@ -341,7 +339,8 @@ extension MoofuslistSource {
   nonisolated func searchCurrentLocation() {
     Task.detached { [weak self] in
       guard let self else { return }
-      await sendProcessing(processing: true)
+      await send(message: .initialize)
+      await send(message: .processing)
       await locationManager.start(maxCount: 1)
     }
   }

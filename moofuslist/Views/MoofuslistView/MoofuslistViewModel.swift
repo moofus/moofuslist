@@ -85,7 +85,7 @@ extension MoofuslistViewModel {
   private func changeFavorite(id: UUID) {
     if let idx = activities.firstIndex(where: { $0.id == id }) {
       activities[idx].isFavorite.toggle()
-      selectedActivity = activities[idx]
+      selectedActivity = activities[idx] // TODO: why is this needed?
     } else {
       assertionFailure()
     }

@@ -20,8 +20,8 @@ class MoofuslistActivity: Hashable, Identifiable {
   var distance: Double
   var imageNames: [String]
   var isFavorite = false
-  @Transient
-  var mapItem: MKMapItem?
+  var latitude: Double
+  var longitude: Double
   var name: String
   var rating: Double
   var reviews: Int
@@ -38,7 +38,8 @@ class MoofuslistActivity: Hashable, Identifiable {
     distance: Double,
     imageNames: [String],
     isFavorite: Bool = false,
-    mapItem: MKMapItem? = nil,
+    latitude: Double,
+    longitude: Double,
     name: String,
     rating: Double,
     reviews: Int,
@@ -54,7 +55,8 @@ class MoofuslistActivity: Hashable, Identifiable {
     self.distance = distance
     self.imageNames = imageNames
     self.isFavorite = isFavorite
-    self.mapItem = mapItem
+    self.latitude = latitude
+    self.longitude = longitude
     self.name = name
     self.rating = rating
     self.reviews = reviews
