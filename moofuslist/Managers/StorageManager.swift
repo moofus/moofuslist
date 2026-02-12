@@ -9,17 +9,12 @@ import Foundation
 import SwiftData
 
 actor StorageManager {
-  private var context: ModelContext! = nil
+  private var context: ModelContext
   private let container: ModelContainer
 
   init(container: ModelContainer) {
     self.container = container
-  }
-
-  func initialize() {
-    if context == nil {
-      context = ModelContext(self.container)
-    }
+    self.context = ModelContext(self.container)
   }
 
   public func insert(activity: MoofuslistActivity) async throws {

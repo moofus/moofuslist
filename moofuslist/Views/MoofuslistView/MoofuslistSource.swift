@@ -23,7 +23,6 @@ final actor MoofuslistSource {
     case inputError
     case loaded(Bool)
     case loading([Activity], Bool, Bool)
-    case loadMapItems
     case mapItem(MKMapItem)
     case processing
     case selectActivity(UUID)
@@ -37,7 +36,6 @@ final actor MoofuslistSource {
   @Injected(\.aiManager) private var aiManager: AIManager
   @Injected(\.locationManager) private var locationManager: LocationManager
 
-  private var activities = [MoofuslistSource.Activity]()
   private var addressToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
@@ -62,7 +60,6 @@ final actor MoofuslistSource {
 
     Task.detached { [weak self] in
       guard let self else { return }
-      await storageManager.initialize()
       async let aiWait: Void = handleAIManager()
       async let locationWait: Void = handleLocationManager()
       _ = await(aiWait, locationWait)
@@ -132,7 +129,7 @@ extension MoofuslistSource {
 
   private func handleLocationManager() async {
     for await message in locationManager.stream {
-      print(message) // ljw add warnings for print statements
+      print(message) // ljw add warnings for print statements (swiftlint)
 
       switch message {
       case .error(let error):
@@ -177,7 +174,7 @@ extension MoofuslistSource {
           mapItem = item
           locationToMapItemCache[locationKey] = mapItem
         } catch {
-          logger.error("Error MKReverseGeocodingRequest: \(error)")
+          logger.error("MKReverseGeocodingRequest: \(error)")
           send(message: .initialize)
           sendError(description: error.localizedDescription)
           assertionFailure("unknown error=\(error)")
@@ -206,6 +203,11 @@ extension MoofuslistSource {
         logger.error("\(error.localizedDescription)")
         distance = activity.distance
       }
+      var mapItem: MKMapItem?
+      if let item = await mapItemFrom(address: activity.address) {
+        mapItem = item
+        mapItem?.name = activity.name
+      }
 
       result.append(
         Activity(
@@ -215,6 +217,8 @@ extension MoofuslistSource {
           desc: activity.description,
           distance: distance,
           imageNames: await imageNames.imageNames(for: activity),
+          isFavorite: false,
+          mapItem: mapItem,
           name: activity.name,
           rating: activity.rating, // TODO: rating
           reviews: activity.reviews, // TODO: reviews
@@ -238,24 +242,26 @@ extension MoofuslistSource {
   }
 
   private func handle(mapItem: MKMapItem) async {
-    if let cityState = mapItem.addressRepresentations?.cityWithContext {
-      do {
-        send(message: .mapItem(mapItem))
-        try await aiManager.findActivities(cityState: cityState)
-      } catch {
-        print(error)
-        send(message: .initialize)
-        if let error = error as? AIManager.Error {
-          sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
-        } else {
-          assertionFailure("unknown error=\(error)")
-          sendError(description: error.localizedDescription)
-        }
-      }
-    } else {
+    guard let cityState = mapItem.addressRepresentations?.cityWithContext else {
+      logger.error("mapItem.addressRepresentations is nil")
       assertionFailure()
       send(message: .initialize)
       sendError()
+      return
+    }
+
+    do {
+      send(message: .mapItem(mapItem))
+      try await aiManager.findActivities(cityState: cityState)
+    } catch {
+      print(error)
+      send(message: .initialize)
+      if let error = error as? AIManager.Error {
+        sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
+      } else {
+        assertionFailure("unknown error=\(error)")
+        sendError(description: error.localizedDescription)
+      }
     }
   }
 
@@ -272,10 +278,6 @@ extension MoofuslistSource {
     Task.detached { [weak self] in
       await self?.send(message: .changeFavorite(id))
     }
-  }
-
-  nonisolated func loadMapItems() async {
-    await send(message: .loadMapItems)
   }
 
   func mapItemFrom(address: String) async -> MKMapItem? {

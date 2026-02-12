@@ -146,7 +146,6 @@ struct MoofuslistContentView: View {
       Button {
         Task {
           showSheet = true
-          await source.loadMapItems()
         }
       } label: {
         HStack {

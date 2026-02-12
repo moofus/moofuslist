@@ -23,7 +23,7 @@ final class MoofuslistViewModel {
     var desc: String
     var distance: Double
     var imageNames: [String]
-    var isFavorite = false
+    var isFavorite: Bool
     var mapItem: MKMapItem?
     var name: String
     var rating: Double
@@ -73,7 +73,6 @@ extension MoofuslistViewModel {
         self.activities = activities
         self.loading = loading
         self.processing = processing
-      case .loadMapItems: await loadMapItems()
       case .mapItem(let mapItem):
         processeMapItem(mapItem)
       case .processing: processing = true
@@ -104,19 +103,6 @@ extension MoofuslistViewModel {
     processing = false
     searchedCityState = ""
     selectedActivity = nil
-  }
-
-  private func loadMapItems() async {
-    for activity in activities {
-      guard !activity.address.isEmpty else { continue }
-      guard activity.mapItem == nil else { continue }
-      if let mapItem = await source.mapItemFrom(address: activity.address) {
-        mapItem.name = activity.name
-        if let idx = activities.firstIndex(where: { $0.id == activity.id }) {
-          activities[idx].mapItem = mapItem
-        }
-      }
-    }
   }
 
   private func processeMapItem(_ mapItem: MKMapItem) {
