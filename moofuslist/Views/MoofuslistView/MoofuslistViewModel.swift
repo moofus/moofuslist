@@ -14,28 +14,9 @@ import SwiftUI
 @MainActor
 @Observable
 final class MoofuslistViewModel {
-  // keep insync with MoofuslistActivity
-  struct Activity: Hashable, Identifiable {
-    var id = UUID()
-    var address: String
-    var category: String
-    var city: String
-    var desc: String
-    var distance: Double
-    var imageNames: [String]
-    var isFavorite: Bool
-    var mapItem: MKMapItem?
-    var name: String
-    var rating: Double
-    var reviews: Int
-    var phoneNumber: String
-    var somethingInteresting: String
-    var state: String
-  }
-
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 
-  var activities: [Activity] = []
+  var activities: [MoofuslistActivity] = []
   private(set) var errorDescription: String = ""
   private(set) var errorRecoverySuggestion: String = ""
   var haveError: Bool = false
@@ -46,7 +27,7 @@ final class MoofuslistViewModel {
   var mapPosition: MapCameraPosition = .automatic
   private(set) var processing: Bool = false
   private(set) var searchedCityState: String = ""
-  var selectedActivity: Activity? = nil
+  var selectedActivity: MoofuslistActivity? = nil
 
   init() {
     Task { @MainActor in
@@ -62,7 +43,6 @@ extension MoofuslistViewModel {
     for await message in source.stream {
       print(message)
       switch message {
-      case .changeFavorite(let id): changeFavorite(id: id)
       case let .error(description, recoverySuggestion):
         errorDescription = description
         errorRecoverySuggestion = recoverySuggestion
@@ -77,14 +57,19 @@ extension MoofuslistViewModel {
         processeMapItem(mapItem)
       case .processing: processing = true
       case .selectActivity(let id): selectActivity(id: id)
+      case let .setIsFavorite(isFavorite, id): set(isFavorite: isFavorite, for: id)
+      case let .storageError(str1, str2):
+        print("str1=\(str1)") // TODO: handle this
+        print("str2=\(str2)")
+        assertionFailure()
       }
     }
   }
 
-  private func changeFavorite(id: UUID) {
+  private func set(isFavorite: Bool, for id: UUID) {
     if let idx = activities.firstIndex(where: { $0.id == id }) {
-      activities[idx].isFavorite.toggle()
-      selectedActivity = activities[idx] // TODO: why is this needed?
+      activities[idx].isFavorite = isFavorite
+      selectedActivity = activities[idx] // to ensure MoofuslistDetailView is updated
     } else {
       assertionFailure()
     }

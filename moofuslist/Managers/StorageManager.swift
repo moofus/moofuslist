@@ -8,41 +8,34 @@
 import Foundation
 import SwiftData
 
+@ModelActor
 actor StorageManager {
-  private var context: ModelContext
-  private let container: ModelContainer
-
-  init(container: ModelContainer) {
-    self.container = container
-    self.context = ModelContext(self.container)
+  public func insert(activity: MoofuslistActivityModel) async throws {
+    modelContext.insert(activity)
+    try modelContext.save()
   }
 
-  public func insert(activity: MoofuslistActivity) async throws {
-    context.insert(activity)
-    try context.save()
+  public func delete(activity: MoofuslistActivityModel) async throws {
+    modelContext.delete(activity)
+    try modelContext.save()
   }
 
-  public func delete(activity: MoofuslistActivity) async throws {
-    context.delete(activity)
-    try context.save()
+  public func fetchAllActivities() async throws -> [MoofuslistActivityModel] {
+    let descriptor = FetchDescriptor<MoofuslistActivityModel>()
+    return try modelContext.fetch(descriptor)
   }
 
-  public func fetchAllActivities() async throws -> [MoofuslistActivity] {
-    let descriptor = FetchDescriptor<MoofuslistActivity>()
-    return try context.fetch(descriptor)
-  }
-
-  public func fetchActivitiesSortedByDistance() async throws -> [MoofuslistActivity] {
-    let descriptor = FetchDescriptor<MoofuslistActivity>(
+  public func fetchActivitiesSortedByDistance() async throws -> [MoofuslistActivityModel] {
+    let descriptor = FetchDescriptor<MoofuslistActivityModel>(
       sortBy: [SortDescriptor(\.distance)]
     )
-    return try context.fetch(descriptor)
+    return try modelContext.fetch(descriptor)
   }
 
-  public func fetchActivitiesSortedByRating() async throws -> [MoofuslistActivity] {
-    let descriptor = FetchDescriptor<MoofuslistActivity>(
+  public func fetchActivitiesSortedByRating() async throws -> [MoofuslistActivityModel] {
+    let descriptor = FetchDescriptor<MoofuslistActivityModel>(
       sortBy: [SortDescriptor(\.rating, order: .reverse)]
     )
-    return try context.fetch(descriptor)
+    return try modelContext.fetch(descriptor)
   }
 }

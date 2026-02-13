@@ -33,7 +33,7 @@ extension Container {
     self { @MainActor in MoofuslistCoordinator() }.singleton
   }
   var storageManager: ParameterFactory<ModelContainer, StorageManager> {
-    self { StorageManager(container: $0) }
+    self { StorageManager(modelContainer: $0) }
   }
   var moofuslistSource: Factory<MoofuslistSource> {
     self { MoofuslistSource() }.singleton

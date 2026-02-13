@@ -14,18 +14,17 @@ import SwiftUI
 
 
 final actor MoofuslistSource {
-  typealias Activity = MoofuslistViewModel.Activity
-
   enum Message {
-    case changeFavorite(UUID)
     case error(String, String)
     case initialize
     case inputError
     case loaded(Bool)
-    case loading([Activity], Bool, Bool)
+    case loading([MoofuslistActivity], Bool, Bool)
     case mapItem(MKMapItem)
     case processing
     case selectActivity(UUID)
+    case setIsFavorite(Bool, UUID)
+    case storageError(String, String)
   }
 
  private struct LocationKey: Hashable {
@@ -36,30 +35,23 @@ final actor MoofuslistSource {
   @Injected(\.aiManager) private var aiManager: AIManager
   @Injected(\.locationManager) private var locationManager: LocationManager
 
+  private var activities = [MoofuslistActivity]()
   private var addressToMapItemCache = [String: MKMapItem]()
   private let continuation: AsyncStream<Message>.Continuation
   private var imageNames = ImageNames()
   private var location = CLLocation()
   private var locationToMapItemCache = [LocationKey: MKMapItem]()
   private let logger = Logger(subsystem: "com.moofus.Moofuslist", category: "MoofuslistSorce")
-  private var storageManager: StorageManager
+  private var storageManager: StorageManager!
+
   let stream: AsyncStream<Message>
 
   init() {
     (stream, continuation) = AsyncStream<Message>.makeStream()
 
-    do {
-      let schema = Schema([MoofuslistActivity.self])
-      let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-      let container = try ModelContainer(for: schema, configurations: [configuration])
-      storageManager = Container.shared.storageManager(container)
-    } catch {
-      logger.error("\(error)")
-      fatalError()
-    }
-
     Task.detached { [weak self] in
       guard let self else { return }
+      await self.initializeStorageManager()
       async let aiWait: Void = handleAIManager()
       async let locationWait: Void = handleLocationManager()
       _ = await(aiWait, locationWait)
@@ -80,6 +72,18 @@ final actor MoofuslistSource {
       }
     }
   }
+  
+  private func initializeStorageManager() async {
+    do {
+      let schema = Schema([MoofuslistActivityModel.self])
+      let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+      let container = try ModelContainer(for: schema, configurations: [configuration])
+      storageManager = Container.shared.storageManager(container)
+    } catch {
+      logger.error("\(error)")
+      send(message: .storageError("Storage initialization failed", error.localizedDescription))
+    }
+  }
 }
 
 // MARK: - Methods to send messages to MoofuslistViewModel
@@ -93,8 +97,8 @@ extension MoofuslistSource {
   }
 
   private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
-    let activities = await convert(activities: activities, location: location)
-    send(message: .loading(activities, loading, processing))
+    self.activities = await convert(activities: activities, location: location)
+    send(message: .loading(self.activities, loading, processing))
   }
 
   private func send(message: Message) {
@@ -129,7 +133,7 @@ extension MoofuslistSource {
 
   private func handleLocationManager() async {
     for await message in locationManager.stream {
-      print(message) // ljw add warnings for print statements (swiftlint)
+      print(message) // TODO: install swiftlint ljw add warnings for print statements
 
       switch message {
       case .error(let error):
@@ -193,8 +197,8 @@ extension MoofuslistSource {
 
 // MARK: - Private Methods
 extension MoofuslistSource {
-  private func convert(activities: [AIManager.Activity], location: CLLocation) async -> [Activity] {
-    var result = [Activity]()
+  private func convert(activities: [AIManager.Activity], location: CLLocation) async -> [MoofuslistActivity] {
+    var result = [MoofuslistActivity]()
     for activity in activities {
       let distance: Double
       do {
@@ -210,7 +214,7 @@ extension MoofuslistSource {
       }
 
       result.append(
-        Activity(
+        MoofuslistActivity(
           address: activity.address,
           category: activity.category,
           city: activity.city,
@@ -229,6 +233,34 @@ extension MoofuslistSource {
       )
     }
     return result
+  }
+
+  private func convert(activity: MoofuslistActivity) async -> MoofuslistActivityModel {
+    var latitude = 0.0
+    var longitude = 0.0
+    if let mapItem = await activity.mapItem {
+      latitude = mapItem.location.coordinate.latitude
+      longitude = mapItem.location.coordinate.longitude
+    }
+
+    return MoofuslistActivityModel(
+      id: activity.id,
+      address: activity.address,
+      category: activity.category,
+      city: activity.city,
+      desc: activity.desc,
+      distance: activity.distance,
+      imageNames: activity.imageNames,
+      isFavorite: false,
+      latitude: latitude,
+      longitude: longitude,
+      name: activity.name,
+      rating: activity.rating,
+      reviews: activity.reviews,
+      phoneNumber: activity.phoneNumber,
+      somethingInteresting: activity.somethingInteresting,
+      state: activity.state
+    )
   }
 
   private func getDistance(from activity: AIManager.Activity, location: CLLocation) async throws -> Double {
@@ -259,28 +291,14 @@ extension MoofuslistSource {
       if let error = error as? AIManager.Error {
         sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
       } else {
-        assertionFailure("unknown error=\(error)")
-        sendError(description: error.localizedDescription)
+        logger.error("unknown error=\(error)")
+        assertionFailure()
+        sendError(description: "Failed to handle map item", recoverySuggestion: "Restart App")
       }
     }
   }
 
-  @MainActor
-  private func navigate(to route: MoofuslistCoordinator.Route) {
-    @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
-    moofuslistCoordinator.navigate(to: route)
-  }
-}
-
-// MARK: - Public Methods
-extension MoofuslistSource {
-  nonisolated func changeFavorite(id: UUID) {
-    Task.detached { [weak self] in
-      await self?.send(message: .changeFavorite(id))
-    }
-  }
-
-  func mapItemFrom(address: String) async -> MKMapItem? {
+  private func mapItemFrom(address: String) async -> MKMapItem? {
     if let mapItem = addressToMapItemCache[address] {
       return mapItem
     }
@@ -323,6 +341,45 @@ extension MoofuslistSource {
     return nil
   }
 
+  @MainActor
+  private func navigate(to route: MoofuslistCoordinator.Route) {
+    @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
+    moofuslistCoordinator.navigate(to: route)
+  }
+
+  private func set(isFavorite: Bool, for id: UUID) async {
+    if let idx = activities.firstIndex(where: { $0.id == id }) {
+      activities[idx].isFavorite = isFavorite
+      let activity: MoofuslistActivityModel = await convert(activity: activities[idx])
+      do {
+        if isFavorite {
+          try await storageManager.insert(activity: activity)
+        } else {
+          try await storageManager.delete(activity: activity)
+        }
+        await send(message: .setIsFavorite(isFavorite, id))
+      } catch {
+        logger.error("\(error)")
+        send(message: .error("Failed to update favorite", error.localizedDescription))
+        assertionFailure()
+      }
+    } else {
+      print("id=\(id)")
+      print("activities=\(activities)")
+      assertionFailure()
+      send(message: .error("Activity not found", "Could not find the activity with the given ID."))
+    }
+  }
+}
+
+// MARK: - Public Methods
+extension MoofuslistSource {
+  nonisolated func setFavorite(id: UUID, value: Bool) {
+    Task.detached { [weak self] in
+      await self?.set(isFavorite: value, for: id)
+    }
+  }
+
   nonisolated func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       guard let self else { return }
@@ -347,7 +404,7 @@ extension MoofuslistSource {
     }
   }
 
-  nonisolated func selectActivity(id: UUID) {
+  nonisolated func selectActivity(id: UUID) { // TODO: update local activities and ?send what?
     Task.detached { [weak self] in
       guard let self else { return }
       await send(message: .selectActivity(id))
@@ -355,3 +412,4 @@ extension MoofuslistSource {
     }
   }
 }
+

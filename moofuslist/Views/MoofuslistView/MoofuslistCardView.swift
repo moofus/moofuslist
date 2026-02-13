@@ -11,7 +11,7 @@ import MapKit
 import SwiftUI
 
 struct MoofuslistCardView: View {
-  let activity: MoofuslistViewModel.Activity
+  let activity: MoofuslistActivity
 
   @Injected(\.moofuslistSource) var source: MoofuslistSource
 
@@ -46,7 +46,7 @@ struct MoofuslistCardView: View {
         Spacer()
 
         Button {
-          source.changeFavorite(id: activity.id)
+          source.setFavorite(id: activity.id, value: !activity.isFavorite)
         } label: {
           Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
             .fontSizeForegroundStyle(size: 18, color: activity.isFavorite ? .accent : .gray)

@@ -25,7 +25,7 @@ struct MoofuslistContentView: View {
     SortOptions(rawValue: selectedSortRawValue) ?? .relevance
   }
 
-  private var sortedActivities: [MoofuslistViewModel.Activity] {
+  private var sortedActivities: [MoofuslistActivity] {
     switch selectedSort {
     case .distance: viewModel.activities.sorted { $0.distance < $1.distance }
     case .relevance: viewModel.activities

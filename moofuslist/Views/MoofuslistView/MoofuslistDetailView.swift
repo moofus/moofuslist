@@ -67,7 +67,7 @@ struct MoofuslistDetailView: View {
                 Spacer()
 
                 Button {
-                  source.changeFavorite(id: activity.id)
+                  source.setFavorite(id: activity.id, value: !activity.isFavorite)
                 } label: {
                   Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
                     .fontSizeForegroundStyle(size: 24, color: activity.isFavorite ? .accent : .gray)
@@ -195,12 +195,10 @@ struct MoofuslistDetailView: View {
     }
   }
 
-  private func openInMaps(activity: MoofuslistViewModel.Activity) {
+  private func openInMaps(activity: MoofuslistActivity) {
     Task {
       let mapItem: MKMapItem
       if let item = activity.mapItem {
-        mapItem = item
-      } else if let item = await source.mapItemFrom(address: activity.address) {
         mapItem = item
       } else {
         logger.error("Failed to mapItem for address=\(activity.address)") 
