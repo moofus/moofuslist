@@ -120,7 +120,6 @@ struct LocationManagerTests {
       case .info(let info):
         Issue.record("Expected location but got info: \(info)")
       case .location(let location):
-        print("ljw \(Date()) \(#file):\(#function):\(#line)")
         try #require(location.coordinate.latitude == locations[idx].coordinate.latitude, "Latitude should match")
         try #require(location.coordinate.longitude == locations[idx].coordinate.longitude, "Longitude should match")
       case .error(let error):

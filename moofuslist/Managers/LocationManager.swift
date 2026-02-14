@@ -123,6 +123,7 @@ extension LocationManager {
         print("error=\(error)")
         assertionFailure()
         continuation.yield(.error(.unknown))
+        return
       }
       started = false
       logger.info("LocationManager processUpdates finished")

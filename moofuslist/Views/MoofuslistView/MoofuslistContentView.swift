@@ -76,7 +76,7 @@ struct MoofuslistContentView: View {
               ForEach(sortedActivities, id: \.id) { activity in
                 MoofuslistCardView(activity: activity)
                   .onTapGesture {
-                    source.selectActivity(id: activity.id)
+                    source.selectActivity(for: activity.id)
                   }
               }
             }

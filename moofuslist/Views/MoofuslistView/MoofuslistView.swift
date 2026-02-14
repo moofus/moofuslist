@@ -34,6 +34,18 @@ struct MoofuslistView: View {
           ProgressView()
         }
 
+        if viewModel.haveFavorites {
+          Button {
+            print("action")
+            
+          } label: {
+            Text("Favorites")
+              .padding()
+          }
+          .buttonStyle(.glassProminent)
+          .padding()
+        }
+
         Spacer()
 
         Label {

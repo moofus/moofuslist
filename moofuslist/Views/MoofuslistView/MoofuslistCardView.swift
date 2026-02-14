@@ -46,7 +46,7 @@ struct MoofuslistCardView: View {
         Spacer()
 
         Button {
-          source.setFavorite(id: activity.id, value: !activity.isFavorite)
+          source.setIsFavorite(!activity.isFavorite, for: activity.id)
         } label: {
           Image(systemName: activity.isFavorite ? "heart.fill" : "heart")
             .fontSizeForegroundStyle(size: 18, color: activity.isFavorite ? .accent : .gray)

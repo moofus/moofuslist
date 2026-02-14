@@ -17,16 +17,17 @@ final class MoofuslistViewModel {
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 
   var activities: [MoofuslistActivity] = []
-  private(set) var errorDescription: String = ""
-  private(set) var errorRecoverySuggestion: String = ""
-  var haveError: Bool = false
-  var inputError: Bool = false
-  private(set) var loading: Bool = false
+  private(set) var errorDescription = ""
+  private(set) var errorRecoverySuggestion = ""
+  var haveError = false
+  private(set) var haveFavorites = false
+  var inputError = false
+  private(set) var loading = false
   private(set) var location = CLLocation()
   private(set) var mapItem: MKMapItem? = nil
   var mapPosition: MapCameraPosition = .automatic
-  private(set) var processing: Bool = false
-  private(set) var searchedCityState: String = ""
+  private(set) var processing = false
+  private(set) var searchedCityState = ""
   var selectedActivity: MoofuslistActivity? = nil
 
   init() {
@@ -46,6 +47,7 @@ extension MoofuslistViewModel {
       case let .error(description, recoverySuggestion):
         errorDescription = description
         errorRecoverySuggestion = recoverySuggestion
+      case .haveFavorites(let value): haveFavorites = value
       case .initialize: initialize()
       case .inputError: inputError = true
       case .loaded(let loading): self.loading = loading
