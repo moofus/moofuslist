@@ -12,6 +12,7 @@ import SwiftUI
 struct MoofuslistView: View {
   @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
   @State private var searchText: String = ""
+  @Environment(\.scenePhase) private var scenePhase
   @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
 
@@ -36,8 +37,7 @@ struct MoofuslistView: View {
 
         if viewModel.haveFavorites {
           Button {
-            print("action")
-            
+            source.displayFavorites()
           } label: {
             Text("Favorites")
               .padding()
@@ -74,6 +74,18 @@ struct MoofuslistView: View {
       Button("OK") {}
     } message: { error in
       Text(viewModel.errorRecoverySuggestion)
+    }
+    .onChange(of: scenePhase, initial: true) { oldPhase, newPhase in
+      switch newPhase {
+      case .active:
+        print("\(Date()) ljw App is active from \(oldPhase)")
+      case .background:
+        print("\(Date()) App entered background from \(oldPhase)")
+      case .inactive:
+        print("\(Date()) ljw App is inactive from \(oldPhase)") // TODO: cancel loading, remove old favorites
+      @unknown default:
+        print("\(Date()) ljw Unknown scene phase from \(oldPhase)")
+      }
     }
   }
 }

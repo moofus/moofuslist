@@ -39,7 +39,7 @@ struct MoofuslistContentView: View {
 
       VStack(spacing: 0) {
         VStack(alignment: .leading, spacing: 16) {
-          Text("Activities near \(viewModel.searchedCityState)")
+          Text(viewModel.contentTitle)
             .fontSizeWeightForegroundStyle(size: 20, weight: .bold, color: .black)
             .padding(.leading, 16)
 
@@ -108,7 +108,6 @@ struct MoofuslistContentView: View {
         }
         .presentationDetents([.medium, .large])
         .disabled(viewModel.loading)
-
       }
       .navigationBarTitleDisplayMode(.inline)
 
@@ -134,7 +133,7 @@ struct MoofuslistContentView: View {
   }
 
   private func getPercent() -> Int {
-    viewModel.activities.count * 100 / 9
+    viewModel.activities.count * 100 / 9 // TODO: fix 9
   }
 
   private struct MapButtonView: View {

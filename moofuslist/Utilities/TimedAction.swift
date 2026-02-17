@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import Combine
 
-class TimedAction {
+final class TimedAction: ObservableObject {
   private(set) var count = UInt.zero
   private var maxCount = UInt.max
   private var task: Task<Void, Never>?

@@ -11,15 +11,20 @@ import SwiftUI
 import MapKit
 
 struct MoofuslistDetailView: View {
-  @AppStorage("autoManualSwitch") private var autoManualSwitch = true // initially switch automatically
+  enum ScrollImages: String, CaseIterable {
+    case auto
+    case manual
+  }
+
+  @AppStorage("scrollImages") private var scrollImages = ScrollImages.auto // initially switch automatically
   @State var errorText = ""
   @State private var haveError = false
-  @State private var selectedImageIdx = 0
+  @State private var selectedImageName: String = ""
   @Injected(\.moofuslistSource) private var source: MoofuslistSource
+  @StateObject var timedAction = TimedAction()
   @Bindable var viewModel: MoofuslistViewModel
 
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "MoofuslistDetailView")
-  @State var timedAction = TimedAction()
 
   var body: some View {
     ZStack {
@@ -29,19 +34,22 @@ struct MoofuslistDetailView: View {
         ScrollView {
           VStack(spacing: 0) {
             VStack {
-              TabView(selection: $selectedImageIdx) {
-                ForEach(0..<activity.imageNames.count, id: \.self) { idx in
-                  Image(systemName: activity.imageNames[idx])
-                    .fontSizeForegroundStyle(size: 80, color: .accent)
-                    .tag(idx)
-                }
+                TabView(selection: $selectedImageName) {
+                  ForEach(Array(activity.imageNames.enumerated()), id: \.element) { idx, imageName in
+                    Image(systemName: imageName)
+                      .fontSizeForegroundStyle(size: 80, color: .accent)
+                      .tag(imageName)
+                  }
               }
               .background(Color(red: 1, green: 0.9, blue: 0.8))
               .tabViewStyle(.page)
               .frame(height: 250)
               .frame(maxWidth: .infinity)
-              .task {
+              .onAppear {
                 startTimedAction()
+              }
+              .onDisappear {
+                timedAction.stop()
               }
             }
 
@@ -137,22 +145,14 @@ struct MoofuslistDetailView: View {
             .padding(20)
           }
         }
-        .onAppear {
-          selectedImageIdx = 0
-        }
 
         if activity.imageNames.count > 1 {
           VStack {
             HStack {
               Spacer()
-              Button {
-                autoManualSwitch.toggle()
-              } label: {
-                if autoManualSwitch {
-                  Text("auto")
-                } else {
-                  Text("manual")
-                }
+              Picker("Scroll Images", selection: $scrollImages) {
+                Text(ScrollImages.auto.rawValue).tag(ScrollImages.auto)
+                Text(ScrollImages.manual.rawValue).tag(ScrollImages.manual)
               }
               .padding()
             }
@@ -172,23 +172,23 @@ struct MoofuslistDetailView: View {
     var starting = true
 
     timedAction.start(sleepTimeInSeconds: 3) {
-      guard autoManualSwitch else {
+      guard scrollImages == .auto else {
         return
       }
 
       guard let activity = viewModel.selectedActivity, activity.imageNames.count > 1 else {
         return
       }
-
       withAnimation {
         if starting {
           starting = false
-          selectedImageIdx = 0
+          selectedImageName = activity.imageNames[0]
         } else {
-          if (selectedImageIdx + 1) < activity.imageNames.count {
-            selectedImageIdx += 1
+          if let idx = activity.imageNames.firstIndex(of: selectedImageName) {
+            let nextIdx = (idx + 1) % activity.imageNames.count
+            selectedImageName = activity.imageNames[nextIdx]
           } else {
-            selectedImageIdx = 0
+            selectedImageName = activity.imageNames[0]
           }
         }
       }

@@ -19,6 +19,7 @@ actor ImageNames {
     "attractions": ["figure.walk"],
     "bakeries": ["birthday.cake"],
     "bars": ["wineglass.fill"],
+    "basketball": ["figure.basketball"],
     "beach": ["beach.umbrella.fill"],
     "beachs": ["beach.umbrella.fill"],
     "beauty salons": ["comb.fill"],
@@ -125,8 +126,9 @@ actor ImageNames {
     "sightseeing": ["binoculars.fill"],
     "sightseeing walk": ["binoculars.fill","figure.walk"],
     "skateparks": ["skateboard.fill"],
+    "skiing": ["figure.skiing.crosscountry"],
+    "snowboarding": ["ffigure.snowboarding"],
     "space": ["moon.stars.fill","globe.americas.fill"],
-    "sports": ["figure.basketball"],
     "stairs": ["figure.stairs"],
     "state capitol": ["building.columns.fill"],
     "statue of liberty": ["ferry.fill","figure.walk"],
@@ -151,6 +153,7 @@ actor ImageNames {
     "water taxi": ["ferry.fill"],
     "wharf": ["water.waves"],
     "wildlife": ["pawprint.fill"],
+    "winter sports": ["figure.skiing.crosscountry","figure.snowboarding"],
     "zoo": ["pawprint.fill","tortoise.fill","bird.fill"],
     "zoos": ["pawprint.fill","tortoise.fill","bird.fill"]
   ]

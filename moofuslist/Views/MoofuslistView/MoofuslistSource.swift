@@ -19,8 +19,8 @@ final actor MoofuslistSource {
     case haveFavorites(Bool)
     case initialize
     case inputError
-    case loaded(Bool)
-    case loading([MoofuslistActivity], Bool, Bool) // loading, processing
+    case loaded(loading: Bool)
+    case loading(activities: [MoofuslistActivity], favorites: Bool, processing: Bool)
     case mapItem(MKMapItem)
     case processing
     case selectActivity(UUID)
@@ -97,12 +97,12 @@ extension MoofuslistSource {
   }
 
   private func sendLoaded(loading: Bool) {
-    send(messages: [.loaded(loading)])
+    send(messages: [.loaded(loading: loading)])
   }
 
-  private func sendLoading(activities: [AIManager.Activity], loading: Bool, processing: Bool) async {
+  private func sendLoading(activities: [AIManager.Activity], processing: Bool) async {
     self.activities = await convert(activities: activities, location: location)
-    send(messages: [.loading(self.activities, loading, processing)])
+    send(messages: [.loading(activities: self.activities, favorites: false, processing: processing)])
   }
 
   private func send(messages: [Message]) {
@@ -122,7 +122,7 @@ extension MoofuslistSource {
       case .begin:
         await navigate(to: .content)
       case .end:
-        send(messages: [.loaded(false)])
+        send(messages: [.loaded(loading: false)])
       case .error(let error):
         send(messages: [.initialize])
         if let description = error.errorDescription, let recoverySuggestion = error.recoverySuggestion {
@@ -132,7 +132,7 @@ extension MoofuslistSource {
           sendError()
         }
       case .loading(let activities):
-        await sendLoading(activities: activities, loading: true, processing: false)
+        await sendLoading(activities: activities, processing: false)
       }
     }
   }
@@ -241,6 +241,31 @@ extension MoofuslistSource {
     return result
   }
 
+  private func convert(activities: [MoofuslistActivityModel]) async -> [MoofuslistActivity] {
+    var result = [MoofuslistActivity]()
+    for activity in activities {
+      result.append(
+        MoofuslistActivity(
+          id: activity.id,
+          address: activity.address,
+          category: activity.category,
+          city: activity.city,
+          desc: activity.desc,
+          distance: activity.distance,
+          imageNames: activity.imageNames,
+          isFavorite: activity.isFavorite,
+          name: activity.name,
+          rating: activity.rating,
+          reviews: activity.reviews,
+          phoneNumber: activity.phoneNumber,
+          somethingInteresting: activity.somethingInteresting,
+          state: activity.state
+        )
+      )
+    }
+    return result
+  }
+
   private func convert(activity: MoofuslistActivity) async -> MoofuslistActivityModel {
     var latitude = 0.0
     var longitude = 0.0
@@ -256,7 +281,7 @@ extension MoofuslistSource {
       desc: activity.desc,
       distance: activity.distance,
       imageNames: activity.imageNames,
-      isFavorite: false,
+      isFavorite: activity.isFavorite,
       latitude: latitude,
       longitude: longitude,
       name: activity.name,
@@ -357,6 +382,19 @@ extension MoofuslistSource {
 
 // MARK: - Private Methods for the Public methods
 extension MoofuslistSource {
+  private func displayFavorites(_ arg: Int?) async {
+    do {
+      await navigate(to: .content)
+      let favorites = try await storageManager.fetchAllActivities()
+      self.activities = await convert(activities: favorites)
+      send(messages: [.loading(activities: self.activities, favorites: true, processing: false)])
+      send(messages: [.loaded(loading: false)])
+    } catch {
+      // TODO: handle
+      assertionFailure()
+    }
+  }
+
   private func searchCityState(cityState: String) async {
     if let mapItem = await mapItemFrom(address: cityState) {
       send(messages: [.initialize, .processing])
@@ -367,7 +405,7 @@ extension MoofuslistSource {
     }
   }
 
-  private func searchCurrentLocation(_ arg: Int) async {
+  private func searchCurrentLocation(_ arg: Int?) async {
     send(messages: [.initialize, .processing])
     await locationManager.start(maxCount: 1)
   }
@@ -418,6 +456,12 @@ extension MoofuslistSource {
 
 // MARK: - Public Methods
 extension MoofuslistSource {
+  nonisolated func displayFavorites() {
+    Task.detached { [weak self] in
+      await self?.displayFavorites(nil)
+    }
+  }
+
   nonisolated func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       await self?.searchCityState(cityState: cityState)
@@ -426,7 +470,7 @@ extension MoofuslistSource {
 
   nonisolated func searchCurrentLocation() {
     Task.detached { [weak self] in
-      await self?.searchCurrentLocation(0)
+      await self?.searchCurrentLocation(nil)
     }
   }
 

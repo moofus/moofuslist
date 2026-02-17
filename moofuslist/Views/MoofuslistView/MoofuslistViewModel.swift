@@ -16,7 +16,8 @@ import SwiftUI
 final class MoofuslistViewModel {
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 
-  var activities: [MoofuslistActivity] = []
+  private(set) var activities: [MoofuslistActivity] = []
+  private(set) var contentTitle = ""
   private(set) var errorDescription = ""
   private(set) var errorRecoverySuggestion = ""
   var haveError = false
@@ -28,10 +29,10 @@ final class MoofuslistViewModel {
   var mapPosition: MapCameraPosition = .automatic
   private(set) var processing = false
   private(set) var searchedCityState = ""
-  var selectedActivity: MoofuslistActivity? = nil
+  private(set) var selectedActivity: MoofuslistActivity? = nil
 
   init() {
-    Task { @MainActor in
+    Task {
       await handleSource()
     }
   }
@@ -39,7 +40,6 @@ final class MoofuslistViewModel {
 
 // MARK: Methods
 extension MoofuslistViewModel {
-  @MainActor
   private func handleSource() async {
     for await message in source.stream {
       print(message)
@@ -51,12 +51,9 @@ extension MoofuslistViewModel {
       case .initialize: initialize()
       case .inputError: inputError = true
       case .loaded(let loading): self.loading = loading
-      case let .loading(activities, loading, processing):
-        self.activities = activities
-        self.loading = loading
-        self.processing = processing
-      case .mapItem(let mapItem):
-        processeMapItem(mapItem)
+      case let .loading(activities, favorites, processing):
+        handleLoading(activities: activities, favorites: favorites, processing: processing)
+      case .mapItem(let mapItem): processeMapItem(mapItem)
       case .processing: processing = true
       case .selectActivity(let id): selectActivity(id: id)
       case let .setIsFavorite(isFavorite, id): set(isFavorite: isFavorite, for: id)
@@ -68,17 +65,18 @@ extension MoofuslistViewModel {
     }
   }
 
-  private func set(isFavorite: Bool, for id: UUID) {
-    if let idx = activities.firstIndex(where: { $0.id == id }) {
-      activities[idx].isFavorite = isFavorite
-      selectedActivity = activities[idx] // to ensure MoofuslistDetailView is updated
-    } else {
-      assertionFailure()
+  private func handleLoading(activities: [MoofuslistActivity], favorites: Bool, processing: Bool) {
+    if favorites {
+      contentTitle = "Favorites"
     }
+    self.activities = activities
+    self.loading = true
+    self.processing = processing
   }
 
   private func initialize() {
     activities = []
+    contentTitle = ""
     errorDescription = ""
     errorRecoverySuggestion = ""
     haveError = false
@@ -88,7 +86,6 @@ extension MoofuslistViewModel {
     mapItem = nil
     mapPosition = .automatic
     processing = false
-    searchedCityState = ""
     selectedActivity = nil
   }
 
@@ -101,7 +98,7 @@ extension MoofuslistViewModel {
       MapCamera(centerCoordinate: newCoordinate, distance: zoomOutDistance)
     )
     if let cityState = mapItem.addressRepresentations?.cityWithContext {
-      searchedCityState = cityState
+      contentTitle = "Activities near \(cityState)"
     }
     withAnimation {
       self.mapItem = mapItem
@@ -113,6 +110,15 @@ extension MoofuslistViewModel {
       selectedActivity = activities[idx]
     } else {
       print("activity.id=\(id) not found \(Date()) \(#file):\(#function):\(#line)")
+      assertionFailure()
+    }
+  }
+
+  private func set(isFavorite: Bool, for id: UUID) {
+    if let idx = activities.firstIndex(where: { $0.id == id }) {
+      activities[idx].isFavorite = isFavorite
+      selectedActivity = activities[idx] // to ensure MoofuslistDetailView is updated
+    } else {
       assertionFailure()
     }
   }
