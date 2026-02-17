@@ -11,9 +11,7 @@ import SwiftUI
 
 struct MoofuslistView: View {
   @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
-  @State private var searchText: String = ""
   @Environment(\.scenePhase) private var scenePhase
-  @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
 
   var body: some View {
@@ -21,46 +19,8 @@ struct MoofuslistView: View {
     @Bindable var viewModel = viewModel
 
     NavigationSplitView(preferredCompactColumn: $moofuslistCoordinator.splitViewColum) {
-      VStack {
-        MoofuslistHeaderView()
-
-        MoofuslistMapView(item: viewModel.mapItem, position: $viewModel.mapPosition)
-
-        GPSPinButton(text: "Search Current Location", padding: 5) {
-          searchText = ""
-          source.searchCurrentLocation()
-        }
-
-        if viewModel.processing {
-          ProgressView()
-        }
-
-        if viewModel.haveFavorites {
-          Button {
-            source.displayFavorites()
-          } label: {
-            Text("Favorites")
-              .padding()
-          }
-          .buttonStyle(.glassProminent)
-          .padding()
-        }
-
-        Spacer()
-
-        Label {
-          Text("Using Apple Intelligence")
-            .font(.footnote)
-        } icon: {
-          Image(systemName: "sparkles")
-            .foregroundStyle(.accent)
-        }
-      }
-      .searchable(text: $searchText, prompt: "Search City, State, or Zip")
-      .onSubmit(of: .search) {
-        source.searchCityState(searchText)
-      }
-      .safeAreaPadding([.leading, .trailing])
+      MoofuslistSideBarView(viewModel: viewModel)
+        .safeAreaPadding([.leading, .trailing])
     } content: {
       MoofuslistContentView(viewModel: viewModel)
     } detail: {
@@ -86,38 +46,6 @@ struct MoofuslistView: View {
       @unknown default:
         print("\(Date()) ljw Unknown scene phase from \(oldPhase)")
       }
-    }
-  }
-}
-
-extension MoofuslistView {
-  struct MoofuslistHeaderView: View {
-    @State private var displayProfile = false
-
-    var body: some View {
-      VStack(spacing: 10) {
-        Text("Moofuslist")
-          .font(.system(size: 42, weight: .bold, design: .serif))
-          .foregroundColor(.accent)
-
-        Text("Where will you explore today?")
-          .font(.headline)
-          .foregroundColor(.secondary)
-      }
-      .sheet(isPresented: $displayProfile) {
-        ProfileView()
-      }
-      .toolbar {
-        ToolbarItem {
-          Button {
-            displayProfile = true
-          } label: {
-            Image(systemName: "person.fill")
-              .foregroundStyle(.accent)
-          }
-        }
-      }
-      .toolbarTitleDisplayMode(.inline)
     }
   }
 }
