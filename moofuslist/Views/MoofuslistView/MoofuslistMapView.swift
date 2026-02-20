@@ -25,5 +25,13 @@ struct MoofuslistMapView: View {
 }
 
 #Preview {
-  MoofuslistMapView(item: nil, position: .constant(.automatic))
+    @Previewable @State var position: MapCameraPosition = .region(
+        MKCoordinateRegion(
+            center: .init(latitude: 37.334, longitude: -122.009),
+            span: .init(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        )
+    )
+
+    MoofuslistMapView(item: nil, position: $position)
+        .padding()
 }
