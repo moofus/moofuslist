@@ -230,9 +230,9 @@ extension MoofuslistSource {
           isFavorite: false,
           mapItem: mapItem,
           name: activity.name,
+          phoneNumber: activity.phoneNumber,
           rating: activity.rating, // TODO: rating
           reviews: activity.reviews, // TODO: reviews
-          phoneNumber: activity.phoneNumber,
           somethingInteresting: activity.somethingInteresting,
           state: activity.state
         )
@@ -255,9 +255,9 @@ extension MoofuslistSource {
           imageNames: activity.imageNames,
           isFavorite: activity.isFavorite,
           name: activity.name,
+          phoneNumber: activity.phoneNumber,
           rating: activity.rating,
           reviews: activity.reviews,
-          phoneNumber: activity.phoneNumber,
           somethingInteresting: activity.somethingInteresting,
           state: activity.state
         )

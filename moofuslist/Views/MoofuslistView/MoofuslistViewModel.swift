@@ -123,3 +123,26 @@ extension MoofuslistViewModel {
     }
   }
 }
+
+#if DEBUG
+// MARK: - TestHooks
+extension MoofuslistViewModel {
+  var testHooks: TestHooks {
+    TestHooks(viewModel: self)
+  }
+  
+  struct TestHooks {
+    let viewModel: MoofuslistViewModel
+
+    var activities: [MoofuslistActivity] {
+      get { viewModel.activities }
+      set { viewModel.activities = newValue }
+    }
+
+    var contentTitle: String {
+      get { viewModel.contentTitle }
+      set { viewModel.contentTitle = newValue }
+    }
+  }
+}
+#endif

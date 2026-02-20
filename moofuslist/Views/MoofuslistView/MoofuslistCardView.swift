@@ -63,43 +63,6 @@ struct MoofuslistCardView: View {
 }
 
 #Preview {
-  let activities = [
-    MoofuslistActivity(
-      id: UUID(),
-      address: "3434 main Street Oakland, CA",
-      category: "Park",
-      city: "Oakland",
-      desc: "This place is beautiful",
-      distance: 1.5,
-      imageNames: ["house", "car"],
-      isFavorite: false,
-      mapItem: nil,
-      name: "name1",
-      rating: 4.7,
-      reviews: 42,
-      phoneNumber: "510-320-8384",
-      somethingInteresting: "somethingInteresting",
-      state: "State"
-    ),
-    MoofuslistActivity(
-      id: UUID(),
-      address: "3434 main Street Oakland, CA",
-      category: "Park",
-      city: "Oakland",
-      desc: "This place is beautiful",
-      distance: 7.9,
-      imageNames: ["house", "car"],
-      isFavorite: true,
-      mapItem: nil,
-      name: "name2",
-      rating: 3.9,
-      reviews: 83,
-      phoneNumber: "510-320-8384",
-      somethingInteresting: "somethingInteresting",
-      state: "State"
-    )
-  ]
-
-  MoofuslistCardView(activity: activities[0])
-  MoofuslistCardView(activity: activities[1])
+  MoofuslistCardView(activity: globalActivities[0])
+  MoofuslistCardView(activity: globalActivities[1])
 }
