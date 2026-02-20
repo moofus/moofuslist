@@ -238,23 +238,9 @@ struct InfoRow: View {
   }
 }
 
-//#Preview {
-//  @Previewable @State var activity: MoofuslistViewModel.Activity? =
-//  MoofuslistViewModel.Activity(
-//    address: "address",
-//    category: "category",
-//    city: "City",
-//    description: "description",
-//    distance: 1.5,
-//    imageNames: ["house"],
-//    name: "name",
-//    rating: 1.7,
-//    reviews: 327,
-//    somethingInteresting: "somethingInteresting",
-//    state: "State"
-//  )
-//  
-//  NavigationStack {
-//    MoofuslistDetailView(activity: $activity)
-//  }
-//}
+#Preview {
+  @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
+  var testHooks: MoofuslistViewModel.TestHooks = MoofuslistViewModel.TestHooks(viewModel: viewModel)
+  testHooks.selectedActivity = globalActivities[0]
+  return MoofuslistDetailView(viewModel: viewModel)
+}

@@ -143,6 +143,11 @@ extension MoofuslistViewModel {
       get { viewModel.contentTitle }
       set { viewModel.contentTitle = newValue }
     }
+
+    var selectedActivity: MoofuslistActivity? {
+      get { viewModel.selectedActivity }
+      set { viewModel.selectedActivity = newValue }
+    }
   }
 }
 #endif
