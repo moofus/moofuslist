@@ -23,5 +23,6 @@ struct GPSPinView: View {
 }
 
 #Preview {
-    GPSPinView()
+  GPSPinView()
+    .background(Color.accentColor)
 }
