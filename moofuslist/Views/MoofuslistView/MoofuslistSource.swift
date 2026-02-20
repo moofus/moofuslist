@@ -254,6 +254,7 @@ extension MoofuslistSource {
           distance: activity.distance,
           imageNames: activity.imageNames,
           isFavorite: activity.isFavorite,
+          mapItem: await mapItemFrom(latitude: activity.latitude, longitude: activity.longitude),
           name: activity.name,
           phoneNumber: activity.phoneNumber,
           rating: activity.rating,
@@ -370,6 +371,14 @@ extension MoofuslistSource {
      }
      */
 
+    return nil
+  }
+
+  private func mapItemFrom(latitude: Double, longitude: Double) async -> MKMapItem? {
+    let location = CLLocation(latitude: latitude, longitude: longitude)
+    if let request = MKReverseGeocodingRequest(location: location) {
+      return try? await request.mapItems.first
+    }
     return nil
   }
 
