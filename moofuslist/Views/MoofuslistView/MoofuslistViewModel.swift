@@ -57,10 +57,6 @@ extension MoofuslistViewModel {
       case .processing: processing = true
       case .selectActivity(let id): selectActivity(id: id)
       case let .setIsFavorite(isFavorite, id): set(isFavorite: isFavorite, for: id)
-      case let .storageError(str1, str2):
-        print("str1=\(str1)") // TODO: handle this
-        print("str2=\(str2)")
-        assertionFailure()
       }
     }
   }

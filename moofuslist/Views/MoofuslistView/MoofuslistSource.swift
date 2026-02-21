@@ -25,7 +25,6 @@ final actor MoofuslistSource {
     case processing
     case selectActivity(UUID)
     case setIsFavorite(Bool, UUID)
-    case storageError(String, String)
   }
 
  private struct LocationKey: Hashable {
@@ -84,7 +83,7 @@ final actor MoofuslistSource {
       send(messages: [.haveFavorites(count > 0)])
     } catch {
       logger.error("\(error)")
-      send(messages: [.storageError("Storage initialization failed", error.localizedDescription)])
+      send(messages: [.error("Storage initialization failed", "Favorites will not be saved")])
       return
     }
   }
