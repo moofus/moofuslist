@@ -7,7 +7,7 @@
 
 import Foundation
 import FactoryKit
-import MapKit
+@preconcurrency import MapKit
 import os
 import SwiftData
 import SwiftUI
@@ -21,7 +21,7 @@ final actor MoofuslistSource {
     case inputError
     case loaded(loading: Bool)
     case loading(activities: [MoofuslistActivity], favorites: Bool, processing: Bool)
-    case mapItem(MKMapItem)
+    case mapInfo(MapInfo)
     case processing
     case selectActivity(UUID)
     case setIsFavorite(Bool, UUID)
@@ -80,8 +80,8 @@ final actor MoofuslistSource {
       let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
       let container = try ModelContainer(for: schema, configurations: [configuration])
       storageManager = Container.shared.storageManager(container)
-      let haveFavorites = try await !storageManager.fetchAllActivities().isEmpty
-      send(messages: [.haveFavorites(haveFavorites)])
+      let count = try await storageManager.countAllActivities()
+      send(messages: [.haveFavorites(count > 0)])
     } catch {
       logger.error("\(error)")
       send(messages: [.storageError("Storage initialization failed", error.localizedDescription)])
@@ -216,83 +216,55 @@ extension MoofuslistSource {
       var mapItem: MKMapItem?
       if let item = await mapItemFrom(address: activity.address) {
         mapItem = item
-        mapItem?.name = activity.name
       }
 
-      result.append(
-        MoofuslistActivity(
-          address: activity.address,
-          category: activity.category,
-          city: activity.city,
-          desc: activity.description,
-          distance: distance,
-          imageNames: await imageNames.imageNames(for: activity),
-          isFavorite: false,
-          mapItem: mapItem,
-          name: activity.name,
-          phoneNumber: activity.phoneNumber,
-          rating: activity.rating, // TODO: rating
-          reviews: activity.reviews, // TODO: reviews
-          somethingInteresting: activity.somethingInteresting,
-          state: activity.state
-        )
+      let newActivity = MoofuslistActivity(
+        address: activity.address,
+        category: activity.category,
+        city: activity.city,
+        desc: activity.description,
+        distance: distance,
+        imageNames: await imageNames.imageNames(for: activity),
+        isFavorite: false,
+        latitude: mapItem?.location.coordinate.latitude,
+        longitude: mapItem?.location.coordinate.longitude,
+        name: activity.name,
+        phoneNumber: activity.phoneNumber,
+        rating: activity.rating, // TODO: rating
+        reviews: activity.reviews, // TODO: reviews
+        somethingInteresting: activity.somethingInteresting,
+        state: activity.state
       )
+      result.append(newActivity)
     }
     return result
   }
 
-  private func convert(activities: [MoofuslistActivityModel]) async -> [MoofuslistActivity] {
-    var result = [MoofuslistActivity]()
-    for activity in activities {
-      result.append(
-        MoofuslistActivity(
-          id: activity.id,
-          address: activity.address,
-          category: activity.category,
-          city: activity.city,
-          desc: activity.desc,
-          distance: activity.distance,
-          imageNames: activity.imageNames,
-          isFavorite: activity.isFavorite,
-          mapItem: await mapItemFrom(latitude: activity.latitude, longitude: activity.longitude),
-          name: activity.name,
-          phoneNumber: activity.phoneNumber,
-          rating: activity.rating,
-          reviews: activity.reviews,
-          somethingInteresting: activity.somethingInteresting,
-          state: activity.state
-        )
-      )
-    }
-    return result
-  }
-
-  private func convert(activity: MoofuslistActivity) async -> MoofuslistActivityModel {
-    var latitude = 0.0
-    var longitude = 0.0
-    if let mapItem = await activity.mapItem {
-      latitude = mapItem.location.coordinate.latitude
-      longitude = mapItem.location.coordinate.longitude
-    }
-    return MoofuslistActivityModel(
-      id: activity.id,
-      address: activity.address,
-      category: activity.category,
-      city: activity.city,
-      desc: activity.desc,
-      distance: activity.distance,
-      imageNames: activity.imageNames,
-      isFavorite: activity.isFavorite,
-      latitude: latitude,
-      longitude: longitude,
-      name: activity.name,
-      rating: activity.rating,
-      reviews: activity.reviews,
-      phoneNumber: activity.phoneNumber,
-      somethingInteresting: activity.somethingInteresting,
-      state: activity.state
-    )
-  }
+//  private func convert(activities: [MoofuslistActivityModel]) async -> [MoofuslistActivity] {
+//    var result = [MoofuslistActivity]()
+//    for activity in activities {
+//      let newActivity = MoofuslistActivity(
+//        id: activity.id,
+//        address: activity.address,
+//        category: activity.category,
+//        city: activity.city,
+//        desc: activity.desc,
+//        distance: activity.distance,
+//        imageNames: activity.imageNames,
+//        isFavorite: activity.isFavorite,
+//        latitude: activity.latitude,
+//        longitude: activity.longitude,
+//        name: activity.name,
+//        phoneNumber: activity.phoneNumber,
+//        rating: activity.rating,
+//        reviews: activity.reviews,
+//        somethingInteresting: activity.somethingInteresting,
+//        state: activity.state
+//      )
+//      result.append(newActivity)
+//    }
+//    return result
+//  }
 
   private func getDistance(from activity: AIManager.Activity, location: CLLocation) async throws -> Double {
     guard let mapItem = await mapItemFrom(address: activity.address) else {
@@ -314,7 +286,12 @@ extension MoofuslistSource {
     }
 
     do {
-      send(messages: [.mapItem(mapItem)])
+      let mapInfo = MapInfo(
+        latitude: mapItem.location.coordinate.latitude,
+        longitude: mapItem.location.coordinate.longitude,
+        cityState: cityState
+      )
+      send(messages: [.mapInfo(mapInfo)])
       try await aiManager.findActivities(cityState: cityState)
     } catch {
       print(error)
@@ -374,14 +351,6 @@ extension MoofuslistSource {
     return nil
   }
 
-  private func mapItemFrom(latitude: Double, longitude: Double) async -> MKMapItem? {
-    let location = CLLocation(latitude: latitude, longitude: longitude)
-    if let request = MKReverseGeocodingRequest(location: location) {
-      return try? await request.mapItems.first
-    }
-    return nil
-  }
-
   @MainActor
   private func navigate(to route: MoofuslistCoordinator.Route) {
     @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
@@ -394,8 +363,7 @@ extension MoofuslistSource {
   private func displayFavorites(_ arg: Int?) async {
     do {
       await navigate(to: .content)
-      let favorites = try await storageManager.fetchAllActivities()
-      self.activities = await convert(activities: favorites)
+      self.activities = try await storageManager.fetchAllActivities()
       send(messages: [.loading(activities: self.activities, favorites: true, processing: false)])
       send(messages: [.loaded(loading: false)])
     } catch {
@@ -434,30 +402,28 @@ extension MoofuslistSource {
     }
     activities[idx].isFavorite = isFavorite
 
-    if !isFavorite {
+    if isFavorite {
+      do {
+        try await storageManager.insert(activity: activities[idx])
+        let count = try await storageManager.countAllActivities()
+        await send(messages: [.setIsFavorite(isFavorite, id), .haveFavorites(count > 0)])
+      } catch {
+        logger.error("\(error)")
+        send(messages: [.error("Failed to create favorite", error.localizedDescription)]) // TODO: fix data error.lo...
+        assertionFailure()
+        return
+      }
+    } else {
       do {
         try await storageManager.delete(with: id)
-        let haveFavorites = try await !storageManager.fetchAllActivities().isEmpty
-        await send(messages: [.setIsFavorite(isFavorite, id), .haveFavorites(haveFavorites)])
+        let count = try await storageManager.countAllActivities()
+        await send(messages: [.setIsFavorite(isFavorite, id), .haveFavorites(count > 0)])
       } catch {
         logger.error("\(error)")
         send(messages: [.error("Failed to delete favorite", error.localizedDescription)]) // TODO: fix data error.lo...
         assertionFailure()
         return
       }
-      return
-    }
-
-    // isFavorite == true
-    do {
-      let activity = await convert(activity: activities[idx])
-      try await storageManager.insert(activity: activity)
-      let haveFavorites = try await !storageManager.fetchAllActivities().isEmpty
-      await send(messages: [.setIsFavorite(isFavorite, id), .haveFavorites(haveFavorites)])
-    } catch {
-      logger.error("\(error)")
-      send(messages: [.error("Failed to create favorite", error.localizedDescription)]) // TODO: fix data error.lo...
-      assertionFailure()
       return
     }
   }

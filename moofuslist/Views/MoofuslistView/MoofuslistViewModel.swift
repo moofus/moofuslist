@@ -7,7 +7,7 @@
 
 import Foundation
 import FactoryKit
-import MapKit
+@preconcurrency import MapKit
 import os
 import SwiftUI
 
@@ -53,7 +53,7 @@ extension MoofuslistViewModel {
       case .loaded(let loading): self.loading = loading
       case let .loading(activities, favorites, processing):
         handleLoading(activities: activities, favorites: favorites, processing: processing)
-      case .mapItem(let mapItem): processeMapItem(mapItem)
+      case .mapInfo(let mapInfo): await processeMapInfo(mapInfo)
       case .processing: processing = true
       case .selectActivity(let id): selectActivity(id: id)
       case let .setIsFavorite(isFavorite, id): set(isFavorite: isFavorite, for: id)
@@ -89,17 +89,20 @@ extension MoofuslistViewModel {
     selectedActivity = nil
   }
 
-  private func processeMapItem(_ mapItem: MKMapItem) {
-    let latitude = mapItem.location.coordinate.latitude
-    let longitude = mapItem.location.coordinate.longitude
-    let newCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+  private func processeMapInfo(_ mapInfo: MapInfo) async {
+    let latitude = mapInfo.latitude
+    let longitude = mapInfo.longitude
+
+    let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     let zoomOutDistance: CLLocationDistance = 10000 // meters
+    
     mapPosition = MapCameraPosition.camera(
-      MapCamera(centerCoordinate: newCoordinate, distance: zoomOutDistance)
+      MapCamera(centerCoordinate: coordinate, distance: zoomOutDistance)
     )
-    if let cityState = mapItem.addressRepresentations?.cityWithContext {
-      contentTitle = "Activities near \(cityState)"
-    }
+    contentTitle = "Activities near \(mapInfo.cityState)"
+    
+    let location = CLLocation(latitude: latitude, longitude: longitude)
+    let mapItem = try? await MKReverseGeocodingRequest(location: location)?.mapItems.first
     withAnimation {
       self.mapItem = mapItem
     }

@@ -6,7 +6,7 @@
 //
 
 import FactoryKit
-import MapKit
+@preconcurrency import MapKit
 import SwiftUI
 
 struct MoofuslistContentView: View {
@@ -16,10 +16,11 @@ struct MoofuslistContentView: View {
     case relevance
   }
 
-  @Injected(\.moofuslistSource) var source: MoofuslistSource
-  @Bindable var viewModel: MoofuslistViewModel
   @AppStorage("selectedSort") private var selectedSortRawValue: String = SortOptions.relevance.rawValue
   @State private var showSheet = false
+  @Injected(\.moofuslistSource) var source: MoofuslistSource
+  @Bindable var viewModel: MoofuslistViewModel
+  @State var mapItems = [UUID: MKMapItem]()
 
   private var selectedSort: SortOptions {
     SortOptions(rawValue: selectedSortRawValue) ?? .relevance
@@ -86,11 +87,17 @@ struct MoofuslistContentView: View {
         .sheet(isPresented: $showSheet) {
           ZStack(alignment: .topTrailing) {
             Map {
+              let _ = print("ljw1 \(Date()) \(#file):\(#function):\(#line)")
               ForEach(viewModel.activities, id: \.id) { activity in
-                if let mapItem = activity.mapItem {
+                if let mapItem = mapItems[activity.id] {
                   Marker(item: mapItem)
                     .tint(.accent)
                 }
+              }
+            }
+            .onAppear() {
+              Task { @MainActor in
+                await loadMapItems()
               }
             }
 
@@ -136,34 +143,45 @@ struct MoofuslistContentView: View {
     viewModel.activities.count * 100 / 9 // TODO: fix 9
   }
 
-  private struct MapButtonView: View {
-    @Binding var showSheet: Bool
-    var source: MoofuslistSource
-
-    var body: some View {
-
-      Button {
-        Task {
-          showSheet = true
-        }
-      } label: {
-        HStack {
-          Image(systemName: "map")
-          Text("Map")
-            .font(.system(size: 14, weight: .medium))
-        }
-        .foregroundColor(.accent)
-        .padding(8)
-        .background(Color.white)
-        .cornerRadius(8)
-        .overlay(
-          RoundedRectangle(cornerRadius: 8)
-            .stroke(.accent.opacity(0.3), lineWidth: 1)
-        )
+  @MainActor
+  private func loadMapItems() async {
+    mapItems.removeAll()
+    for activity in viewModel.activities {
+      if let mapItem = await activity.mapItem() {
+        mapItems[activity.id] = mapItem
       }
     }
   }
 }
+
+private struct MapButtonView: View {
+  @Binding var showSheet: Bool
+  var source: MoofuslistSource
+
+  var body: some View {
+
+    Button {
+      Task {
+        showSheet = true
+      }
+    } label: {
+      HStack {
+        Image(systemName: "map")
+        Text("Map")
+          .font(.system(size: 14, weight: .medium))
+      }
+      .foregroundColor(.accent)
+      .padding(8)
+      .background(Color.white)
+      .cornerRadius(8)
+      .overlay(
+        RoundedRectangle(cornerRadius: 8)
+          .stroke(.accent.opacity(0.3), lineWidth: 1)
+      )
+    }
+  }
+}
+
 
 #if DEBUG
 #Preview("ContentView") {

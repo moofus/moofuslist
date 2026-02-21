@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import MapKit
+@preconcurrency import MapKit
 
 struct MoofuslistActivity: Hashable, Identifiable {
   // keep insync with MoofuslistActivityModel
@@ -18,13 +18,22 @@ struct MoofuslistActivity: Hashable, Identifiable {
   var distance: Double
   var imageNames: [String]
   var isFavorite: Bool
-  var mapItem: MKMapItem? // Note: latitude, longitude is saved in storage
+  var latitude: Double?
+  var longitude: Double?
   var name: String
   var phoneNumber: String
   var rating: Double
   var reviews: Int
   var somethingInteresting: String
   var state: String
+
+  func mapItem() async -> MKMapItem? {
+    guard let latitude, let longitude else {
+      return nil
+    }
+    let location = CLLocation(latitude: latitude, longitude: longitude)
+    return try? await MKReverseGeocodingRequest(location: location)?.mapItems.first
+  }
 }
 
 let globalActivities = [
@@ -37,7 +46,8 @@ let globalActivities = [
     distance: 1.5,
     imageNames: ["house", "car"],
     isFavorite: false,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "name1",
     phoneNumber: "510-320-8384",
     rating: 4.7,
@@ -54,7 +64,8 @@ let globalActivities = [
     distance: 7.9,
     imageNames: ["house", "car"],
     isFavorite: true,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "name2",
     phoneNumber: "510-320-8384",
     rating: 3.9,
@@ -71,7 +82,8 @@ let globalActivities = [
     distance: 0.3,
     imageNames: ["fork.knife"],
     isFavorite: false,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "Downtown Pizza Co.",
     phoneNumber: "510-320-8384",
     rating: 4.8,
@@ -88,7 +100,8 @@ let globalActivities = [
     distance: 0.5,
     imageNames: ["tree.fill"],
     isFavorite: false,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "Central Park Trails",
     phoneNumber: "510-320-8384",
     rating: 4.6,
@@ -105,7 +118,8 @@ let globalActivities = [
     distance: 1.2,
     imageNames: ["building.2.fill"],
     isFavorite: false,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "Modern Art Gallery",
     phoneNumber: "510-320-8384",
     rating: 4.7,
@@ -122,7 +136,8 @@ let globalActivities = [
     distance: 0.8,
     imageNames: ["popcorn.fill"],
     isFavorite: true,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "Comedy Club Live",
     phoneNumber: "510-320-8384",
     rating: 4.5,
@@ -139,7 +154,8 @@ let globalActivities = [
     distance: 1.1,
     imageNames: ["bag.fill"],
     isFavorite: false,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "Vintage Market Hall",
     phoneNumber: "510-320-8384",
     rating: 4.8,
@@ -156,7 +172,8 @@ let globalActivities = [
     distance: 0.6,
     imageNames: ["moon.stars.fill"],
     isFavorite: false,
-    mapItem: nil,
+    latitude: nil,
+    longitude: nil,
     name: "The Rooftop Bar",
     phoneNumber: "510-320-8384",
     rating: 4.8,

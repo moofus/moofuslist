@@ -198,11 +198,11 @@ struct MoofuslistDetailView: View {
   private func openInMaps(activity: MoofuslistActivity) {
     Task {
       let mapItem: MKMapItem
-      if let item = activity.mapItem {
+      if let item = await activity.mapItem() {
         mapItem = item
       } else {
-        logger.error("Failed to mapItem for address=\(activity.address)") 
-        assertionFailure()
+        logger.error("Failed to mapItem for latitude=\(activity.latitude ?? -1) longitude=\(activity.longitude ?? -1)")
+        assertionFailure() // TODO: display message to user
         return
       }
       mapItem.name = activity.name

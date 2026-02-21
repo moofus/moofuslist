@@ -14,7 +14,8 @@ final class TimedAction: ObservableObject {
   private var task: Task<Void, Never>?
 
   deinit {
-    stop()
+    task?.cancel()
+    task = nil
   }
 
   func start(

@@ -11,7 +11,7 @@ import FactoryKit
 import os
 import SwiftUI
 
-protocol LocationUpdateProtocol {
+protocol LocationUpdateProtocol: Sendable {
   var accuracyLimited: Bool { get }
   var authorizationDenied: Bool { get }
   var authorizationDeniedGlobally: Bool { get }
