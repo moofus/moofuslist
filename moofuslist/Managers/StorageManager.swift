@@ -11,21 +11,6 @@ import SwiftData
 @ModelActor
 actor StorageManager {
 
-  public func insert(activities: [MoofuslistActivityModel]) async throws {
-    try modelContext.transaction {
-      for activity in activities {
-        modelContext.insert(activity)
-      }
-    }
-    try modelContext.save()
-  }
-
-  public func insert(activity: MoofuslistActivity) async throws {
-    let activity = await convert(activity: activity)
-    modelContext.insert(activity)
-    try modelContext.save()
-  }
-
   public func delete(activity: MoofuslistActivityModel) async throws {
     modelContext.delete(activity)
     try modelContext.save()
@@ -65,6 +50,21 @@ actor StorageManager {
       sortBy: [SortDescriptor(\.rating, order: .reverse)]
     )
     return try modelContext.fetch(descriptor)
+  }
+
+  public func insert(activities: [MoofuslistActivityModel]) async throws {
+    try modelContext.transaction {
+      for activity in activities {
+        modelContext.insert(activity)
+      }
+    }
+    try modelContext.save()
+  }
+
+  public func insert(activity: MoofuslistActivity) async throws {
+    let activity = await convert(activity: activity)
+    modelContext.insert(activity)
+    try modelContext.save()
   }
 }
 

@@ -1,0 +1,9 @@
+# Sample .swiftlint.yml
+disabled_rules:
+  - colon
+opt_in_rules:
+  - empty_count
+excluded:
+  - Pods
+line_length: 110
+

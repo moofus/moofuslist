@@ -179,6 +179,7 @@
 			buildConfigurationList = 2AC7B4C32EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslist" */;
 			buildPhases = (
 				2AC7B49E2EF9E40800A8401A /* Sources */,
+				2A7BEAB92F4A281900D56CF3 /* SwiftLint */,
 				2AC7B49F2EF9E40800A8401A /* Frameworks */,
 				2AC7B4A02EF9E40800A8401A /* Resources */,
 			);
@@ -327,6 +328,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2A7BEAB92F4A281900D56CF3 /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftlint >/dev/null 2>&1\nthen\n    echo \"running swiftlint\"\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2A0937042F32661E00911D42 /* Sources */ = {
