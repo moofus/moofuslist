@@ -47,7 +47,7 @@ struct MoofuslistView: View {
       case .background:
         print("\(Date()) App entered background from \(oldPhase)")
       case .inactive:
-        print("\(Date()) ljw App is inactive from \(oldPhase)") // TODO: cancel loading, remove old favorites
+        print("\(Date()) ljw App is inactive from \(oldPhase)")
       @unknown default:
         print("\(Date()) ljw Unknown scene phase from \(oldPhase)")
       }

@@ -95,9 +95,8 @@ struct MoofuslistDetailView: View {
               // Action Buttons
               VStack(spacing: 12) {
                 Button {
-                  if let url = URL(string: "tel://\(activity.phoneNumber)"),
-                     UIApplication.shared.canOpenURL(url) {
-                      UIApplication.shared.open(url)
+                  if let url = URL(string: "tel://\(activity.phoneNumber)"), UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url)
                   } else {
                     haveError = true
                     errorText = "Could not call phone number: \(activity.phoneNumber)"
@@ -167,8 +166,8 @@ struct MoofuslistDetailView: View {
         Text("Select an activity")
       }
     }
-    .alert("Error", isPresented: $haveError) {
-      ErrorView(errorText: errorText)
+    .alert(errorText, isPresented: $haveError) {
+      // SwiftUI will automatically display an OK button
     }
   }
 
