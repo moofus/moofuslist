@@ -60,9 +60,10 @@ actor AIManager {
     case loading([Activity])
   }
 
+  static let maxNumOfActivities = 10
   @Generable(description: "A container for a list of activities")
   struct Activities {
-    @Guide(description: "A list of activities to do", .count(6...10))
+    @Guide(description: "A list of activities to do", .count(6...maxNumOfActivities))
     let activities: [Activity]
   }
 

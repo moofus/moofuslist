@@ -115,28 +115,27 @@ struct MoofuslistContentView: View {
       .navigationBarTitleDisplayMode(.inline)
 
       if viewModel.loading {
-        ZStack {
-          Color(.systemGray6).ignoresSafeArea()
-
-          RoundedRectangle(cornerRadius: 15)
-            .fill(Color(.secondarySystemBackground))
-            .shadow(radius: 10)
-
-          ProgressView(value: Double(viewModel.activities.count) / 9.0) {
+        VStack(spacing: 14) {
+          ProgressView(value: Double(viewModel.activities.count) / Double(AIManager.maxNumOfActivities)) {
             Text("\(getPercent())% progress")
           }
           .foregroundStyle(Color.primary)
           .padding()
           .cornerRadius(6)
+
+          Text("Apple Intelligence loading is slow")
+            .font(.footnote)
         }
         .padding()
-        .frame(width: 180, height: 100)
+        .frame(width: 260, height: 100)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
       }
     }
   }
 
   private func getPercent() -> Int {
-    viewModel.activities.count * 100 / 9 // TODO: fix 9
+    viewModel.activities.count * 100 / AIManager.maxNumOfActivities
   }
 }
 
