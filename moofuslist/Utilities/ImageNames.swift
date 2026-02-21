@@ -160,6 +160,7 @@ actor ImageNames {
     "zoos": ["pawprint.fill","tortoise.fill","bird.fill"]
   ]
 
+  // swiftlint:disable no_print_statements
   func imageNames(for activity: AIManager.Activity) async -> [String] {
     print("------------------------------")
     let activity = activity.lowercased()
@@ -189,6 +190,7 @@ actor ImageNames {
     print("input=\(input) \(result)")
     return result
   }
+  // swiftlint:enable no_print_statements
 
   private func removeSimilarImages(result: inout [String]) -> [String] {
     if result.contains("building.columns.fill") {

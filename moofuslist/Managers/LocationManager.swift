@@ -124,7 +124,7 @@ extension LocationManager {
           }
         }
       } catch {
-        print("error=\(error)")
+        logger.error("\(error)")
         assertionFailure()
         continuation.yield(.error(.unknown))
         return

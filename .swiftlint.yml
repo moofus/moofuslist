@@ -7,3 +7,9 @@ excluded:
   - Pods
 line_length: 120
 
+custom_rules:
+  no_print_statements:
+    name: "Print Statement"
+    regex: 'print\('
+    message: "Do not use print statements. Use a proper logging framework or remove them."
+    severity: warning

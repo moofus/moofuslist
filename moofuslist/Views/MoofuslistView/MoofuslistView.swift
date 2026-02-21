@@ -40,6 +40,7 @@ struct MoofuslistView: View {
       Text(viewModel.errorRecoverySuggestion)
     }
     .onChange(of: scenePhase, initial: true) { oldPhase, newPhase in
+      // swiftlint:disable no_print_statements
       switch newPhase {
       case .active:
         print("\(Date()) ljw App is active from \(oldPhase)")
@@ -50,6 +51,7 @@ struct MoofuslistView: View {
       @unknown default:
         print("\(Date()) ljw Unknown scene phase from \(oldPhase)")
       }
+      // swiftlint:enable no_print_statements
     }
   }
 }

@@ -41,7 +41,7 @@ final class MoofuslistViewModel {
 
 // MARK: Methods
 extension MoofuslistViewModel {
-  // swiftlint:disable cyclomatic_complexity
+  // swiftlint:disable cyclomatic_complexity no_print_statements
   private func handleSource() async {
     for await message in source.stream {
       print(message)
@@ -63,7 +63,7 @@ extension MoofuslistViewModel {
       }
     }
   }
-  // swiftlint:enable cyclomatic_complexity
+  // swiftlint:enable cyclomatic_complexity no_print_statements
 
   private func handleLoading(activities: [MoofuslistActivity], favorites: Bool, processing: Bool) {
     if favorites {
@@ -121,7 +121,6 @@ extension MoofuslistViewModel {
     if let idx = activities.firstIndex(where: { $0.id == id }) {
       selectedActivity = activities[idx]
     } else {
-      print("activity.id=\(id) not found \(Date()) \(#file):\(#function):\(#line)")
       assertionFailure()
     }
   }

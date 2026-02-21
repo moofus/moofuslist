@@ -156,19 +156,17 @@ extension AIManager {
         }
       }
       continuation.yield(.end)
-    } catch LanguageModelSession.GenerationError.guardrailViolation(let error) {
-      print("guardrailViolation Error")
-      print(error)
+    } catch LanguageModelSession.GenerationError.guardrailViolation {
+      logger.error("guardrailViolation Error")
       assertionFailure()
       continuation.yield(.error(Error.guardrailViolation))
-    } catch LanguageModelSession.GenerationError.exceededContextWindowSize(let error) {
-      print("exceededContextWindowSize Error")
-      print(error)
+    } catch LanguageModelSession.GenerationError.exceededContextWindowSize {
+      logger.error("exceededContextWindowSize Error")
       assertionFailure()
       continuation.yield(.error(Error.exceededContextWindowSize))
     } catch {
-      print("Error")
-      print(error.localizedDescription)
+      logger.error("\(error)")
+      assertionFailure()
       continuation.yield(.error(Error.unknown(error.localizedDescription)))
     }
   }

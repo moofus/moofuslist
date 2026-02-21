@@ -12,6 +12,7 @@ import os
 import SwiftData
 import SwiftUI
 
+// swiftlint:disable file_length
 final actor MoofuslistSource {
   enum Message {
     case error(String, String) // description, recoverySuggestion
@@ -57,17 +58,17 @@ final actor MoofuslistSource {
       _ = await(aiWait, locationWait)
     }
 
-    Task { @MainActor in
-      @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
-
-      for await message in moofuslistCoordinator.stream {
-        switch message {
-        case .content: print("source content")
-        case .detail: print("source detail")
-        case .sidebar: print("source sidebar")
-        }
-      }
-    }
+//    Task { @MainActor in
+//      @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
+//
+//      for await message in moofuslistCoordinator.stream {
+//        switch message {
+//        case .content: printljw("source content")
+//        case .detail: printljw("source detail")
+//        case .sidebar: printljw("source sidebar")
+//        }
+//      }
+//    }
   }
 
   private func initializeStorageManager() async {
@@ -90,10 +91,6 @@ final actor MoofuslistSource {
 extension MoofuslistSource {
   private func sendError(description: String = "Error", recoverySuggestion: String = "Try again later.") {
     send(messages: [.error(description, recoverySuggestion)])
-  }
-
-  private func sendLoaded(loading: Bool) {
-    send(messages: [.loaded(loading: loading)])
   }
 
   private func sendLoading(activities: [AIManager.Activity], processing: Bool) async {
@@ -135,7 +132,9 @@ extension MoofuslistSource {
 
   private func handleLocationManager() async {
     for await message in locationManager.stream {
-      print(message) // TODO: install swiftlint add warnings for print statements
+      // swiftlint:disable no_print_statements
+      print(message)
+      // swiftlint:enable no_print_statements
 
       switch message {
       case .error(let error):
@@ -229,8 +228,8 @@ extension MoofuslistSource {
         longitude: mapItem?.location.coordinate.longitude,
         name: activity.name,
         phoneNumber: activity.phoneNumber,
-        rating: activity.rating, // TODO: rating
-        reviews: activity.reviews, // TODO: reviews
+        rating: activity.rating,
+        reviews: activity.reviews,
         somethingInteresting: activity.somethingInteresting,
         state: activity.state
       )
@@ -267,7 +266,7 @@ extension MoofuslistSource {
       send(messages: [.mapInfo(mapInfo)])
       try await aiManager.findActivities(cityState: cityState)
     } catch {
-      print(error)
+      assertionFailure("\(error)")
       send(messages: [.initialize])
       if let error = error as? AIManager.Error {
         sendError(
@@ -291,19 +290,16 @@ extension MoofuslistSource {
     let request = MKLocalSearch.Request()
     request.naturalLanguageQuery = address
     request.resultTypes = .address
-    //    print("before search")
     let search = MKLocalSearch(request: request)
-    print("after search")
     do {
       let response = try await search.start()
-      print("after start")
       if let mapItem = response.mapItems.first {
         addressToMapItemCache[address] = mapItem
         return mapItem
       }
     } catch {
       logger.error("address=\(address) \(Date()) \(#file):\(#function):\(#line)")
-      print(error)
+      logger.error("\(error)")
       return nil
     }
 
@@ -316,7 +312,7 @@ extension MoofuslistSource {
      }
      } catch {
      logger.error("ljw address=\(address) \(Date()) \(#file):\(#function):\(#line)")
-     print(error.localizedDescription)
+     printljw(error.localizedDescription)
      }
      */
 
@@ -339,8 +335,7 @@ extension MoofuslistSource {
       send(messages: [.loading(activities: self.activities, favorites: true, processing: false)])
       send(messages: [.loaded(loading: false)])
     } catch {
-      // TODO: handle
-      assertionFailure()
+      sendError(description: "Failed to display favorites")
     }
   }
 
@@ -381,7 +376,7 @@ extension MoofuslistSource {
         await send(messages: [.setIsFavorite(isFavorite, id), .haveFavorites(count > 0)])
       } catch {
         logger.error("\(error)")
-        send(messages: [.error("Failed to create favorite", error.localizedDescription)]) // TODO: fix data error.lo...
+        sendError(description: "Failed to create favorite")
         assertionFailure()
         return
       }
@@ -392,7 +387,7 @@ extension MoofuslistSource {
         await send(messages: [.setIsFavorite(isFavorite, id), .haveFavorites(count > 0)])
       } catch {
         logger.error("\(error)")
-        send(messages: [.error("Failed to delete favorite", error.localizedDescription)]) // TODO: fix data error.lo...
+        sendError(description: "Failed to delete favorite")
         assertionFailure()
         return
       }
@@ -439,3 +434,4 @@ extension MoofuslistSource {
     }
   }
 }
+// swiftlint:enable file_length

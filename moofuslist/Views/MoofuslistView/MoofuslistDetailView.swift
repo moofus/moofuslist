@@ -206,7 +206,8 @@ struct MoofuslistDetailView: View {
         mapItem = item
       } else {
         logger.error("mapItem latitude=\(activity.latitude ?? -1) longitude=\(activity.longitude ?? -1)")
-        assertionFailure() // TODO: display message to user
+        haveError = true
+        errorText = "Error loading map"
         return
       }
       mapItem.name = activity.name

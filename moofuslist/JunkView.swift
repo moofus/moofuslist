@@ -8,6 +8,7 @@
 import MapKit
 import SwiftUI
 
+// swiftlint:disable no_print_statements
 // struct JunkView: View {
 //  @State var mapItem: MKMapItem?
 //
@@ -41,6 +42,7 @@ import SwiftUI
 //  JunkView()
 // }
 //
+// swiftlint:enable no_print_statements
 
 struct BlinkingImageView: View {
   @State private var isVisible: Bool
