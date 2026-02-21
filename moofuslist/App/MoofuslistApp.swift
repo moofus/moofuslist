@@ -1,5 +1,5 @@
 //
-//  moofuslistApp.swift
+//  MoofuslistApp.swift
 //  moofuslist
 //
 //  Created by Lamar Williams III on 12/22/25.
@@ -11,7 +11,7 @@ import SwiftData
 import SwiftUI
 
 @main
-struct moofuslistApp: App {
+struct MoofuslistApp: App {
   var body: some Scene {
     WindowGroup {
       MoofuslistView()

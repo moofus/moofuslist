@@ -12,7 +12,6 @@ import os
 import SwiftData
 import SwiftUI
 
-
 final actor MoofuslistSource {
   enum Message {
     case error(String, String) // description, recoverySuggestion
@@ -21,6 +20,7 @@ final actor MoofuslistSource {
     case inputError
     case loaded(loading: Bool)
     case loading(activities: [MoofuslistActivity], favorites: Bool, processing: Bool)
+    case loadMapItems
     case mapInfo(MapInfo)
     case processing
     case selectActivity(UUID)
@@ -62,17 +62,14 @@ final actor MoofuslistSource {
 
       for await message in moofuslistCoordinator.stream {
         switch message {
-        case .content:
-          print("source content")
-        case .detail:
-          print("source detail")
-        case .sidebar:
-          print("source sidebar")
+        case .content: print("source content")
+        case .detail: print("source detail")
+        case .sidebar: print("source sidebar")
         }
       }
     }
   }
-  
+
   private func initializeStorageManager() async {
     do {
       let schema = Schema([MoofuslistActivityModel.self])
@@ -166,7 +163,10 @@ extension MoofuslistSource {
   /// - Parameter location: the location used to get the mapItem
   private func handle(location: CLLocation) async {
     let mapItem: MKMapItem
-    let locationKey = LocationKey(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+    let locationKey = LocationKey(
+      latitude: location.coordinate.latitude,
+      longitude: location.coordinate.longitude
+    )
     if let item = locationToMapItemCache[locationKey] {
       mapItem = item
     } else {
@@ -239,32 +239,6 @@ extension MoofuslistSource {
     return result
   }
 
-//  private func convert(activities: [MoofuslistActivityModel]) async -> [MoofuslistActivity] {
-//    var result = [MoofuslistActivity]()
-//    for activity in activities {
-//      let newActivity = MoofuslistActivity(
-//        id: activity.id,
-//        address: activity.address,
-//        category: activity.category,
-//        city: activity.city,
-//        desc: activity.desc,
-//        distance: activity.distance,
-//        imageNames: activity.imageNames,
-//        isFavorite: activity.isFavorite,
-//        latitude: activity.latitude,
-//        longitude: activity.longitude,
-//        name: activity.name,
-//        phoneNumber: activity.phoneNumber,
-//        rating: activity.rating,
-//        reviews: activity.reviews,
-//        somethingInteresting: activity.somethingInteresting,
-//        state: activity.state
-//      )
-//      result.append(newActivity)
-//    }
-//    return result
-//  }
-
   private func getDistance(from activity: AIManager.Activity, location: CLLocation) async throws -> Double {
     guard let mapItem = await mapItemFrom(address: activity.address) else {
       return activity.distance
@@ -296,7 +270,10 @@ extension MoofuslistSource {
       print(error)
       send(messages: [.initialize])
       if let error = error as? AIManager.Error {
-        sendError(description: error.errorDescription ?? "", recoverySuggestion: error.recoverySuggestion ?? "")
+        sendError(
+          description: error.errorDescription ?? "",
+          recoverySuggestion: error.recoverySuggestion ?? ""
+        )
       } else {
         logger.error("unknown error=\(error)")
         assertionFailure()
@@ -321,8 +298,6 @@ extension MoofuslistSource {
       let response = try await search.start()
       print("after start")
       if let mapItem = response.mapItems.first {
-        //        print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
-        //        print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
         addressToMapItemCache[address] = mapItem
         return mapItem
       }
@@ -336,8 +311,6 @@ extension MoofuslistSource {
      let request = MKGeocodingRequest(addressString: address)
      do {
      if let mapItem = try await request?.mapItems.first {
-     print("ljw address=\(String(describing: address)) \(Date()) \(#file):\(#function):\(#line)")
-     print("ljw mapItem=\(String(describing: mapItem.address?.fullAddress)) \(Date()) \(#file):\(#function):\(#line)")
      addressToMapItemCache[address] = mapItem
      return mapItem
      }
@@ -436,6 +409,12 @@ extension MoofuslistSource {
     }
   }
 
+  nonisolated func loadMapItems() {
+    Task.detached { [weak self] in
+      await self?.send(messages: [.loadMapItems])
+    }
+  }
+
   nonisolated func searchCityState(_ cityState: String) {
     Task.detached { [weak self] in
       await self?.searchCityState(cityState: cityState)
@@ -460,4 +439,3 @@ extension MoofuslistSource {
     }
   }
 }
-

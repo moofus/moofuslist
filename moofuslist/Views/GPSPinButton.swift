@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct GPSPinButton: View {
-  private let action: (() async -> ())?
+  private let action: (() async -> Void)?
   private let padding: Double
   private let text: String
 
-  init(text: String, padding: Double = 16, action: (() -> ())? = nil) {
+  init(text: String, padding: Double = 16, action: (() -> Void)? = nil) {
     self.action = action
     self.padding = padding
     self.text = text

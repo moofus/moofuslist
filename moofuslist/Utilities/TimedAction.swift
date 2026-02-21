@@ -21,7 +21,7 @@ final class TimedAction: ObservableObject {
   func start(
     count maxCount: UInt = UInt.max,
     sleepTimeInSeconds: UInt = 2,
-    action: @escaping () -> (),
+    action: @escaping () -> Void,
     errorHandler: ((Error) -> Void)? = nil
   ) {
     self.maxCount = maxCount

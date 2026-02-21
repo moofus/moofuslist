@@ -35,7 +35,7 @@ struct MoofuslistDetailView: View {
           VStack(spacing: 0) {
             VStack {
                 TabView(selection: $selectedImageName) {
-                  ForEach(Array(activity.imageNames.enumerated()), id: \.element) { idx, imageName in
+                  ForEach(Array(activity.imageNames.enumerated()), id: \.element) { _, imageName in
                     Image(systemName: imageName)
                       .fontSizeForegroundStyle(size: 80, color: .accent)
                       .tag(imageName)
@@ -85,7 +85,10 @@ struct MoofuslistDetailView: View {
               // Info Cards
               VStack(spacing: 12) {
                 InfoRow(icon: "location.fill", title: "Address", value: activity.address)
-                InfoRow(icon: "mappin.circle.fill", title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away")
+                InfoRow(
+                  icon: "mappin.circle.fill",
+                  title: "Distance", value: "\(String(format: "%.1f", activity.distance)) miles away"
+                )
                 InfoRow(icon: "tag.fill", title: "Category", value: activity.category)
               }
 
@@ -112,24 +115,25 @@ struct MoofuslistDetailView: View {
                   .cornerRadius(12)
                 }
 
-                Button(action: {
-                  openInMaps(activity: activity)
-                }) {
-                  HStack {
-                    Image(systemName: "map.fill")
-                    Text("Get Directions")
+                Button(
+                  action: { openInMaps(activity: activity) },
+                  label: {
+                    HStack {
+                      Image(systemName: "map.fill")
+                      Text("Get Directions")
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(12)
+                    .background(Color.white)
+                    .foregroundColor(.accent)
+                    .cornerRadius(12)
+                    .overlay(
+                      RoundedRectangle(cornerRadius: 12)
+                        .stroke(.accent, lineWidth: 1.5)
+                    )
                   }
-                  .font(.system(size: 16, weight: .semibold))
-                  .frame(maxWidth: .infinity)
-                  .padding(12)
-                  .background(Color.white)
-                  .foregroundColor(.accent)
-                  .cornerRadius(12)
-                  .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                      .stroke(.accent, lineWidth: 1.5)
-                  )
-                }
+                )
               }
 
               // Description
@@ -201,12 +205,14 @@ struct MoofuslistDetailView: View {
       if let item = await activity.mapItem() {
         mapItem = item
       } else {
-        logger.error("Failed to mapItem for latitude=\(activity.latitude ?? -1) longitude=\(activity.longitude ?? -1)")
+        logger.error("mapItem latitude=\(activity.latitude ?? -1) longitude=\(activity.longitude ?? -1)")
         assertionFailure() // TODO: display message to user
         return
       }
       mapItem.name = activity.name
-      mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+      mapItem.openInMaps(launchOptions: [
+        MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+      ])
     }
   }
 }
@@ -216,20 +222,20 @@ struct InfoRow: View {
   let icon: String
   let title: String
   let value: String
-  
+
   var body: some View {
     HStack(spacing: 12) {
       Image(systemName: icon)
         .fontSizeWeightForegroundStyle(size: 16, weight: .semibold, color: .accent)
         .frame(width: 24)
-      
+
       VStack(alignment: .leading, spacing: 4) {
         Text(title)
           .fontSizeWeightForegroundStyle(size: 12, weight: .medium, color: .gray)
         Text(value)
           .fontSizeWeightForegroundStyle(size: 14, weight: .semibold, color: .black)
       }
-      
+
       Spacer()
     }
     .padding(12)

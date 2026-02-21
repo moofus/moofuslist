@@ -16,7 +16,7 @@ import SwiftUI
 final class MoofuslistViewModel {
   @ObservationIgnored @Injected(\.moofuslistSource) private var source: MoofuslistSource
 
-  private(set) var activities: [MoofuslistActivity] = []
+  private(set) var activities = [MoofuslistActivity]()
   private(set) var contentTitle = ""
   private(set) var errorDescription = ""
   private(set) var errorRecoverySuggestion = ""
@@ -25,11 +25,12 @@ final class MoofuslistViewModel {
   var inputError = false
   private(set) var loading = false
   private(set) var location = CLLocation()
-  private(set) var mapItem: MKMapItem? = nil
+  private(set) var mapItem: MKMapItem?
+  private(set) var mapItems = [UUID: MKMapItem]()
   var mapPosition: MapCameraPosition = .automatic
   private(set) var processing = false
   private(set) var searchedCityState = ""
-  private(set) var selectedActivity: MoofuslistActivity? = nil
+  private(set) var selectedActivity: MoofuslistActivity?
 
   init() {
     Task {
@@ -40,6 +41,7 @@ final class MoofuslistViewModel {
 
 // MARK: Methods
 extension MoofuslistViewModel {
+  // swiftlint:disable cyclomatic_complexity
   private func handleSource() async {
     for await message in source.stream {
       print(message)
@@ -53,6 +55,7 @@ extension MoofuslistViewModel {
       case .loaded(let loading): self.loading = loading
       case let .loading(activities, favorites, processing):
         handleLoading(activities: activities, favorites: favorites, processing: processing)
+      case .loadMapItems: await loadMapItems()
       case .mapInfo(let mapInfo): await processeMapInfo(mapInfo)
       case .processing: processing = true
       case .selectActivity(let id): selectActivity(id: id)
@@ -60,6 +63,7 @@ extension MoofuslistViewModel {
       }
     }
   }
+  // swiftlint:enable cyclomatic_complexity
 
   private func handleLoading(activities: [MoofuslistActivity], favorites: Bool, processing: Bool) {
     if favorites {
@@ -85,18 +89,27 @@ extension MoofuslistViewModel {
     selectedActivity = nil
   }
 
+  private func loadMapItems() async {
+    mapItems.removeAll()
+    for activity in activities {
+      if let mapItem = await activity.mapItem() {
+        mapItems[activity.id] = mapItem
+      }
+    }
+  }
+
   private func processeMapInfo(_ mapInfo: MapInfo) async {
     let latitude = mapInfo.latitude
     let longitude = mapInfo.longitude
 
     let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     let zoomOutDistance: CLLocationDistance = 10000 // meters
-    
+
     mapPosition = MapCameraPosition.camera(
       MapCamera(centerCoordinate: coordinate, distance: zoomOutDistance)
     )
     contentTitle = "Activities near \(mapInfo.cityState)"
-    
+
     let location = CLLocation(latitude: latitude, longitude: longitude)
     let mapItem = try? await MKReverseGeocodingRequest(location: location)?.mapItems.first
     withAnimation {
@@ -129,7 +142,7 @@ extension MoofuslistViewModel {
   var testHooks: TestHooks {
     TestHooks(viewModel: self)
   }
-  
+
   struct TestHooks {
     let viewModel: MoofuslistViewModel
 

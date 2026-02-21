@@ -110,13 +110,13 @@ actor AIManager {
 
   let logger = Logger(subsystem: "com.moofus.moofuslist", category: "AIManager")
 
-  let instructions = """
-                  Your job is to find activities to do and places to go.
-                  
-                  Always include a short description, and something interesting about the activity or place.
-                  Include a rating and the number of reviews for the rating.
-                  Include the phone number.
-                  """
+  let instructions =
+  """
+  Your job is to find activities to do and places to go.
+  Always include a short description, and something interesting about the activity or place.
+  Include a rating and the number of reviews for the rating.
+  Include the phone number.
+  """
   let continuation: AsyncStream<Message>.Continuation
   let stream: AsyncStream<Message>
 
@@ -155,20 +155,17 @@ extension AIManager {
         }
       }
       continuation.yield(.end)
-    }
-    catch LanguageModelSession.GenerationError.guardrailViolation(let error) {
+    } catch LanguageModelSession.GenerationError.guardrailViolation(let error) {
       print("guardrailViolation Error")
       print(error)
       assertionFailure()
       continuation.yield(.error(Error.guardrailViolation))
-    }
-    catch LanguageModelSession.GenerationError.exceededContextWindowSize(let error) {
+    } catch LanguageModelSession.GenerationError.exceededContextWindowSize(let error) {
       print("exceededContextWindowSize Error")
       print(error)
       assertionFailure()
       continuation.yield(.error(Error.exceededContextWindowSize))
-    }
-    catch {
+    } catch {
       print("Error")
       print(error.localizedDescription)
       continuation.yield(.error(Error.unknown(error.localizedDescription)))

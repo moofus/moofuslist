@@ -30,9 +30,13 @@ struct MoofuslistView: View {
     .alert("\"City, State\" is invalid!", isPresented: $viewModel.inputError) {
       Button("OK") {}
     }
-    .alert(viewModel.errorDescription, isPresented: $viewModel.haveError, presenting: viewModel) {  viewModel in
+    .alert(
+      viewModel.errorDescription,
+      isPresented: $viewModel.haveError,
+      presenting: viewModel
+    ) { _ in
       Button("OK") {}
-    } message: { error in
+    } message: { _ in
       Text(viewModel.errorRecoverySuggestion)
     }
     .onChange(of: scenePhase, initial: true) { oldPhase, newPhase in

@@ -1,15 +1,15 @@
 //
-//  moofuslistUITestsLaunchTests.swift
-//  moofuslistUITests
+//  MoofuslistUITestsLaunchTests.swift
+//  MoofuslistUITests
 //
 //  Created by Lamar Williams III on 12/22/25.
 //
 
 import XCTest
 
-final class moofuslistUITestsLaunchTests: XCTestCase {
+final class MoofuslistUITestsLaunchTests: XCTestCase {
 
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
+    override static var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }
 

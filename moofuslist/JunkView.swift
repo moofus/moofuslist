@@ -8,7 +8,7 @@
 import MapKit
 import SwiftUI
 
-//struct JunkView: View {
+// struct JunkView: View {
 //  @State var mapItem: MKMapItem?
 //
 //  var body: some View {
@@ -35,13 +35,12 @@ import SwiftUI
 //      }
 //    }
 //  }
-//}
+// }
 //
-//#Preview {
+// #Preview {
 //  JunkView()
-//}
+// }
 //
-import SwiftUI
 
 struct BlinkingImageView: View {
   @State private var isVisible: Bool

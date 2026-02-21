@@ -20,7 +20,6 @@ struct MoofuslistContentView: View {
   @State private var showSheet = false
   @Injected(\.moofuslistSource) var source: MoofuslistSource
   @Bindable var viewModel: MoofuslistViewModel
-  @State var mapItems = [UUID: MKMapItem]()
 
   private var selectedSort: SortOptions {
     SortOptions(rawValue: selectedSortRawValue) ?? .relevance
@@ -87,18 +86,15 @@ struct MoofuslistContentView: View {
         .sheet(isPresented: $showSheet) {
           ZStack(alignment: .topTrailing) {
             Map {
-              let _ = print("ljw1 \(Date()) \(#file):\(#function):\(#line)")
-              ForEach(viewModel.activities, id: \.id) { activity in
-                if let mapItem = mapItems[activity.id] {
+              ForEach(Array(viewModel.mapItems.keys), id: \.self) { key in
+                if let mapItem = viewModel.mapItems[key] {
                   Marker(item: mapItem)
                     .tint(.accent)
                 }
               }
             }
-            .onAppear() {
-              Task { @MainActor in
-                await loadMapItems()
-              }
+            .onAppear {
+              source.loadMapItems()
             }
 
             Button {
@@ -142,16 +138,6 @@ struct MoofuslistContentView: View {
   private func getPercent() -> Int {
     viewModel.activities.count * 100 / 9 // TODO: fix 9
   }
-
-  @MainActor
-  private func loadMapItems() async {
-    mapItems.removeAll()
-    for activity in viewModel.activities {
-      if let mapItem = await activity.mapItem() {
-        mapItems[activity.id] = mapItem
-      }
-    }
-  }
 }
 
 private struct MapButtonView: View {
@@ -181,7 +167,6 @@ private struct MapButtonView: View {
     }
   }
 }
-
 
 #if DEBUG
 #Preview("ContentView") {

@@ -112,8 +112,6 @@ struct ProfileButton: View {
     }
 }
 
-
-
 #Preview {
     ProfileView()
 }

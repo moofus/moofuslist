@@ -46,14 +46,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2A0937142F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "moofuslistTests" target */ = {
+		2A0937142F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "moofuslistTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				LocationManagerTests.swift,
 			);
 			target = 2AC7B4AE2EF9E40900A8401A /* moofuslistTests */;
 		};
-		2A0937152F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "LocationManagerTests" target */ = {
+		2A0937152F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "LocationManagerTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				LocationManagerTests.swift,
@@ -68,18 +68,18 @@
 			path = moofuslist;
 			sourceTree = "<group>";
 		};
-		2AC7B4B22EF9E40900A8401A /* moofuslistTests */ = {
+		2AC7B4B22EF9E40900A8401A /* MoofuslistTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2A0937142F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "moofuslistTests" target */,
-				2A0937152F32662F00911D42 /* Exceptions for "moofuslistTests" folder in "LocationManagerTests" target */,
+				2A0937142F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "moofuslistTests" target */,
+				2A0937152F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "LocationManagerTests" target */,
 			);
-			path = moofuslistTests;
+			path = MoofuslistTests;
 			sourceTree = "<group>";
 		};
-		2AC7B4BC2EF9E40900A8401A /* moofuslistUITests */ = {
+		2AC7B4BC2EF9E40900A8401A /* MoofuslistUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = moofuslistUITests;
+			path = MoofuslistUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -132,8 +132,8 @@
 			children = (
 				2AFEDEF12F3322AA00BE64DA /* moofuslist.xctestplan */,
 				2AC7B4A42EF9E40800A8401A /* moofuslist */,
-				2AC7B4B22EF9E40900A8401A /* moofuslistTests */,
-				2AC7B4BC2EF9E40900A8401A /* moofuslistUITests */,
+				2AC7B4B22EF9E40900A8401A /* MoofuslistTests */,
+				2AC7B4BC2EF9E40900A8401A /* MoofuslistUITests */,
 				2A0937162F3271EF00911D42 /* Frameworks */,
 				2AC7B4A32EF9E40800A8401A /* Products */,
 			);
@@ -213,7 +213,7 @@
 				2AC7B4B12EF9E40900A8401A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				2AC7B4B22EF9E40900A8401A /* moofuslistTests */,
+				2AC7B4B22EF9E40900A8401A /* MoofuslistTests */,
 			);
 			name = moofuslistTests;
 			packageProductDependencies = (
@@ -237,7 +237,7 @@
 				2AC7B4BB2EF9E40900A8401A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				2AC7B4BC2EF9E40900A8401A /* moofuslistUITests */,
+				2AC7B4BC2EF9E40900A8401A /* MoofuslistUITests */,
 			);
 			name = moofuslistUITests;
 			packageProductDependencies = (
@@ -332,12 +332,14 @@
 /* Begin PBXShellScriptBuildPhase section */
 		2A7BEAB92F4A281900D56CF3 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/.swiftlint.yml",
 			);
 			name = SwiftLint;
 			outputFileListPaths = (
@@ -346,7 +348,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftlint >/dev/null 2>&1\nthen\n    echo \"running swiftlint\"\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -572,6 +574,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QSFP52FBJ9;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This is needed so you can see your location on the map";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -605,6 +608,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QSFP52FBJ9;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This is needed so you can see your location on the map";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

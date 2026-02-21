@@ -11,8 +11,6 @@ import FactoryTesting
 import Testing
 @testable import moofuslist
 
-// CLLocationUpdate.liveUpdates()
-
 struct LocationManagerTests {
   @Test("Errors", .container, arguments: [
     MockLocationUpdate(authorizationDenied: true),
@@ -77,7 +75,10 @@ struct LocationManagerTests {
       if locationUpdate.accuracyLimited {
         try #require(info == LocationManager.Info.accuracyLimited, "Info should be accuracyLimited")
       } else if locationUpdate.authorizationRequestInProgress {
-        try #require(info == LocationManager.Info.authorizationRequestInProgress, "Info should be authorizationRequestInProgress")
+        try #require(
+          info == LocationManager.Info.authorizationRequestInProgress,
+          "Info should be authorizationRequestInProgress"
+        )
       } else if locationUpdate.insufficientlyInUse {
         try #require(info == LocationManager.Info.insufficientlyInUse, "Info should be insufficientlyInUse")
       } else if locationUpdate.serviceSessionRequired {
@@ -139,14 +140,16 @@ struct LocationManagerTests {
     var authorizationRequestInProgress = false
     var authorizationRestricted = false
     var insufficientlyInUse = false
-    var location: CLLocation? = nil
+    var location: CLLocation?
     var locationUnavailable = false
     var serviceSessionRequired = false
     var stationary = false
   }
 
   struct MockLocationUpdates: LocationUpdateStream {
+    // swiftlint:disable nesting
     typealias Element = MockLocationUpdate
+    // swiftlint:enable nesting
 
     private let stream: AsyncStream<MockLocationUpdate>
 
@@ -159,7 +162,10 @@ struct LocationManagerTests {
     }
   }
 
-  private func consumeTask(hooks: LocationManager.TestHooks, maxCount: Int) -> Task<[LocationManager.Message], Never> {
+  private func consumeTask(
+    hooks: LocationManager.TestHooks,
+    maxCount: Int
+  ) -> Task<[LocationManager.Message], Never> {
     Task {
       var messages = [LocationManager.Message]()
       var tmpCount = 0
@@ -174,9 +180,11 @@ struct LocationManagerTests {
     }
   }
 
+  // swiftlint:disable large_tuple
   private func initialize(maxCount: Int) -> (
     AsyncStream<MockLocationUpdate>.Continuation,
-    LocationManager.TestHooks, task: Task<(), Never>
+    LocationManager.TestHooks,
+    task: Task<(), Never>
   ) {
     let (stream, continuation) = AsyncStream<MockLocationUpdate>.makeStream()
     let mockSequence = MockLocationUpdates(stream: stream)
@@ -188,4 +196,5 @@ struct LocationManagerTests {
     }
     return (continuation, hooks, task)
   }
+  // swiftlint:enable large_tuple
 }

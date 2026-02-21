@@ -38,7 +38,7 @@ actor LocationManager {
   private let logger = Logger(subsystem: "com.moofus.moofuslist", category: "LocationManager")
   private var maxCount = Int.max
   let stream: AsyncStream<Message>
-  private var task: Task<Void,Never>? = nil
+  private var task: Task<Void, Never>?
 
   private(set) var started = false {
     didSet {
@@ -62,6 +62,7 @@ extension LocationManager {
     task = nil
   }
 
+  // swiftlint:disable cyclomatic_complexity function_body_length
   private func processUpdates<S: LocationUpdateStream>(updates: S) {
     task = Task {
       logger.info("LocationManager processUpdates started")
@@ -79,7 +80,10 @@ extension LocationManager {
           }
           if await update.accuracyLimited {
             continuation.yield(.info(.accuracyLimited))
-            logger.info("Location accuracyLimited: Moofuslist can't access your precise location, using approximate location")
+            logger.info("""
+                        Location accuracyLimited: Moofuslist can't access your precise location, \
+                        using approximate location
+                        """)
           }
           if await update.authorizationDeniedGlobally {
             continuation.yield(.error(.authorizationDeniedGlobally))
@@ -129,6 +133,7 @@ extension LocationManager {
       logger.info("LocationManager processUpdates finished")
     }
   }
+  // swiftlint:enable cyclomatic_complexity function_body_length
 }
 
 // MARK: - Error Enum
@@ -143,9 +148,13 @@ extension LocationManager {
     var failureReason: String? {
       switch self {
       case .authorizationDenied:
-        "User denied location permissions for Moofuslist or location services are turned off or device is in Airplane mode"
+        """
+        User denied location permissions for Moofuslist or location services are turned off or \
+        device is in Airplane mode
+        """
       case .authorizationDeniedGlobally: "Location Services are disabled for this device."
-      case .authorizationRestricted: "Moofuslist can't access your location. Do you have Parental Controls enabled?"
+      case .authorizationRestricted:
+        "Moofuslist can't access your location. Do you have Parental Controls enabled?"
       case .locationUnavailable: "Location Unabailable"
       case .unknown: "Unknown Error"
       }
@@ -158,7 +167,8 @@ extension LocationManager {
     var recoverySuggestion: String? {
       switch self {
       case .authorizationDenied: "Please authorize Moofuslist to access Location Services"
-      case .authorizationDeniedGlobally: "Please enable Location Services by going to Settings -> Privacy & Security"
+      case .authorizationDeniedGlobally:
+        "Please enable Location Services by going to Settings -> Privacy & Security"
       case .authorizationRestricted: "Maybe disable Parental Controls?"
       case .locationUnavailable: "Location Unabailable"
       case .unknown: "Unknown Error"
@@ -196,7 +206,7 @@ extension LocationManager {
   nonisolated func testHooks() -> TestHooks {
     TestHooks(locationManager: self)
   }
-  
+
   struct TestHooks {
     let locationManager: LocationManager
 
@@ -210,7 +220,7 @@ extension LocationManager {
   }
 }
 
-
+// swiftlint:disable comment_spacing
 //struct LocationManagerView: View {
 //  @State private var test = false
 //
@@ -239,5 +249,6 @@ extension LocationManager {
 //  LocationManagerView()
 //}
 //
-#endif // DEBUG
+// swiftlint:enable comment_spacing
 
+#endif // DEBUG

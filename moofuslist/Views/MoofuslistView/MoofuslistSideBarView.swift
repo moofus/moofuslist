@@ -62,9 +62,7 @@ struct MoofuslistSideBarView: View {
   }
 }
 
-
 #Preview {
     @Previewable @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
     MoofuslistSideBarView(viewModel: viewModel)
 }
-

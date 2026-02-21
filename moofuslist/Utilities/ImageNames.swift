@@ -5,6 +5,7 @@
 //  Created by Lamar Williams III on 1/24/26.
 //
 
+// swiftlint:disable comma line_length
 actor ImageNames {
   private let imageNames: [String: [String]] = [
     "360-degree view": ["binoculars.fill"],
@@ -179,12 +180,10 @@ actor ImageNames {
   }
 
   func process(input: String, result: inout [String]) -> [String] {
-    for (key, imageStrings) in imageNames {
-      if input.contains(key) {
-        for imageString in imageStrings {
-          if result.contains(imageString) { continue }
-          result.append(imageString)
-        }
+    for (key, imageStrings) in imageNames where input.contains(key) {
+      for imageString in imageStrings {
+        if result.contains(imageString) { continue }
+        result.append(imageString)
       }
     }
     print("input=\(input) \(result)")
@@ -366,3 +365,4 @@ actor ImageNames {
  ]
 
  */
+// swiftlint:enable comma line_length

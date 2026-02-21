@@ -5,5 +5,5 @@ opt_in_rules:
   - empty_count
 excluded:
   - Pods
-line_length: 110
+line_length: 120
 

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ErrorView: View {
   @State var errorText: String
-  private(set) var action: (() -> ())? = nil
+  private(set) var action: (() -> Void)?
 
   var body: some View {
     GroupBox {
