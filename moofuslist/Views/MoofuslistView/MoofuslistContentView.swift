@@ -116,18 +116,24 @@ struct MoofuslistContentView: View {
 
       if viewModel.loading {
         VStack(spacing: 14) {
-          ProgressView(value: Double(viewModel.activities.count) / Double(AIManager.maxNumOfActivities)) {
+          ProgressView(value: Double(viewModel.activities.count) / Double(AIManager.maxNumOfActivities + 1)) {
             Text("\(getPercent())% progress")
           }
           .foregroundStyle(Color.primary)
           .padding()
           .cornerRadius(6)
 
-          Text("Apple Intelligence loading is slow")
+          VStack {
+            Text("Apple Intelligence loading is slow")
+            Button(role: .cancel) {
+              source.cancelLoading()
+            }
             .font(.footnote)
+            .buttonStyle(.glassProminent)
+          }
         }
         .padding()
-        .frame(width: 260, height: 100)
+        .frame(width: 260, height: 200)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
       }

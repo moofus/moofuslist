@@ -12,6 +12,28 @@ import MapKit
 import os
 
 actor AIManager {
+  static let maxNumOfActivities = 10
+
+  var cancelStreamLoop = false
+  let continuation: AsyncStream<Message>.Continuation
+  let instructions =
+  """
+  Your job is to find activities to do and places to go.
+  Include a short description.
+  Include something interesting about the activity or the place.
+  Include a rating and the number of reviews for the rating.
+  Include the phone number.
+  """
+  let logger = Logger(subsystem: "com.moofus.moofuslist", category: "AIManager")
+  let stream: AsyncStream<Message>
+
+  init() {
+    (stream, continuation) = AsyncStream<Message>.makeStream()
+  }
+}
+
+// MARK: - Enums
+extension AIManager {
   enum Error: LocalizedError {
     case appleIntelligenceNotEnabled
     case deviceNotEligible
@@ -59,8 +81,10 @@ actor AIManager {
     case error(LocalizedError)
     case loading([Activity])
   }
+}
 
-  static let maxNumOfActivities = 10
+// MARK: - Generables
+extension AIManager {
   @Generable(description: "A container for a list of activities")
   struct Activities {
     @Guide(description: "A list of activities to do", .count(6...maxNumOfActivities))
@@ -108,26 +132,14 @@ actor AIManager {
       )
     }
   }
-
-  let logger = Logger(subsystem: "com.moofus.moofuslist", category: "AIManager")
-
-  let instructions =
-  """
-  Your job is to find activities to do and places to go.
-  Always include a short description, and something interesting about the activity or place.
-  Include a rating and the number of reviews for the rating.
-  Include the phone number.
-  """
-  let continuation: AsyncStream<Message>.Continuation
-  let stream: AsyncStream<Message>
-
-  init() {
-    (stream, continuation) = AsyncStream<Message>.makeStream()
-  }
 }
 
 // MARK: - Public Methods
 extension AIManager {
+  func cancelLoading() {
+    cancelStreamLoop = true
+  }
+
   func findActivities(cityState: String) async throws {
     try isModelAvailable()
 
@@ -137,6 +149,7 @@ extension AIManager {
     do {
       let stream = session.streamResponse(to: text, generating: Activities.self)
       var beginSent = false
+      cancelStreamLoop = false
 
       for try await partial in stream {
         var activities = [Activity]()
@@ -153,6 +166,11 @@ extension AIManager {
         }
         if !activities.isEmpty {
           continuation.yield(.loading(activities))
+        }
+        if cancelStreamLoop {
+          cancelStreamLoop = false
+          logger.info("loading canceled")
+          break
         }
       }
       continuation.yield(.end)

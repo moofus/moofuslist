@@ -28,7 +28,7 @@ final actor MoofuslistSource {
     case setIsFavorite(Bool, UUID)
   }
 
- private struct LocationKey: Hashable {
+  private struct LocationKey: Hashable {
     let latitude: Double
     let longitude: Double
   }
@@ -57,18 +57,6 @@ final actor MoofuslistSource {
       async let locationWait: Void = handleLocationManager()
       _ = await(aiWait, locationWait)
     }
-
-//    Task { @MainActor in
-//      @Injected(\.moofuslistCoordinator) var moofuslistCoordinator: MoofuslistCoordinator
-//
-//      for await message in moofuslistCoordinator.stream {
-//        switch message {
-//        case .content: printljw("source content")
-//        case .detail: printljw("source detail")
-//        case .sidebar: printljw("source sidebar")
-//        }
-//      }
-//    }
   }
 
   private func initializeStorageManager() async {
@@ -249,12 +237,15 @@ extension MoofuslistSource {
   }
 
   private func handle(mapItem: MKMapItem) async {
-    guard let cityState = mapItem.addressRepresentations?.cityWithContext else {
+    guard var cityState = mapItem.addressRepresentations?.cityWithContext else {
       logger.error("mapItem.addressRepresentations is nil")
       assertionFailure()
       send(messages: [.initialize])
       sendError()
       return
+    }
+    if cityState.isEmpty, let cityName = mapItem.addressRepresentations?.cityName {
+      cityState = cityName
     }
 
     do {
@@ -398,6 +389,12 @@ extension MoofuslistSource {
 
 // MARK: - Public Methods
 extension MoofuslistSource {
+  nonisolated func cancelLoading() {
+    Task.detached { [weak self] in
+      await self?.aiManager.cancelLoading()
+    }
+  }
+
   nonisolated func displayFavorites() {
     Task.detached { [weak self] in
       await self?.displayFavorites(nil)
