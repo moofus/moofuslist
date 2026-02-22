@@ -84,4 +84,39 @@ struct AIManagerTests {
     #expect(err.errorDescription == "Can't get location.")
     #expect(err.recoverySuggestion == "Apple Intelligence is not enabled in Settings.")
   }
+
+  @Test("All error cases have proper descriptions", arguments: [
+    AIManager.Error.deviceNotEligible,
+    AIManager.Error.exceededContextWindowSize,
+    AIManager.Error.guardrailViolation,
+    AIManager.Error.location,
+    AIManager.Error.model("test error"),
+    AIManager.Error.modelNotReady,
+    AIManager.Error.unknown("unknown error")
+  ])
+  func allErrorCases(error: AIManager.Error) async throws {
+    #expect(error.failureReason != nil)
+    #expect(error.errorDescription != nil)
+    #expect(error.recoverySuggestion != nil)
+  }
+
+  @Test("findActivities completes full stream cycle")
+  func fullStreamCycle() async throws {
+    let manager = AIManager()
+
+    try await manager.findActivities(cityState: "Sacramento, CA")
+    var yielded: [String] = []
+    var streamIterator = await manager.stream.makeAsyncIterator()
+    loop: while let msg = await streamIterator.next() {
+      switch msg {
+      case .begin: yielded.append("begin")
+      case .loading: yielded.append("loading")
+      case .end: yielded.append("end"); break loop
+      case .error: yielded.append("error")
+      }
+    }
+    #expect(yielded.contains("begin"))
+    #expect(yielded.contains("loading"))
+    #expect(yielded.contains("end"))
+  }
 }
