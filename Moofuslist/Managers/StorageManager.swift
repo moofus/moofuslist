@@ -62,14 +62,14 @@ actor StorageManager {
   }
 
   public func insert(activity: MoofuslistActivity) async throws {
-    let activity = await convert(activity: activity)
+    let activity = convert(activity: activity)
     modelContext.insert(activity)
     try modelContext.save()
   }
 }
 
 extension StorageManager {
-  private func convert(activities: [MoofuslistActivityModel]) -> [MoofuslistActivity] {
+  nonisolated private func convert(activities: [MoofuslistActivityModel]) -> [MoofuslistActivity] {
     var result = [MoofuslistActivity]()
     for activity in activities {
       let newActivity = MoofuslistActivity(
@@ -95,7 +95,7 @@ extension StorageManager {
     return result
   }
 
-  private func convert(activity: MoofuslistActivity) async -> MoofuslistActivityModel {
+  nonisolated private func convert(activity: MoofuslistActivity) -> MoofuslistActivityModel {
     MoofuslistActivityModel(
       id: activity.id,
       address: activity.address,
@@ -124,3 +124,29 @@ extension StorageManager {
     return items.first
   }
 }
+
+#if DEBUG
+
+extension StorageManager {
+  var testHooks: TestHooks {
+    TestHooks(storageManager: self)
+  }
+
+  struct TestHooks {
+    let storageManager: StorageManager
+
+    init(storageManager: StorageManager) {
+      self.storageManager = storageManager
+    }
+
+    func convert(activities: [MoofuslistActivityModel]) -> [MoofuslistActivity] {
+      storageManager.convert(activities: activities)
+    }
+
+    func convert(activity: MoofuslistActivity) -> MoofuslistActivityModel {
+      storageManager.convert(activity: activity)
+    }
+  }
+}
+
+#endif

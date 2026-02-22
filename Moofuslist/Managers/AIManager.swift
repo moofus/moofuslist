@@ -259,10 +259,10 @@ extension AIManager {
 }
 #endif
 
+// swiftlint:disable line_length
 /*
 typealias Activity = AIManager.Activity
 
-// swiftlint:disable line_length
 let mockActivities: [AIManager.Activity] = [
   Activity(name: "white rock lake", address: "White Rock Lake Park, Alamogordo, NM 88311", city: "Alamogordo", state: "New Mexico", category: "recreational area", rating: 4.3, reviews: 250, distance: 125.0, phoneNumber: "(575) 523-5200", description: "white rock lake is a popular spot for boating, fishing, and picnicking, surrounded by scenic views and hiking trails.", somethingInteresting: "The lake is part of a man-made reservoir, created by the White Rock Dam, and is a hub for outdoor recreation in the region."),
 
@@ -278,5 +278,5 @@ let mockActivities: [AIManager.Activity] = [
 
   Activity(name: "white sands national park", address: "17070 White Sands Rd, Alamogordo, NM 88311", city: "Alamogordo", state: "New Mexico", category: "national park", rating: 4.8, reviews: 150, distance: 125.0, phoneNumber: "(575) 523-5200", description: "white sands national park is known for its stunning gypsum sand dunes, which can be seen from space. visitors can hike, sand sledding, and enjoy breathtaking views.", somethingInteresting: "The park\'s dunes are made of gypsum, which is the same mineral that makes up drywall, giving them a unique texture and color.")
 ]
-// swiftlint:enable line_length
 */
+// swiftlint:enable line_length
