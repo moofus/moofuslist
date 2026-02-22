@@ -231,3 +231,52 @@ extension AIManager {
     }
   }
 }
+
+#if DEBUG
+extension AIManager {
+
+  func testHooks() -> TestHooks {
+    TestHooks(aiManager: self)
+  }
+
+  struct TestHooks {
+    let aiManager: AIManager
+
+    init(aiManager: AIManager) {
+      self.aiManager = aiManager
+    }
+
+    var cancelStreamLoop: Bool {
+      get async {
+        await aiManager.cancelStreamLoop
+      }
+    }
+
+    func isModelAvailable() async throws {
+      try await aiManager.isModelAvailable()
+    }
+  }
+}
+#endif
+
+/*
+typealias Activity = AIManager.Activity
+
+// swiftlint:disable line_length
+let mockActivities: [AIManager.Activity] = [
+  Activity(name: "white rock lake", address: "White Rock Lake Park, Alamogordo, NM 88311", city: "Alamogordo", state: "New Mexico", category: "recreational area", rating: 4.3, reviews: 250, distance: 125.0, phoneNumber: "(575) 523-5200", description: "white rock lake is a popular spot for boating, fishing, and picnicking, surrounded by scenic views and hiking trails.", somethingInteresting: "The lake is part of a man-made reservoir, created by the White Rock Dam, and is a hub for outdoor recreation in the region."),
+
+  Activity(name: "las cruces botanic garden", address: "2250 N Sierra Vista Dr, Las Cruces, NM 88005", city: "Las Cruces", state: "New Mexico", category: "botanical garden", rating: 4.4, reviews: 220, distance: 130.0, phoneNumber: "(575) 522-2400", description: "the las cruces botanic garden features a diverse collection of plants from around the world, offering beautiful gardens and educational programs.", somethingInteresting: "The garden is home to a wide variety of plant species, including desert flora and tropical plants, creating a unique ecosystem."),
+
+  Activity(name: "chaco culture national historical park", address: "2400 Chaco Culture Way, Aztec, NM 87101", city: "Aztec", state: "New Mexico", category: "historical site", rating: 4.6, reviews: 180, distance: 180.0, phoneNumber: "(575) 522-2400", description: "chaco culture national historical park showcases ancient cliff dwellings and ruins built by the ancestral puebloans, reflecting their sophisticated architectural skills.", somethingInteresting: "The park includes the well-preserved structures of Pueblo Bonito, one of the largest and most significant archaeological sites in the Southwest."),
+
+  Activity(name: "roswell international ufo museum and research center", address: "14110 4th St SW, Roswell, NM 88201", city: "Roswell", state: "New Mexico", category: "museum", rating: 4.5, reviews: 350, distance: 200.0, phoneNumber: "(575) 988-4200", description: "the museum is dedicated to the study and exhibition of ufos and extraterrestrial phenomena, featuring a vast collection of artifacts and exhibits.", somethingInteresting: "Roswell is famous for the 1947 UFO incident, and the museum plays a central role in this ongoing mystery."),
+
+  Activity(name: "taos pueblo", address: "480 Pueblo Rd, Taos, NM 87846", city: "Taos", state: "New Mexico", category: "cultural landmark", rating: 4.9, reviews: 200, distance: 150.0, phoneNumber: "(575) 751-1880", description: "taos pueblo is a living native american community with a rich history dating back over 900 years. visitors can explore the historic dwellings and learn about the pueblo culture.", somethingInteresting: "The pueblo is one of the oldest continuously inhabited communities in the United States, with a history that predates European settlement."),
+
+  Activity(name: "carlsbad caverns national park", address: "24005 Cavern Rd, Carlsbad, NM 88220", city: "Carlsbad", state: "New Mexico", category: "national park", rating: 4.7, reviews: 300, distance: 175.0, phoneNumber: "(575) 522-2400", description: "carlsbad caverns is home to the big room, the largest known cave chamber in the world. visitors can explore the stunning underground formations and guided tours.", somethingInteresting: "The park features more than 200 miles of mapped cave passages, with the Big Room being the centerpiece attraction."),
+
+  Activity(name: "white sands national park", address: "17070 White Sands Rd, Alamogordo, NM 88311", city: "Alamogordo", state: "New Mexico", category: "national park", rating: 4.8, reviews: 150, distance: 125.0, phoneNumber: "(575) 523-5200", description: "white sands national park is known for its stunning gypsum sand dunes, which can be seen from space. visitors can hike, sand sledding, and enjoy breathtaking views.", somethingInteresting: "The park\'s dunes are made of gypsum, which is the same mineral that makes up drywall, giving them a unique texture and color.")
+]
+// swiftlint:enable line_length
+*/
