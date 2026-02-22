@@ -61,14 +61,17 @@ final actor MoofuslistSource {
 
   private func initializeStorageManager() async {
     do {
-      let schema = Schema([MoofuslistActivityModel.self])
-      let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-      let container = try ModelContainer(for: schema, configurations: [configuration])
+      logger.info("Initializing ModelContainer...")
+      let container = try ModelContainer(for: MoofuslistActivityModel.self)
+      logger.info("ModelContainer initialized successfully")
       storageManager = Container.shared.storageManager(container)
+      logger.info("StorageManager created")
       let count = try await storageManager.countAllActivities()
+      logger.info("Activity count: \(count)")
       send(messages: [.haveFavorites(count > 0)])
     } catch {
-      logger.error("\(error)")
+      logger.error("Storage initialization error: \(error)")
+      logger.error("Error details: \(error.localizedDescription)")
       send(messages: [.error("Storage initialization failed", "Favorites will not be saved")])
       return
     }

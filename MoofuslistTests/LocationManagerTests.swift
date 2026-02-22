@@ -9,7 +9,7 @@ import CoreLocation
 import FactoryKit
 import FactoryTesting
 import Testing
-@testable import moofuslist
+@testable import Moofuslist
 
 struct LocationManagerTests {
   @Test("Errors", .container, arguments: [

@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import moofuslist
+@testable import Moofuslist
 
 struct MoofuslistTests {
 

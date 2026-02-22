@@ -39,19 +39,19 @@
 
 /* Begin PBXFileReference section */
 		2A0937082F32661E00911D42 /* LocationManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2AC7B4A22EF9E40800A8401A /* moofuslist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moofuslist.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		2AC7B4AF2EF9E40900A8401A /* moofuslistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = moofuslistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2AC7B4B92EF9E40900A8401A /* moofuslistUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = moofuslistUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2AFEDEF12F3322AA00BE64DA /* moofuslist.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = moofuslist.xctestplan; sourceTree = "<group>"; };
+		2AC7B4A22EF9E40800A8401A /* Moofuslist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moofuslist.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AC7B4AF2EF9E40900A8401A /* MoofuslistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoofuslistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AC7B4B92EF9E40900A8401A /* MoofuslistUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoofuslistUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AFEDEF12F3322AA00BE64DA /* Moofuslist.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Moofuslist.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2A0937142F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "moofuslistTests" target */ = {
+		2A0937142F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "MoofuslistTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				LocationManagerTests.swift,
 			);
-			target = 2AC7B4AE2EF9E40900A8401A /* moofuslistTests */;
+			target = 2AC7B4AE2EF9E40900A8401A /* MoofuslistTests */;
 		};
 		2A0937152F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "LocationManagerTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -63,15 +63,15 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2AC7B4A42EF9E40800A8401A /* moofuslist */ = {
+		2AC7B4A42EF9E40800A8401A /* Moofuslist */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = moofuslist;
+			path = Moofuslist;
 			sourceTree = "<group>";
 		};
 		2AC7B4B22EF9E40900A8401A /* MoofuslistTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2A0937142F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "moofuslistTests" target */,
+				2A0937142F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "MoofuslistTests" target */,
 				2A0937152F32662F00911D42 /* Exceptions for "MoofuslistTests" folder in "LocationManagerTests" target */,
 			);
 			path = MoofuslistTests;
@@ -130,8 +130,8 @@
 		2AC7B4992EF9E40800A8401A = {
 			isa = PBXGroup;
 			children = (
-				2AFEDEF12F3322AA00BE64DA /* moofuslist.xctestplan */,
-				2AC7B4A42EF9E40800A8401A /* moofuslist */,
+				2AFEDEF12F3322AA00BE64DA /* Moofuslist.xctestplan */,
+				2AC7B4A42EF9E40800A8401A /* Moofuslist */,
 				2AC7B4B22EF9E40900A8401A /* MoofuslistTests */,
 				2AC7B4BC2EF9E40900A8401A /* MoofuslistUITests */,
 				2A0937162F3271EF00911D42 /* Frameworks */,
@@ -142,9 +142,9 @@
 		2AC7B4A32EF9E40800A8401A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2AC7B4A22EF9E40800A8401A /* moofuslist.app */,
-				2AC7B4AF2EF9E40900A8401A /* moofuslistTests.xctest */,
-				2AC7B4B92EF9E40900A8401A /* moofuslistUITests.xctest */,
+				2AC7B4A22EF9E40800A8401A /* Moofuslist.app */,
+				2AC7B4AF2EF9E40900A8401A /* MoofuslistTests.xctest */,
+				2AC7B4B92EF9E40900A8401A /* MoofuslistUITests.xctest */,
 				2A0937082F32661E00911D42 /* LocationManagerTests.xctest */,
 			);
 			name = Products;
@@ -174,9 +174,9 @@
 			productReference = 2A0937082F32661E00911D42 /* LocationManagerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		2AC7B4A12EF9E40800A8401A /* moofuslist */ = {
+		2AC7B4A12EF9E40800A8401A /* Moofuslist */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2AC7B4C32EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslist" */;
+			buildConfigurationList = 2AC7B4C32EF9E40900A8401A /* Build configuration list for PBXNativeTarget "Moofuslist" */;
 			buildPhases = (
 				2AC7B49E2EF9E40800A8401A /* Sources */,
 				2A7BEAB92F4A281900D56CF3 /* SwiftLint */,
@@ -188,20 +188,20 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2AC7B4A42EF9E40800A8401A /* moofuslist */,
+				2AC7B4A42EF9E40800A8401A /* Moofuslist */,
 			);
-			name = moofuslist;
+			name = Moofuslist;
 			packageProductDependencies = (
 				2A67A7AE2F0076D40021309F /* Factory */,
 				2A67A7B02F0076D40021309F /* FactoryKit */,
 			);
 			productName = moofuslist;
-			productReference = 2AC7B4A22EF9E40800A8401A /* moofuslist.app */;
+			productReference = 2AC7B4A22EF9E40800A8401A /* Moofuslist.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2AC7B4AE2EF9E40900A8401A /* moofuslistTests */ = {
+		2AC7B4AE2EF9E40900A8401A /* MoofuslistTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2AC7B4C62EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslistTests" */;
+			buildConfigurationList = 2AC7B4C62EF9E40900A8401A /* Build configuration list for PBXNativeTarget "MoofuslistTests" */;
 			buildPhases = (
 				2AC7B4AB2EF9E40900A8401A /* Sources */,
 				2AC7B4AC2EF9E40900A8401A /* Frameworks */,
@@ -215,17 +215,17 @@
 			fileSystemSynchronizedGroups = (
 				2AC7B4B22EF9E40900A8401A /* MoofuslistTests */,
 			);
-			name = moofuslistTests;
+			name = MoofuslistTests;
 			packageProductDependencies = (
 				2A67A7B22F0076D40021309F /* FactoryTesting */,
 			);
 			productName = moofuslistTests;
-			productReference = 2AC7B4AF2EF9E40900A8401A /* moofuslistTests.xctest */;
+			productReference = 2AC7B4AF2EF9E40900A8401A /* MoofuslistTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		2AC7B4B82EF9E40900A8401A /* moofuslistUITests */ = {
+		2AC7B4B82EF9E40900A8401A /* MoofuslistUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2AC7B4C92EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslistUITests" */;
+			buildConfigurationList = 2AC7B4C92EF9E40900A8401A /* Build configuration list for PBXNativeTarget "MoofuslistUITests" */;
 			buildPhases = (
 				2AC7B4B52EF9E40900A8401A /* Sources */,
 				2AC7B4B62EF9E40900A8401A /* Frameworks */,
@@ -239,11 +239,11 @@
 			fileSystemSynchronizedGroups = (
 				2AC7B4BC2EF9E40900A8401A /* MoofuslistUITests */,
 			);
-			name = moofuslistUITests;
+			name = MoofuslistUITests;
 			packageProductDependencies = (
 			);
 			productName = moofuslistUITests;
-			productReference = 2AC7B4B92EF9E40900A8401A /* moofuslistUITests.xctest */;
+			productReference = 2AC7B4B92EF9E40900A8401A /* MoofuslistUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -273,7 +273,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2AC7B49D2EF9E40800A8401A /* Build configuration list for PBXProject "moofuslist" */;
+			buildConfigurationList = 2AC7B49D2EF9E40800A8401A /* Build configuration list for PBXProject "Moofuslist" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -290,9 +290,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2AC7B4A12EF9E40800A8401A /* moofuslist */,
-				2AC7B4AE2EF9E40900A8401A /* moofuslistTests */,
-				2AC7B4B82EF9E40900A8401A /* moofuslistUITests */,
+				2AC7B4A12EF9E40800A8401A /* Moofuslist */,
+				2AC7B4AE2EF9E40900A8401A /* MoofuslistTests */,
+				2AC7B4B82EF9E40900A8401A /* MoofuslistUITests */,
 				2A0937072F32661E00911D42 /* LocationManagerTests */,
 			);
 		};
@@ -386,17 +386,17 @@
 /* Begin PBXTargetDependency section */
 		2A09370D2F32661F00911D42 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2AC7B4A12EF9E40800A8401A /* moofuslist */;
+			target = 2AC7B4A12EF9E40800A8401A /* Moofuslist */;
 			targetProxy = 2A09370C2F32661F00911D42 /* PBXContainerItemProxy */;
 		};
 		2AC7B4B12EF9E40900A8401A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2AC7B4A12EF9E40800A8401A /* moofuslist */;
+			target = 2AC7B4A12EF9E40800A8401A /* Moofuslist */;
 			targetProxy = 2AC7B4B02EF9E40900A8401A /* PBXContainerItemProxy */;
 		};
 		2AC7B4BB2EF9E40900A8401A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2AC7B4A12EF9E40800A8401A /* moofuslist */;
+			target = 2AC7B4A12EF9E40800A8401A /* Moofuslist */;
 			targetProxy = 2AC7B4BA2EF9E40900A8401A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -419,7 +419,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/moofuslist";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Moofuslist";
 			};
 			name = Debug;
 		};
@@ -440,7 +440,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/moofuslist";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Moofuslist";
 			};
 			name = Release;
 		};
@@ -653,7 +653,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/moofuslist";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Moofuslist";
 			};
 			name = Debug;
 		};
@@ -675,7 +675,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/moofuslist";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moofuslist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Moofuslist";
 			};
 			name = Release;
 		};
@@ -731,7 +731,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2AC7B49D2EF9E40800A8401A /* Build configuration list for PBXProject "moofuslist" */ = {
+		2AC7B49D2EF9E40800A8401A /* Build configuration list for PBXProject "Moofuslist" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2AC7B4C12EF9E40900A8401A /* Debug */,
@@ -740,7 +740,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2AC7B4C32EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslist" */ = {
+		2AC7B4C32EF9E40900A8401A /* Build configuration list for PBXNativeTarget "Moofuslist" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2AC7B4C42EF9E40900A8401A /* Debug */,
@@ -749,7 +749,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2AC7B4C62EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslistTests" */ = {
+		2AC7B4C62EF9E40900A8401A /* Build configuration list for PBXNativeTarget "MoofuslistTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2AC7B4C72EF9E40900A8401A /* Debug */,
@@ -758,7 +758,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2AC7B4C92EF9E40900A8401A /* Build configuration list for PBXNativeTarget "moofuslistUITests" */ = {
+		2AC7B4C92EF9E40900A8401A /* Build configuration list for PBXNativeTarget "MoofuslistUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2AC7B4CA2EF9E40900A8401A /* Debug */,
