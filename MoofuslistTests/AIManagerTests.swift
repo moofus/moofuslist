@@ -38,7 +38,7 @@ struct AIManagerTests {
   func streamYieldsMessages() async throws {
     let manager = AIManager()
     // Start findActivities (should yield .begin, then .loading, then .end or error)
-    Task { try await manager.findActivities(cityState: "Sacramento, CA") }
+    try await manager.findActivities(cityState: "Sacramento, CA")
     var yielded: [String] = []
     var streamIterator = await manager.stream.makeAsyncIterator()
     for _ in 0..<3 {
@@ -51,7 +51,10 @@ struct AIManagerTests {
         }
       }
     }
-    #expect(!yielded.isEmpty, "Stream should yield at least one message")
+    #expect(yielded.count == 3)
+    #expect(yielded[0] == "begin")
+    #expect(yielded[1] == "loading")
+    #expect(yielded[2] == "loading")
   }
 
   @Test("Activity.lowercased lowercases category and description")

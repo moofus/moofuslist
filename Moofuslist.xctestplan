@@ -22,7 +22,7 @@
       "target" : {
         "containerPath" : "container:moofuslist.xcodeproj",
         "identifier" : "2AC7B4AE2EF9E40900A8401A",
-        "name" : "moofuslistTests"
+        "name" : "MoofuslistTests"
       }
     },
     {
@@ -30,7 +30,7 @@
       "target" : {
         "containerPath" : "container:moofuslist.xcodeproj",
         "identifier" : "2AC7B4B82EF9E40900A8401A",
-        "name" : "moofuslistUITests"
+        "name" : "MoofuslistUITests"
       }
     },
     {
