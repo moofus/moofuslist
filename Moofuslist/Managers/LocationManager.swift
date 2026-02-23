@@ -57,7 +57,6 @@ actor LocationManager {
 // MARK: - Private Methods
 extension LocationManager {
   private func reset() {
-    count = 0
     task?.cancel()
     task = nil
   }
@@ -66,14 +65,15 @@ extension LocationManager {
   private func processUpdates<S: LocationUpdateStream>(updates: S) {
     task = Task {
       logger.info("LocationManager processUpdates started")
+      count = 0
       do {
         for try await update in updates {
           if Task.isCancelled { break }
           if !started { break }
           if let location = await update.location {
-            continuation.yield(.location(location))
             count += 1
-            logger.info("count=\(self.count) location=\(location)")
+            logger.info("ljw count=\(self.count) location=\(location)")
+            continuation.yield(.location(location))
             if count >= maxCount {
               break
             }
@@ -203,7 +203,7 @@ extension LocationManager {
 // MARK: - Test Hooks
 extension LocationManager {
   /// Test hooks to access actor state for testing purposes
-  nonisolated func testHooks() -> TestHooks {
+  func testHooks() -> TestHooks {
     TestHooks(locationManager: self)
   }
 
@@ -216,6 +216,15 @@ extension LocationManager {
 
     func start(maxCount: Int = Int.max) async {
       await locationManager.start(maxCount: maxCount)
+    }
+
+    func count() async -> Int {
+      let count = await locationManager.count
+      return count
+    }
+
+    func started() async -> Bool {
+      await locationManager.started
     }
   }
 }
