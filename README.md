@@ -31,7 +31,8 @@
 ### 📸 Screenshots
 <img width="262" height="500" alt="Screenshot1 2026-01-30 at 10 39 42 AM" src="https://github.com/user-attachments/assets/0a7fbe61-43b2-493b-8e9c-aed7b58b7455" />
 <img width="262" height="500" alt="Screenshot2 2026-01-30 at 10 39 54 AM" src="https://github.com/user-attachments/assets/93305547-379f-45cb-b924-7f193c9b06ed" />
-<img width="262" height="500" alt="Screenshot3 2026-01-30 at 12 55 56 PM" src="https://github.com/user-attachments/assets/7bef53ac-1073-4e04-b356-f66c7f7c98ca" />
+<img width="262" height="500" alt="Screen3 2026-02-23 at 10 23 33 AM" src="https://github.com/user-attachments/assets/617f6a78-9145-4305-ba2d-adaeaa9cdea2" />
+<img width="262" height="500" alt="Screen4 2026-02-23 at 10 06 34 AM" src="https://github.com/user-attachments/assets/0f44603f-8c6d-4b89-9bfd-c3f5d93f54ab" />
 <img width="262" height="500" alt="Screenshot4 2026-01-30 at 12 53 12 PM" src="https://github.com/user-attachments/assets/23f8b9a9-9545-4458-a5ec-11ec60a8a0c1" />
 <img width="262" height="500" alt="Screenshot5 2026-01-30 at 10 40 36 AM" src="https://github.com/user-attachments/assets/c2609e29-18ce-46ac-8a23-8fbfe8db5e78" />
 
