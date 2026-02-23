@@ -238,7 +238,7 @@ struct LocationManagerTests {
     _ = await task.value
   }
 
-  @Test("count increments correctly")
+  @Test("count increments correctly", .container)
   func testCountTracking() async throws {
     // Verify count property increases with each location
     let maxCount = 3
@@ -266,7 +266,7 @@ struct LocationManagerTests {
     try #require(count == maxCount, "count=\(count) should be \(maxCount)")
   }
 
-  @Test("authorizationRequestInProgress allows continued processing")
+  @Test("authorizationRequestInProgress allows continued processing", .container)
   func testAuthRequestContinues() async throws {
     // Send authRequestInProgress, then a location, verify both received
     let maxCount = 2
@@ -313,7 +313,7 @@ struct LocationManagerTests {
   }
 
   // swiftlint:disable cyclomatic_complexity
-  @Test("mixed message sequences")
+  @Test("mixed message sequences", .container)
   func testMixedSequences() async throws {
     // Test location → info → location sequences
     let maxCount = 4
@@ -377,7 +377,7 @@ struct LocationManagerTests {
   }
   // swiftlint:enable cyclomatic_complexity
 
-  @Test("breaking errors stop processing subsequent updates")
+  @Test("breaking errors stop processing subsequent updates", .container)
   func testBreakingErrorsStopProcessing() async throws {
     // Verify that after a breaking error, no further updates are processed
     let maxCount = 2
