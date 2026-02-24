@@ -45,7 +45,9 @@ struct MoofuslistSideBarView: View {
           }
         }
       }
+
       Spacer(minLength: 0)
+
       Label {
         Text("Using Apple Intelligence")
           .font(.footnote)
@@ -62,6 +64,6 @@ struct MoofuslistSideBarView: View {
 }
 
 #Preview {
-    @Previewable @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
-    MoofuslistSideBarView(viewModel: viewModel)
+  @Previewable @Injected(\.moofuslistViewModel) var viewModel: MoofuslistViewModel
+  MoofuslistSideBarView(viewModel: viewModel)
 }

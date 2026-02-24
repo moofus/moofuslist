@@ -135,7 +135,6 @@ private struct LoadingView: View {
       ProgressView(value: Double(viewModel.activities.count) / Double(AIManager.maxNumOfActivities + 1)) {
         Text("\(getPercent())% progress")
       }
-      .foregroundStyle(Color.primary)
       .padding()
       .cornerRadius(6)
 
@@ -216,7 +215,8 @@ struct MapSheetView: View {
           .clipShape(Circle())
       }
       .padding()
-    }  }
+    }
+  }
 }
 
 #if DEBUG

@@ -10,12 +10,12 @@ import os
 import SwiftUI
 import MapKit
 
-struct MoofuslistDetailView: View {
-  enum ScrollImages: String, CaseIterable {
-    case auto
-    case manual
-  }
+private enum ScrollImages: String, CaseIterable {
+  case auto
+  case manual
+}
 
+struct MoofuslistDetailView: View {
   @AppStorage("scrollImages") private var scrollImages = ScrollImages.auto // initially switch automatically
   @State var errorText = ""
   @State private var haveError = false
@@ -28,30 +28,16 @@ struct MoofuslistDetailView: View {
 
   var body: some View {
     ZStack {
-      Color(.listBackground).ignoresSafeArea()
-
       if let activity = viewModel.selectedActivity {
         ScrollView {
           VStack(spacing: 0) {
-            VStack {
-                TabView(selection: $selectedImageName) {
-                  ForEach(Array(activity.imageNames.enumerated()), id: \.element) { _, imageName in
-                    Image(systemName: imageName)
-                      .fontSizeForegroundStyle(size: 80, color: .accent)
-                      .tag(imageName)
-                  }
-              }
-              .background(Color(red: 1, green: 0.9, blue: 0.8))
-              .tabViewStyle(.page)
-              .frame(height: 250)
-              .frame(maxWidth: .infinity)
-              .onAppear {
-                startTimedAction()
-              }
-              .onDisappear {
-                timedAction.stop()
-              }
-            }
+            ScrollingImageView(
+              activity: activity,
+              scrollImages: scrollImages,
+              selectedImageName: $selectedImageName,
+              timedAction: timedAction,
+              viewModel: viewModel
+            )
 
             VStack(alignment: .leading, spacing: 20) {
               HStack {
@@ -166,8 +152,55 @@ struct MoofuslistDetailView: View {
         Text("Select an activity")
       }
     }
+    .background(Color.listBackground)
     .alert(errorText, isPresented: $haveError) {
       // SwiftUI will automatically display an OK button
+    }
+  }
+
+  private func openInMaps(activity: MoofuslistActivity) {
+    Task {
+      let mapItem: MKMapItem
+      if let item = await activity.mapItem() {
+        mapItem = item
+      } else {
+        logger.error("mapItem latitude=\(activity.latitude ?? -1) longitude=\(activity.longitude ?? -1)")
+        haveError = true
+        errorText = "Error loading map"
+        return
+      }
+      mapItem.name = activity.name
+      mapItem.openInMaps(launchOptions: [
+        MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+      ])
+    }
+  }
+}
+
+private struct ScrollingImageView: View {
+  let activity: MoofuslistActivity
+  let scrollImages: ScrollImages
+  @Binding var selectedImageName: String
+  var timedAction: TimedAction
+  @Bindable var viewModel: MoofuslistViewModel
+
+  var body: some View {
+    TabView(selection: $selectedImageName) {
+      ForEach(Array(activity.imageNames.enumerated()), id: \.element) { _, imageName in
+        Image(systemName: imageName)
+          .fontSizeForegroundStyle(size: 80, color: .accent)
+          .tag(imageName)
+      }
+    }
+    .background(Color(red: 1, green: 0.9, blue: 0.8))
+    .tabViewStyle(.page)
+    .frame(height: 250)
+    .frame(maxWidth: .infinity)
+    .onAppear {
+      startTimedAction()
+    }
+    .onDisappear {
+      timedAction.stop()
     }
   }
 
@@ -195,24 +228,6 @@ struct MoofuslistDetailView: View {
           }
         }
       }
-    }
-  }
-
-  private func openInMaps(activity: MoofuslistActivity) {
-    Task {
-      let mapItem: MKMapItem
-      if let item = await activity.mapItem() {
-        mapItem = item
-      } else {
-        logger.error("mapItem latitude=\(activity.latitude ?? -1) longitude=\(activity.longitude ?? -1)")
-        haveError = true
-        errorText = "Error loading map"
-        return
-      }
-      mapItem.name = activity.name
-      mapItem.openInMaps(launchOptions: [
-        MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
-      ])
     }
   }
 }
