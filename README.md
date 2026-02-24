@@ -12,7 +12,7 @@
 
 ### 🛠️ Technical Stack
 #### This application leverages the latest Apple frameworks to provide a modern, high-performance user experience.
-**Feature**:         **Technology**      **Implement Detail**
+**Feature**,         **Technology**,      **Implement Detail**
 - UI Framework:      SwiftUI	           Used for all UI elements to ensure a declarative and responsive interface.
 - AI Integration:    Apple Intelligence  Leveraged to intelligently retrieve activities for the user.
 - Concurrency:       Swift Concurrency	 Implemented in place of Combine for modern, efficient asynchronous code.
