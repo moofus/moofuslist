@@ -17,7 +17,7 @@
 | **UI Framework** | SwiftUI | Used for all UI elements to ensure a declarative and responsive interface. |
 | **AI Integration** | Apple Intelligence | Leveraged to intelligently retrieve activities for the user. |
 | **Concurrency** | Swift Concurrency | Implemented in place of Combine for modern, efficient asynchronous code. |
-| **Persistence** | SwiftData | Utilized as the primary data storage solution. |
+| **Persistence** | SwiftData | Utilized as the primary data storage solution for favorites. |
 | **Communication** | AsyncStreams | Used for sending messages throughout the application. |
 | **Location** | Core Location | Used for retrieving the user's current location. |
 | **Mapping** | MapKit | MK methods are utilized for various geocoding requests. |
