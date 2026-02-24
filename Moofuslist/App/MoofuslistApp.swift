@@ -20,13 +20,13 @@ struct MoofuslistApp: App {
 }
 
 extension Container {
-  var aiManager: Factory<AIManager> {
+  var aiManager: Factory<AIManaging> {
     self { AIManager() }.singleton
   }
   var liveUpdates: Factory<any LocationUpdateStream> {
     self { CLLocationUpdate.liveUpdates() }
   }
-  var locationManager: Factory<LocationManager> {
+  var locationManager: Factory<LocationManaging> {
     self { LocationManager() }.singleton
   }
   @MainActor var moofuslistCoordinator: Factory<MoofuslistCoordinator> {

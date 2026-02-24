@@ -1,5 +1,5 @@
 //
-//  StorageManagerTest.swift
+//  StorageManagerTests.swift
 //  MoofuslistTests
 //
 //  Created by Lamar Williams III on 2/22/26.
@@ -13,7 +13,7 @@ import Foundation
 // swiftlint:disable file_length function_body_length type_body_length
 
 @Suite("StorageManager Tests")
-struct StorageManagerTest {
+struct StorageManagerTests {
 
   let container: ModelContainer
   let storageManager: StorageManager

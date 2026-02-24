@@ -1,6 +1,6 @@
 import FoundationModels
-@testable import Moofuslist
 import Testing
+@testable import Moofuslist
 
 @Suite("AIManager Basic Functionality")
 struct AIManagerTests {

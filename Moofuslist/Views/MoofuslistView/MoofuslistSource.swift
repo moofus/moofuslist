@@ -33,8 +33,8 @@ final actor MoofuslistSource {
     let longitude: Double
   }
 
-  @Injected(\.aiManager) private var aiManager: AIManager
-  @Injected(\.locationManager) private var locationManager: LocationManager
+  @Injected(\.aiManager) private var aiManager: AIManaging
+  @Injected(\.locationManager) private var locationManager: LocationManaging
 
   private var activities = [MoofuslistActivity]()
   private var addressToMapItemCache = [String: MKMapItem]()
@@ -101,7 +101,7 @@ extension MoofuslistSource {
 // MARK: - Private Handle Managers
 extension MoofuslistSource {
   private func handleAIManager() async {
-    for await message in aiManager.stream {
+    for await message in await aiManager.stream {
       switch message {
       case .begin:
         await navigate(to: .content)
@@ -122,7 +122,7 @@ extension MoofuslistSource {
   }
 
   private func handleLocationManager() async {
-    for await message in locationManager.stream {
+    for await message in await locationManager.stream {
       // swiftlint:disable no_print_statements
       print(message)
       // swiftlint:enable no_print_statements

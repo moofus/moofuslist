@@ -11,6 +11,12 @@ import FactoryKit
 import os
 import SwiftUI
 
+protocol LocationManaging: Actor {
+  var stream: AsyncStream<LocationManager.Message> { get async }
+  func start(maxCount: Int) async
+}
+extension LocationManager: LocationManaging { }
+
 protocol LocationUpdateProtocol: Sendable {
   var accuracyLimited: Bool { get }
   var authorizationDenied: Bool { get }
