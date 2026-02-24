@@ -1,7 +1,8 @@
 
 # Moofuslist 📍
 #### An AI-powered application that provides a list of places to go and things to do for any city in the United States.
-#### Loading of the cells is a little slow due to getting data from Apple Intelligence
+#### Loading of the cells is a little slow due to data coming from Apple Intelligence
+#### Data contains hallucinations due to data coming from Apple Intelligence
 
 ### 🏛️ Project Purpose & Design Philosophy
 #### This project was built to demonstrate my specific approach to how iOS software applications should be designed and implemented. It prioritizes a clean design to ensure the app is:
