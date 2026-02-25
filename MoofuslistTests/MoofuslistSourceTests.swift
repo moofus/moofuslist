@@ -136,6 +136,182 @@ struct MoofuslistSourceTests {
     #expect(foundLoading)
     #expect(foundEnd)
   }
+
+  @Test("cancelLoading forwards to AIManager", .container)
+  func testCancelLoading() async throws {
+    let mockAI = MockAIManager()
+    Container.shared.aiManager.register { mockAI }
+
+    let mockLocation = MockLocationManager()
+    Container.shared.locationManager.register { mockLocation }
+
+    let source = MoofuslistSource()
+
+    // Give init some time
+    try await Task.sleep(for: .milliseconds(50))
+
+    source.cancelLoading()
+
+    // Allow the call to propagate
+    try await Task.sleep(for: .milliseconds(50))
+
+    let count = await mockAI.cancelLoadingCallCount
+    #expect(count == 1, "cancelLoading should be forwarded once")
+    _ = source // silence unused warning if any
+  }
+
+  @Test("searchCurrentLocation sends initialize and processing; starts location", .container)
+  func testSearchCurrentLocation() async throws {
+    let mockAI = MockAIManager()
+    Container.shared.aiManager.register { mockAI }
+
+    let mockLocation = MockLocationManager()
+    Container.shared.locationManager.register { mockLocation }
+
+    let source = MoofuslistSource()
+
+    // Prepare collector
+    var messages: [MoofuslistSource.Message] = []
+    let collectTask = Task {
+      var collected = 0
+      for await message in await source.stream {
+        messages.append(message)
+        collected += 1
+        if collected >= 2 { // expecting .initialize and .processing
+          break
+        }
+      }
+      return messages
+    }
+
+    // Trigger search current location
+    source.searchCurrentLocation()
+
+    let result = await collectTask.value
+    #expect(result.count >= 2)
+
+    // Verify ordering contains initialize then processing in some form
+    var sawInitialize = false
+    var sawProcessing = false
+    for msg in result {
+      switch msg {
+      case .initialize: sawInitialize = true
+      case .processing: sawProcessing = true
+      default: break
+      }
+    }
+    #expect(sawInitialize)
+    #expect(sawProcessing)
+
+    let startCalls = await mockLocation.startCallCount
+    #expect(startCalls == 1, "LocationManager.start should be called once")
+  }
+
+  @Test("loadMapItems emits message", .container)
+  func testLoadMapItems() async throws {
+    let mockAI = MockAIManager()
+    Container.shared.aiManager.register { mockAI }
+
+    let mockLocation = MockLocationManager()
+    Container.shared.locationManager.register { mockLocation }
+
+    let source = MoofuslistSource()
+
+    let collectTask = Task { () -> MoofuslistSource.Message? in
+      for await message in await source.stream {
+        if case .loadMapItems = message { return message }
+      }
+      return nil
+    }
+
+    source.loadMapItems()
+
+    let msg = await collectTask.value
+    #expect(msg != nil, "Should receive loadMapItems message")
+  }
+
+  @Test("selectActivity emits message", .container)
+  func testSelectActivity() async throws {
+    let mockAI = MockAIManager()
+    Container.shared.aiManager.register { mockAI }
+
+    let mockLocation = MockLocationManager()
+    Container.shared.locationManager.register { mockLocation }
+
+    let source = MoofuslistSource()
+
+    let targetId = UUID()
+
+    let collectTask = Task { () -> UUID? in
+      for await message in await source.stream {
+        if case .selectActivity(let id) = message { return id }
+      }
+      return nil
+    }
+
+    source.selectActivity(for: targetId)
+
+    let receivedId = await collectTask.value
+    #expect(receivedId == targetId, "Should receive selectActivity with the same ID")
+  }
+
+  @Test("setIsFavorite with unknown ID emits error", .container)
+  func testSetIsFavoriteUnknownId() async throws {
+    let mockAI = MockAIManager()
+    Container.shared.aiManager.register { mockAI }
+
+    let mockLocation = MockLocationManager()
+    Container.shared.locationManager.register { mockLocation }
+
+    let source = MoofuslistSource()
+
+    let collectTask = Task { () -> Bool in
+      for await message in await source.stream {
+        if case .error(let desc, _) = message {
+          return desc == "Activity not found"
+        }
+      }
+      return false
+    }
+
+    source.setIsFavorite(true, for: UUID())
+
+    let gotExpectedError = await collectTask.value
+    #expect(gotExpectedError, "Should emit Activity not found error")
+  }
+
+  @Test("AI error from stream emits initialize and error", .container)
+  func testAIErrorFromStream() async throws {
+    let mockAI = MockAIManager()
+    Container.shared.aiManager.register { mockAI }
+
+    let mockLocation = MockLocationManager()
+    Container.shared.locationManager.register { mockLocation }
+
+    let source = MoofuslistSource()
+
+    // Collect a small set of messages until we see .error
+    let collectTask = Task { () -> [MoofuslistSource.Message] in
+      var messages: [MoofuslistSource.Message] = []
+      for await message in await source.stream {
+        messages.append(message)
+        if case .error = message { break }
+      }
+      return messages
+    }
+
+    // Simulate an AI error on the stream
+    await mockAI.simulateError(.deviceNotEligible)
+
+    let messages = await collectTask.value
+
+    // We expect to have seen an initialize and an error
+    let hasInitialize = messages.contains { if case .initialize = $0 { true } else { false } }
+    let hasError = messages.contains { if case .error = $0 { true } else { false } }
+
+    #expect(hasInitialize, "Should emit initialize after AI error")
+    #expect(hasError, "Should emit error message after AI error")
+  }
 }
 
 // MARK: - Utilities

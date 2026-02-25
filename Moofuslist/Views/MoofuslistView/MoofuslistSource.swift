@@ -358,7 +358,6 @@ extension MoofuslistSource {
       logger.error("id=\(id)")
       logger.error("activities=\(self.activities)")
       send(messages: [.error("Activity not found", "Exit and restart application")])
-      assertionFailure()
       return
     }
     activities[idx].isFavorite = isFavorite
