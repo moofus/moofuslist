@@ -27,9 +27,9 @@ struct MoofuslistContentView: View {
 
   private var sortedActivities: [MoofuslistActivity] {
     switch selectedSortOption {
-    case .distance: viewModel.activities.sorted { $0.distance < $1.distance }
-    case .relevance: viewModel.activities
-    case .rating: viewModel.activities.sorted { $0.rating > $1.rating }
+    case .distance: return sortBy(\.distance)
+    case .rating: return sortBy(\.rating, ascending: false)
+    case .relevance: return viewModel.activities
     }
   }
 
@@ -68,6 +68,16 @@ struct MoofuslistContentView: View {
       if viewModel.loading {
         LoadingView(source: source, viewModel: viewModel)
       }
+    }
+  }
+
+  private func sortBy<T: Comparable>(
+    _ keyPath: KeyPath<MoofuslistActivity, T>,
+    ascending: Bool = true
+  ) -> [MoofuslistActivity] {
+    viewModel.activities.sorted {
+      ascending ? $0[keyPath: keyPath] < $1[keyPath: keyPath]
+      : $0[keyPath: keyPath] > $1[keyPath: keyPath]
     }
   }
 }
